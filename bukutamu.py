@@ -6,11 +6,11 @@ import gspread
 from oauth2client.service_account import ServiceAccountCredentials
 
 # ==========================================
-# 1. KONFIGURASI HALAMAN (MENGGANTI LOGO TAB BROWSER)
+# 1. KONFIGURASI HALAMAN
 # ==========================================
 st.set_page_config(
     page_title="E-Buku Tamu Stamet Bima", 
-    page_icon="https://upload.wikimedia.org/wikipedia/commons/4/44/Logo_BMKG.png", 
+    # Dikosongkan agar otomatis menggunakan logo awan bawaan Streamlit
     layout="wide"
 )
 
@@ -130,6 +130,7 @@ if menu == "FORMULIR KUNJUNGAN PUBLIK":
         components.html("""
             <div id="clock" style="font-family: 'Arial', sans-serif; font-size: 14px; font-weight: bold; color: #003366; text-align: right; padding-top: 25px;"></div>
             <script>
+                // Update time in real-time according to WITA timezone
                 function updateTime() {
                     const now = new Date();
                     const options = { timeZone: 'Asia/Makassar', weekday: 'long', year: 'numeric', month: 'long', day: 'numeric', hour: '2-digit', minute: '2-digit', second: '2-digit', hour12: false };
