@@ -10,15 +10,19 @@ from oauth2client.service_account import ServiceAccountCredentials
 # ==========================================
 st.set_page_config(
     page_title="E-Buku Tamu Stamet Bima", 
-    # Dikosongkan agar otomatis menggunakan logo awan bawaan Streamlit
     layout="wide"
 )
 
 # ==========================================
-# 2. KUSTOMISASI DESAIN WARNA DAN TOTAL WHITE-LABELING
+# 2. KUSTOMISASI DESAIN WARNA DAN ANTI-DARK MODE HP
 # ==========================================
 st.markdown("""
     <style>
+    /* PERINTAH UTAMA: Memaksa browser HP menolak Dark Mode dan mengunci Mode Terang */
+    html, body, [data-testid="stAppViewContainer"] {
+        color-scheme: light !important;
+    }
+    
     /* 1. Menghilangkan Header Bawaan Streamlit (Tombol Deploy dan Menu Kanan Atas) */
     [data-testid="stHeader"] {
         display: none !important;
@@ -41,7 +45,7 @@ st.markdown("""
     
     /* 5. Memastikan teks Sidebar berwarna putih */
     [data-testid="stSidebar"] h1, [data-testid="stSidebar"] h2, [data-testid="stSidebar"] h3, 
-    [data-testid="stSidebar"] p, [data-testid="stSidebar"] label, [data-testid="stSidebar"] span {
+    [data-testid="stSidebar"] p, [data-testid="stSidebar"] label, [data-testid="stSidebar"] span, [data-testid="stSidebar"] div {
         color: #ffffff !important;
     }
     
@@ -52,16 +56,21 @@ st.markdown("""
         padding: 20px;
     }
 
-    /* 7. PENANGKAL OTOMATIS DARK MODE HP (MEMAKSA TEKS TETAP GELAP/NAVY) */
-    .main h1, .main h2, .main h3, .main h4, .main h5, .main h6, .main label, .main p, .main span {
+    /* 7. TARGET AGRESIF: Mengunci seluruh elemen teks halaman utama agar tetap Biru Navy */
+    section.main h1, section.main h2, section.main h3, section.main h4, section.main h5, section.main h6,
+    section.main label, section.main p, section.main span,
+    section.main div[data-testid="stMarkdownContainer"] p,
+    section.main div[data-testid="stWidgetLabel"] p {
         color: #003366 !important;
     }
-    /* Memastikan teks penjelasan/caption berwarna abu-abu tua agar tidak pudar */
-    .main .stCaptionContainer, .main div[data-testid="stCaptionContainer"] p {
+    
+    /* Memastikan teks penjelasan atau caption tetap berwarna gelap proprosional */
+    section.main .stCaptionContainer, section.main div[data-testid="stCaptionContainer"] p {
         color: #444444 !important;
     }
-    /* Memastikan tulisan teks yang sedang diketik di dalam kolom input berwarna gelap */
-    .main input {
+    
+    /* Memastikan tulisan yang sedang diketik di dalam kolom input berwarna hitam tajam */
+    section.main input {
         color: #111111 !important;
     }
     </style>
@@ -209,7 +218,7 @@ if menu == "FORMULIR KUNJUNGAN PUBLIK":
                         st.rerun()
 
         elif st.session_state.tamu_terdaftar and not st.session_state.ikm_selesai:
-            st.success(f"DATA BERHASIL TERSIMPAN: Terima kasih Bapak/Ibu {st.session_state.nama_pendaftar}, data kunjungan Anda telah sah carat.")
+            st.success(f"DATA BERHASIL TERSIMPAN: Terima kasih Bapak/Ibu {st.session_state.nama_pendaftar}, data kunjungan Anda telah sah tercatat.")
             st.balloons()
             
             st.divider()
