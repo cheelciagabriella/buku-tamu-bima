@@ -6,35 +6,46 @@ import gspread
 from oauth2client.service_account import ServiceAccountCredentials
 
 # ==========================================
-# 1. KONFIGURASI HALAMAN 
+# 1. KONFIGURASI HALAMAN (MENGGANTI LOGO TAB BROWSER)
 # ==========================================
 st.set_page_config(
     page_title="E-Buku Tamu Stamet Bima", 
+    page_icon="https://upload.wikimedia.org/wikipedia/commons/4/44/Logo_BMKG.png", 
     layout="wide"
 )
 
 # ==========================================
-# 2. KUSTOMISASI DESAIN WARNA (TEMA FORMAL BMKG)
+# 2. KUSTOMISASI DESAIN WARNA DAN TOTAL WHITE-LABELING
 # ==========================================
 st.markdown("""
     <style>
-    /* Mengubah Latar Belakang Halaman Utama (Gradasi Biru-Hijau Lembut) */
+    /* 1. Menghilangkan Header Bawaan Streamlit (Tombol Deploy dan Menu Kanan Atas) */
+    [data-testid="stHeader"] {
+        display: none !important;
+    }
+    
+    /* 2. Menghilangkan Footer Bawaan Streamlit (Made with Streamlit) */
+    footer {
+        visibility: hidden !important;
+    }
+    
+    /* 3. Mengubah Latar Belakang Halaman Utama (Gradasi Biru-Hijau Lembut) */
     [data-testid="stAppViewContainer"] {
         background: linear-gradient(135deg, #e0f2fe 0%, #e8f5e9 100%) !important;
     }
     
-    /* Mengubah Latar Belakang Menu Samping (Sidebar) menjadi Biru Tua BMKG */
+    /* 4. Mengubah Latar Belakang Menu Samping (Sidebar) menjadi Biru Tua BMKG */
     [data-testid="stSidebar"] {
         background-color: #002B49 !important;
     }
     
-    /* Memastikan teks Sidebar berwarna putih */
+    /* 5. Memastikan teks Sidebar berwarna putih */
     [data-testid="stSidebar"] h1, [data-testid="stSidebar"] h2, [data-testid="stSidebar"] h3, 
     [data-testid="stSidebar"] p, [data-testid="stSidebar"] label, [data-testid="stSidebar"] span {
         color: #ffffff !important;
     }
     
-    /* Mengatur kontainer formulir agar semi-transparan putih elegan */
+    /* 6. Mengatur kontainer formulir agar semi-transparan putih elegan */
     [data-testid="stForm"], .stElementContainer div[data-aria-stable="true"] {
         background-color: rgba(255, 255, 255, 0.9) !important;
         border-radius: 10px;
@@ -50,7 +61,6 @@ def simpan_ke_google_sheets(nama_tab, data_list):
     try:
         scope = ["https://spreadsheets.google.com/feeds", "https://www.googleapis.com/auth/drive"]
         
-        # Deteksi otomatis basis data lokal atau cloud secrets
         if "gspread" in st.secrets:
             credentials_info = dict(st.secrets["gspread"])
             creds = ServiceAccountCredentials.from_json_keyfile_dict(credentials_info, scope)
@@ -94,7 +104,6 @@ st.sidebar.caption("STASIUN METEOROLOGI KELAS III SULTAN MUHAMMAD SALAHUDDIN BIM
 # ==========================================
 if menu == "FORMULIR KUNJUNGAN PUBLIK":
     
-    # Header Utama: Logo, Nama Resmi Instansi (Kapital, Tebal, Tengah), dan Jam WITA
     col_logo, col_text, col_clock = st.columns([1.2, 5.5, 2.3])
     with col_logo:
         try:
@@ -136,10 +145,7 @@ if menu == "FORMULIR KUNJUNGAN PUBLIK":
     
     tab1, tab2 = st.tabs(["E-BUKU TAMU DIGITAL", "E-KATALOG PNBP"])
     
-    # --- TAB 1: INTEGRASI ALUR E-BUKU TAMU & IKM ---
     with tab1:
-        
-        # ALUR TAHAP 1: Mengisi Formulir Buku Tamu
         if not st.session_state.tamu_terdaftar:
             st.subheader("FORMULIR REGISTRASI PENGUNJUNG")
             st.caption("Mohon lengkapi data registrasi di bawah ini untuk kepentingan administrasi pelayanan publik.")
@@ -180,8 +186,6 @@ if menu == "FORMULIR KUNJUNGAN PUBLIK":
                     st.warning("PERHATIAN: Mohon uraikan maksud kunjungan secara spesifik pada kolom yang tersedia.")
                 else:
                     tujuan_final = alasan_lainnya if tujuan == "Lain-lain" else tujuan
-                    
-                    # Mengunci zona waktu server ke WITA (UTC+8)
                     waktu_sekarang = datetime.now(timezone(timedelta(hours=8))).strftime("%Y-%m-%d %H:%M:%S")
                     
                     row_tamu = [waktu_sekarang, nama, identitas, no_hp, instansi, tujuan_final, "Pelayanan Terdaftar"]
@@ -191,7 +195,6 @@ if menu == "FORMULIR KUNJUNGAN PUBLIK":
                         st.session_state.nama_pendaftar = nama
                         st.rerun()
 
-        # ALUR TAHAP 2: Otomatis Membuka Survei IKM setelah Buku Tamu Tersimpan
         elif st.session_state.tamu_terdaftar and not st.session_state.ikm_selesai:
             st.success(f"DATA BERHASIL TERSIMPAN: Terima kasih Bapak/Ibu {st.session_state.nama_pendaftar}, data kunjungan Anda telah sah tercatat.")
             st.balloons()
@@ -217,7 +220,6 @@ if menu == "FORMULIR KUNJUNGAN PUBLIK":
                 submit_ikm_otomatis = st.form_submit_button("KIRIM PENILAIAN IKM", type="primary", use_container_width=True)
                 
                 if submit_ikm_otomatis:
-                    # Mengunci zona waktu server ke WITA (UTC+8)
                     waktu_survei = datetime.now(timezone(timedelta(hours=8))).strftime("%Y-%m-%d %H:%M:%S")
                     row_survei = [waktu_survei, st.session_state.nama_pendaftar, layanan, sikap, fasilitas, saran]
                     
@@ -225,7 +227,6 @@ if menu == "FORMULIR KUNJUNGAN PUBLIK":
                         st.session_state.ikm_selesai = True
                         st.rerun()
 
-        # ALUR TAHAP 3: Selesai Seluruh Rangkaian dan Menyediakan Tombol Reset untuk Tamu Baru
         else:
             st.success("PROSES SELESAI: Terima kasih atas partisipasi Anda dalam mengisi Buku Tamu dan Survei IKM Stasiun Meteorologi Bima.")
             st.info("Kontribusi penilaian Anda sangat berharga bagi peningkatan mutu dan akuntabilitas pelayanan publik kami.")
@@ -237,15 +238,11 @@ if menu == "FORMULIR KUNJUNGAN PUBLIK":
                 st.session_state.ikm_selesai = False
                 st.rerun()
 
-    # --- TAB 2: E-KATALOG ---
     with tab2:
         st.subheader("KATALOG INFORMASI TARIF PNBP")
         st.info("Dasar Hukum: Peraturan Pemerintah Republik Indonesia Nomor 47 Tahun 2018.")
         st.write("(Salinan infografis katalog pelayanan publik akan ditampilkan pada bagian ini)")
 
-# ==========================================
-# 7. HALAMAN 2: SURVEI KEPUASAN MANDIRI (SIDEBAR MENU)
-# ==========================================
 elif menu == "SURVEI KEPUASAN (IKM)":
     
     st.title("SURVEI INDEKS KEPUASAN MASYARAKAT (IKM)")
@@ -269,7 +266,6 @@ elif menu == "SURVEI KEPUASAN (IKM)":
         submit_survei = st.form_submit_button("KIRIM PENILAIAN", type="primary", use_container_width=True)
         
         if submit_survei:
-            # Mengunci zona waktu server ke WITA (UTC+8)
             waktu_survei = datetime.now(timezone(timedelta(hours=8))).strftime("%Y-%m-%d %H:%M:%S")
             identitas_survei = nama_survei if nama_survei else "Anonim"
             
