@@ -1,5 +1,5 @@
 import streamlit as st
-from datetime import datetime
+from datetime import datetime, timezone, timedelta
 import pandas as pd
 import streamlit.components.v1 as components
 import gspread
@@ -180,7 +180,9 @@ if menu == "FORMULIR KUNJUNGAN PUBLIK":
                     st.warning("PERHATIAN: Mohon uraikan maksud kunjungan secara spesifik pada kolom yang tersedia.")
                 else:
                     tujuan_final = alasan_lainnya if tujuan == "Lain-lain" else tujuan
-                    waktu_sekarang = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+                    
+                    # Mengunci zona waktu server ke WITA (UTC+8)
+                    waktu_sekarang = datetime.now(timezone(timedelta(hours=8))).strftime("%Y-%m-%d %H:%M:%S")
                     
                     row_tamu = [waktu_sekarang, nama, identitas, no_hp, instansi, tujuan_final, "Pelayanan Terdaftar"]
                     
@@ -215,7 +217,8 @@ if menu == "FORMULIR KUNJUNGAN PUBLIK":
                 submit_ikm_otomatis = st.form_submit_button("KIRIM PENILAIAN IKM", type="primary", use_container_width=True)
                 
                 if submit_ikm_otomatis:
-                    waktu_survei = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+                    # Mengunci zona waktu server ke WITA (UTC+8)
+                    waktu_survei = datetime.now(timezone(timedelta(hours=8))).strftime("%Y-%m-%d %H:%M:%S")
                     row_survei = [waktu_survei, st.session_state.nama_pendaftar, layanan, sikap, fasilitas, saran]
                     
                     if simpan_ke_google_sheets("Survei", row_survei):
@@ -266,7 +269,8 @@ elif menu == "SURVEI KEPUASAN (IKM)":
         submit_survei = st.form_submit_button("KIRIM PENILAIAN", type="primary", use_container_width=True)
         
         if submit_survei:
-            waktu_survei = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+            # Mengunci zona waktu server ke WITA (UTC+8)
+            waktu_survei = datetime.now(timezone(timedelta(hours=8))).strftime("%Y-%m-%d %H:%M:%S")
             identitas_survei = nama_survei if nama_survei else "Anonim"
             
             row_survei = [waktu_survei, identitas_survei, layanan, sikap, fasilitas, saran]
