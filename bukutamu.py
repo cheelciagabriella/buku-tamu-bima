@@ -1,4 +1,4 @@
-import streamlit as st
+import streamlit st
 from datetime import datetime, timezone, timedelta
 import pandas as pd
 import streamlit.components.v1 as components
@@ -10,12 +10,11 @@ from oauth2client.service_account import ServiceAccountCredentials
 # ==========================================
 st.set_page_config(
     page_title="E-Buku Tamu Stamet Bima", 
-    # Dikosongkan agar otomatis menggunakan logo awan bawaan Streamlit
     layout="wide"
 )
 
 # ==========================================
-# 2. KUSTOMISASI DESAIN WARNA DAN TOTAL WHITE-LABELING
+# 2. KUSTOMISASI DESAIN WARNA (TEMA PUSAT KOMANDO - DARK MODE)
 # ==========================================
 st.markdown("""
     <style>
@@ -29,40 +28,52 @@ st.markdown("""
         visibility: hidden !important;
     }
     
-    /* 3. Mengubah Latar Belakang Halaman Utama (Gradasi Biru-Hijau Lembut) */
+    /* 3. Mengubah Latar Belakang Halaman Utama menjadi Biru Gelap Komando */
     [data-testid="stAppViewContainer"] {
-        background: linear-gradient(135deg, #e0f2fe 0%, #e8f5e9 100%) !important;
+        background: linear-gradient(135deg, #020617 0%, #0f172a 100%) !important;
     }
     
-    /* 4. Mengubah Latar Belakang Menu Samping (Sidebar) menjadi Biru Tua BMKG */
+    /* 4. Mengubah Latar Belakang Menu Samping (Sidebar) menjadi Biru Tua Pekat */
     [data-testid="stSidebar"] {
-        background-color: #002B49 !important;
+        background-color: #001529 !important;
     }
     
-    /* 5. Memastikan teks Sidebar berwarna putih */
+    /* 5. Memastikan semua teks di Sidebar tetap Putih Bersih */
     [data-testid="stSidebar"] h1, [data-testid="stSidebar"] h2, [data-testid="stSidebar"] h3, 
-    [data-testid="stSidebar"] p, [data-testid="stSidebar"] label, [data-testid="stSidebar"] span {
+    [data-testid="stSidebar"] p, [data-testid="stSidebar"] label, [data-testid="stSidebar"] span, [data-testid="stSidebar"] div {
         color: #ffffff !important;
     }
     
-    /* 6. Mengatur kontainer formulir agar semi-transparan putih elegan */
+    /* 6. Mengatur kontainer formulir menjadi Biru Donker BMKG yang solid dan kontras */
     [data-testid="stForm"], .stElementContainer div[data-aria-stable="true"] {
-        background-color: rgba(255, 255, 255, 0.9) !important;
+        background-color: #002B49 !important;
+        border: 1px solid #004080;
         border-radius: 10px;
         padding: 20px;
     }
 
-    /* 7. PENANGKAL OTOMATIS DARK MODE HP (MEMAKSA TEKS TETAP GELAP/NAVY) */
-    .main h1, .main h2, .main h3, .main h4, .main h5, .main h6, .main label, .main p, .main span {
-        color: #003366 !important;
+    /* 7. KUNCI MUTLAK: Memaksa semua elemen teks di halaman utama berwarna Putih/Terang */
+    section.main h1, section.main h2, section.main h3, section.main h4, section.main h5, section.main h6,
+    section.main label, section.main p, section.main span,
+    section.main div[data-testid="stMarkdownContainer"] p,
+    section.main div[data-testid="stWidgetLabel"] p {
+        color: #ffffff !important;
     }
-    /* Memastikan teks penjelasan/caption berwarna abu-abu tua agar tidak pudar */
-    .main .stCaptionContainer, .main div[data-testid="stCaptionContainer"] p {
-        color: #444444 !important;
+    
+    /* Memastikan teks penjelasan atau caption berwarna abu-abu terang agar terbaca */
+    section.main .stCaptionContainer, section.main div[data-testid="stCaptionContainer"] p {
+        color: #cbd5e1 !important;
     }
-    /* Memastikan tulisan teks yang sedang diketik di dalam kolom input berwarna gelap */
-    .main input {
+    
+    /* Kolom inputan tetap dibikin putih bersih di dalamnya dengan tulisan hitam agar kontras saat diketik */
+    section.main input {
+        background-color: #ffffff !important;
         color: #111111 !important;
+    }
+    
+    /* Mengubah warna teks tab menu agar tetap terlihat jelas */
+    button[data-baseweb="tab"] p {
+        color: #ffffff !important;
     }
     </style>
 """, unsafe_allow_html=True)
@@ -127,13 +138,13 @@ if menu == "FORMULIR KUNJUNGAN PUBLIK":
     with col_text:
         st.markdown("""
             <div style='text-align: center; padding-top: 5px; line-height: 1.2;'>
-                <div style='color: #003366; font-size: 30px; font-weight: 900; letter-spacing: 1px; margin-bottom: 2px;'>
+                <div style='color: #38bdf8; font-size: 30px; font-weight: 900; letter-spacing: 1px; margin-bottom: 2px;'>
                     PORTAL LAYANAN PUBLIK TERINTEGRASI
                 </div>
-                <div style='color: #1b5e20; font-size: 18px; font-weight: 800; letter-spacing: 0.5px; margin-bottom: 2px;'>
+                <div style='color: #4ade80; font-size: 18px; font-weight: 800; letter-spacing: 0.5px; margin-bottom: 2px;'>
                     STASIUN METEOROLOGI KELAS III SULTAN MUHAMMAD SALAHUDDIN BIMA
                 </div>
-                <div style='color: #444444; font-size: 14px; font-weight: 700; letter-spacing: 1px; margin-top: 0px;'>
+                <div style='color: #e2e8f0; font-size: 14px; font-weight: 700; letter-spacing: 1px; margin-top: 0px;'>
                     BADAN METEOROLOGI, KLIMATOLOGI, DAN GEOFISIKA
                 </div>
             </div>
@@ -141,7 +152,7 @@ if menu == "FORMULIR KUNJUNGAN PUBLIK":
         
     with col_clock:
         components.html("""
-            <div id="clock" style="font-family: 'Arial', sans-serif; font-size: 14px; font-weight: bold; color: #003366; text-align: right; padding-top: 25px;"></div>
+            <div id="clock" style="font-family: 'Arial', sans-serif; font-size: 14px; font-weight: bold; color: #facc15; text-align: right; padding-top: 25px;"></div>
             <script>
                 function updateTime() {
                     const now = new Date();
@@ -158,6 +169,7 @@ if menu == "FORMULIR KUNJUNGAN PUBLIK":
     
     tab1, tab2 = st.tabs(["E-BUKU TAMU DIGITAL", "E-KATALOG PNBP"])
     
+    # --- TAB 1: E-BUKU TAMU ---
     with tab1:
         if not st.session_state.tamu_terdaftar:
             st.subheader("FORMULIR REGISTRASI PENGUNJUNG")
@@ -209,7 +221,7 @@ if menu == "FORMULIR KUNJUNGAN PUBLIK":
                         st.rerun()
 
         elif st.session_state.tamu_terdaftar and not st.session_state.ikm_selesai:
-            st.success(f"DATA BERHASIL TERSIMPAN: Terima kasih Bapak/Ibu {st.session_state.nama_pendaftar}, data kunjungan Anda telah sah carat.")
+            st.success(f"DATA BERHASIL TERSIMPAN: Terima kasih Bapak/Ibu {st.session_state.nama_pendaftar}, data kunjungan Anda telah sah tercatat.")
             st.balloons()
             
             st.divider()
@@ -251,11 +263,54 @@ if menu == "FORMULIR KUNJUNGAN PUBLIK":
                 st.session_state.ikm_selesai = False
                 st.rerun()
 
+    # --- TAB 2: E-KATALOG PNBP RESMI (KATEGORI ROMAWI I PTSP) ---
     with tab2:
-        st.subheader("KATALOG INFORMASI TARIF PNBP")
-        st.info("Dasar Hukum: Peraturan Pemerintah Republik Indonesia Nomor 47 Tahun 2018.")
-        st.write("(Salinan infografis katalog pelayanan publik akan ditampilkan pada bagian ini)")
+        st.subheader("KATALOG JENIS LAYANAN DATA DAN INFORMASI")
+        st.caption("Klasifikasi Resmi Berdasarkan Peraturan Pemerintah Nomor 47 Tahun 2018 yang Berlaku pada PTSP BMKG.")
+        
+        # Penambahan menu lipat interaktif untuk Kategori I.A Resmi PTSP
+        with st.expander("I.A. INFORMASI KHUSUS METEOROLOGI, KLIMATOLOGI, DAN GEOFISIKA"):
+            st.markdown("""
+            Layanan informasi data rutin yang disediakan dan diolah sesuai dengan standar operasional instansi:
+            * **1. Informasi Cuaca Penerbangan:** Layanan informasi meteorologi penunjang keselamatan rute penerbangan.
+            * **2. Informasi Cuaca Pelayaran:** Layanan prakiraan cuaca maritim, tinggi gelombang, dan kecepatan angin laut.
+            * **3. Informasi Cuaca Pelabuhan:** Laporan meteorologi lokal khusus kawasan operasional dermaga/pelabuhan.
+            * **4. Informasi Cuaca Pengeboran Lepas Pantai:** Analisis kondisi iklim makro dan mikro titik pengeboran minyak/gas bumi.
+            * **5. Informasi Iklim Agro Industri:** * *a. Analisis dan Prakiraan Hujan Bulanan*
+                * *b. Prakiraan Musim Kemarau dan Musim Hujan*
+                * *c. Dokumen Atlas Kesesuaian Agroklimat serta Normal Temperatur*
+                * *d. Atlas Curah Hujan dan Windrose Wilayah Indonesia*
+            * **6. Informasi Kualitas Udara Rata-Rata Mingguan:** Laporan data polutan atmosfer (PM10, PM2.5, SO2, NOx, O3, CO, CO2, CH4).
+            * **7. Informasi Peta Kegempaan Perencanaan Konstruksi:** Peta spasial kegempaan nasional dan nilai percepatan tanah.
+            * **8. Informasi Keperluan Klaim Asuransi:** Penerbitan dokumen bukti rekaman fenomena cuaca atau gempa untuk asuransi.
+            """)
+            
+        st.write("")
+        
+        # Penambahan menu lipat interaktif untuk Kategori I.B Resmi PTSP
+        with st.expander("I.B. INFORMASI KHUSUS METEOROLOGI, KLIMATOLOGI, DAN GEOFISIKA SESUAI PERMINTAAN"):
+            st.markdown("""
+            Layanan pengolahan data atau analisa spasial sektoral yang dikustomisasi berdasarkan permohonan pemohon:
+            * **1. Informasi Meteorologi Khusus:** Informasi cuaca kegiatan olahraga, kegiatan komersial outdoor/indoor, dan data radar cuaca terperinci (per 10 menit).
+            * **2. Informasi Klimatologi Khusus:** Analisis iklim maritim tabular/grafik dan dokumen peta atlas potensi rawan banjir.
+            * **3. Informasi Perubahan Iklim & Kualitas Udara:** Penerbitan atlas kerentanan iklim, potensi energi matahari/angin, serta jasa pengambilan dan pengujian laboratorium sampel kimia air hujan/polutan udara.
+            * **4. Informasi Geofisika Khusus:** Buku variasi magnet bumi, peta tingkat kerawanan petir, waktu terbit/terbenam benda langit, almanak resmi BMKG, peta ketinggian hilal, dan data titik gaya berat (gravitasi).
+            """)
+            
+        st.write("")
+        
+        # Bagian informasi pembebasan biaya gratis Rp 0,00 untuk memperkuat substansi Latsar
+        with st.container(border=True):
+            st.markdown("### **KETENTUAN TARIF KHUSUS RP 0,00 (GRATIS)**")
+            st.markdown("""
+            Berdasarkan aturan internal PTSP, layanan kategori Romawi I di atas dapat diberikan dengan tarif **Rp 0,00 (Nol Rupiah)** apabila digunakan untuk kepentingan:
+            1. **Pendidikan dan Penelitian Non-Komersial:** Pengajuan tugas akhir, skripsi, tesis, dan disertasi mahasiswa dengan melampirkan surat pengantar resmi dekan universitas.
+            2. **Penanggulangan Bencana & Kegiatan Sosial:** Keperluan koordinasi SAR, BMKG warning bencana, pertahanan negara (TNI/POLRI), serta agenda keagamaan non-profit.
+            """)
 
+# ==========================================
+# 7. HALAMAN 2: SURVEI KEPUASAN (IKM)
+# ==========================================
 elif menu == "SURVEI KEPUASAN (IKM)":
     
     st.title("SURVEI INDEKS KEPUASAN MASYARAKAT (IKM)")
