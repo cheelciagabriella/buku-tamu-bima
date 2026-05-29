@@ -51,6 +51,19 @@ st.markdown("""
         border-radius: 10px;
         padding: 20px;
     }
+
+    /* 7. PENANGKAL OTOMATIS DARK MODE HP (MEMAKSA TEKS TETAP GELAP/NAVY) */
+    .main h1, .main h2, .main h3, .main h4, .main h5, .main h6, .main label, .main p, .main span {
+        color: #003366 !important;
+    }
+    /* Memastikan teks penjelasan/caption berwarna abu-abu tua agar tidak pudar */
+    .main .stCaptionContainer, .main div[data-testid="stCaptionContainer"] p {
+        color: #444444 !important;
+    }
+    /* Memastikan tulisan teks yang sedang diketik di dalam kolom input berwarna gelap */
+    .main input {
+        color: #111111 !important;
+    }
     </style>
 """, unsafe_allow_html=True)
 
@@ -130,7 +143,6 @@ if menu == "FORMULIR KUNJUNGAN PUBLIK":
         components.html("""
             <div id="clock" style="font-family: 'Arial', sans-serif; font-size: 14px; font-weight: bold; color: #003366; text-align: right; padding-top: 25px;"></div>
             <script>
-                // Update time in real-time according to WITA timezone
                 function updateTime() {
                     const now = new Date();
                     const options = { timeZone: 'Asia/Makassar', weekday: 'long', year: 'numeric', month: 'long', day: 'numeric', hour: '2-digit', minute: '2-digit', second: '2-digit', hour12: false };
@@ -197,7 +209,7 @@ if menu == "FORMULIR KUNJUNGAN PUBLIK":
                         st.rerun()
 
         elif st.session_state.tamu_terdaftar and not st.session_state.ikm_selesai:
-            st.success(f"DATA BERHASIL TERSIMPAN: Terima kasih Bapak/Ibu {st.session_state.nama_pendaftar}, data kunjungan Anda telah sah tercatat.")
+            st.success(f"DATA BERHASIL TERSIMPAN: Terima kasih Bapak/Ibu {st.session_state.nama_pendaftar}, data kunjungan Anda telah sah carat.")
             st.balloons()
             
             st.divider()
