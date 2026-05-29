@@ -1,4 +1,4 @@
-import streamlit st
+import streamlit as st
 from datetime import datetime, timezone, timedelta
 import pandas as pd
 import streamlit.components.v1 as components
@@ -268,7 +268,6 @@ if menu == "FORMULIR KUNJUNGAN PUBLIK":
         st.subheader("KATALOG JENIS LAYANAN DATA DAN INFORMASI")
         st.caption("Klasifikasi Resmi Berdasarkan Peraturan Pemerintah Nomor 47 Tahun 2018 yang Berlaku pada PTSP BMKG.")
         
-        # Penambahan menu lipat interaktif untuk Kategori I.A Resmi PTSP
         with st.expander("I.A. INFORMASI KHUSUS METEOROLOGI, KLIMATOLOGI, DAN GEOFISIKA"):
             st.markdown("""
             Layanan informasi data rutin yang disediakan dan diolah sesuai dengan standar operasional instansi:
@@ -287,7 +286,6 @@ if menu == "FORMULIR KUNJUNGAN PUBLIK":
             
         st.write("")
         
-        # Penambahan menu lipat interaktif untuk Kategori I.B Resmi PTSP
         with st.expander("I.B. INFORMASI KHUSUS METEOROLOGI, KLIMATOLOGI, DAN GEOFISIKA SESUAI PERMINTAAN"):
             st.markdown("""
             Layanan pengolahan data atau analisa spasial sektoral yang dikustomisasi berdasarkan permohonan pemohon:
@@ -299,7 +297,6 @@ if menu == "FORMULIR KUNJUNGAN PUBLIK":
             
         st.write("")
         
-        # Bagian informasi pembebasan biaya gratis Rp 0,00 untuk memperkuat substansi Latsar
         with st.container(border=True):
             st.markdown("### **KETENTUAN TARIF KHUSUS RP 0,00 (GRATIS)**")
             st.markdown("""
