@@ -14,15 +14,10 @@ st.set_page_config(
 )
 
 # ==========================================
-# 2. KUSTOMISASI DESAIN WARNA DAN ANTI-DARK MODE HP
+# 2. KUSTOMISASI DESAIN WARNA (TEMA PUSAT KOMANDO - DARK MODE)
 # ==========================================
 st.markdown("""
     <style>
-    /* PERINTAH UTAMA: Memaksa browser HP menolak Dark Mode dan mengunci Mode Terang */
-    html, body, [data-testid="stAppViewContainer"] {
-        color-scheme: light !important;
-    }
-    
     /* 1. Menghilangkan Header Bawaan Streamlit (Tombol Deploy dan Menu Kanan Atas) */
     [data-testid="stHeader"] {
         display: none !important;
@@ -33,45 +28,52 @@ st.markdown("""
         visibility: hidden !important;
     }
     
-    /* 3. Mengubah Latar Belakang Halaman Utama (Gradasi Biru-Hijau Lembut) */
+    /* 3. Mengubah Latar Belakang Halaman Utama menjadi Biru Gelap Komando */
     [data-testid="stAppViewContainer"] {
-        background: linear-gradient(135deg, #e0f2fe 0%, #e8f5e9 100%) !important;
+        background: linear-gradient(135deg, #020617 0%, #0f172a 100%) !important;
     }
     
-    /* 4. Mengubah Latar Belakang Menu Samping (Sidebar) menjadi Biru Tua BMKG */
+    /* 4. Mengubah Latar Belakang Menu Samping (Sidebar) menjadi Biru Tua Pekat */
     [data-testid="stSidebar"] {
-        background-color: #002B49 !important;
+        background-color: #001529 !important;
     }
     
-    /* 5. Memastikan teks Sidebar berwarna putih */
+    /* 5. Memastikan semua teks di Sidebar tetap Putih Bersih */
     [data-testid="stSidebar"] h1, [data-testid="stSidebar"] h2, [data-testid="stSidebar"] h3, 
     [data-testid="stSidebar"] p, [data-testid="stSidebar"] label, [data-testid="stSidebar"] span, [data-testid="stSidebar"] div {
         color: #ffffff !important;
     }
     
-    /* 6. Mengatur kontainer formulir agar semi-transparan putih elegan */
+    /* 6. Mengatur kontainer formulir menjadi Biru Donker BMKG yang solid dan kontras */
     [data-testid="stForm"], .stElementContainer div[data-aria-stable="true"] {
-        background-color: rgba(255, 255, 255, 0.9) !important;
+        background-color: #002B49 !important;
+        border: 1px solid #004080;
         border-radius: 10px;
         padding: 20px;
     }
 
-    /* 7. TARGET AGRESIF: Mengunci seluruh elemen teks halaman utama agar tetap Biru Navy */
+    /* 7. KUNCI MUTLAK: Memaksa semua elemen teks di halaman utama berwarna Putih/Terang */
     section.main h1, section.main h2, section.main h3, section.main h4, section.main h5, section.main h6,
     section.main label, section.main p, section.main span,
     section.main div[data-testid="stMarkdownContainer"] p,
     section.main div[data-testid="stWidgetLabel"] p {
-        color: #003366 !important;
+        color: #ffffff !important;
     }
     
-    /* Memastikan teks penjelasan atau caption tetap berwarna gelap proprosional */
+    /* Memastikan teks penjelasan atau caption berwarna abu-abu terang agar terbaca */
     section.main .stCaptionContainer, section.main div[data-testid="stCaptionContainer"] p {
-        color: #444444 !important;
+        color: #cbd5e1 !important;
     }
     
-    /* Memastikan tulisan yang sedang diketik di dalam kolom input berwarna hitam tajam */
+    /* Kolom inputan tetap dibikin putih bersih di dalamnya dengan tulisan hitam agar kontras saat diketik */
     section.main input {
+        background-color: #ffffff !important;
         color: #111111 !important;
+    }
+    
+    /* Mengubah warna teks tab menu agar tetap terlihat jelas */
+    button[data-baseweb="tab"] p {
+        color: #ffffff !important;
     }
     </style>
 """, unsafe_allow_html=True)
@@ -134,23 +136,25 @@ if menu == "FORMULIR KUNJUNGAN PUBLIK":
             st.image("https://upload.wikimedia.org/wikipedia/commons/4/44/Logo_BMKG.png", width=120)
             
     with col_text:
+        # Teks Judul disesuaikan warnanya agar menyala terang di atas background gelap
         st.markdown("""
             <div style='text-align: center; padding-top: 5px; line-height: 1.2;'>
-                <div style='color: #003366; font-size: 30px; font-weight: 900; letter-spacing: 1px; margin-bottom: 2px;'>
+                <div style='color: #38bdf8; font-size: 30px; font-weight: 900; letter-spacing: 1px; margin-bottom: 2px;'>
                     PORTAL LAYANAN PUBLIK TERINTEGRASI
                 </div>
-                <div style='color: #1b5e20; font-size: 18px; font-weight: 800; letter-spacing: 0.5px; margin-bottom: 2px;'>
+                <div style='color: #4ade80; font-size: 18px; font-weight: 800; letter-spacing: 0.5px; margin-bottom: 2px;'>
                     STASIUN METEOROLOGI KELAS III SULTAN MUHAMMAD SALAHUDDIN BIMA
                 </div>
-                <div style='color: #444444; font-size: 14px; font-weight: 700; letter-spacing: 1px; margin-top: 0px;'>
+                <div style='color: #e2e8f0; font-size: 14px; font-weight: 700; letter-spacing: 1px; margin-top: 0px;'>
                     BADAN METEOROLOGI, KLIMATOLOGI, DAN GEOFISIKA
                 </div>
             </div>
         """, unsafe_allow_html=True)
         
     with col_clock:
+        # Jam digital kustom warna putih kekuningan agar kontras tinggi
         components.html("""
-            <div id="clock" style="font-family: 'Arial', sans-serif; font-size: 14px; font-weight: bold; color: #003366; text-align: right; padding-top: 25px;"></div>
+            <div id="clock" style="font-family: 'Arial', sans-serif; font-size: 14px; font-weight: bold; color: #facc15; text-align: right; padding-top: 25px;"></div>
             <script>
                 function updateTime() {
                     const now = new Date();
