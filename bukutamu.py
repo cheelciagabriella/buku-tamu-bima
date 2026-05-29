@@ -14,7 +14,7 @@ st.set_page_config(
 )
 
 # ==========================================
-# 2. KUSTOMISASI DESAIN WARNA (TEMA PUSAT KOMANDO - DARK MODE)
+# 2. KUSTOMISASI DESAIN WARNA (TEMA TERANG RESPONSIF)
 # ==========================================
 st.markdown("""
     <style>
@@ -28,52 +28,46 @@ st.markdown("""
         visibility: hidden !important;
     }
     
-    /* 3. Mengubah Latar Belakang Halaman Utama menjadi Biru Gelap Komando */
+    /* 3. Latar Belakang Halaman Utama (Gradasi Biru-Hijau Lembut) */
     [data-testid="stAppViewContainer"] {
-        background: linear-gradient(135deg, #020617 0%, #0f172a 100%) !important;
+        background: linear-gradient(135deg, #e0f2fe 0%, #e8f5e9 100%) !important;
     }
     
-    /* 4. Mengubah Latar Belakang Menu Samping (Sidebar) menjadi Biru Tua Pekat */
+    /* 4. Latar Belakang Menu Samping (Sidebar) tetap Biru Tua BMKG */
     [data-testid="stSidebar"] {
-        background-color: #001529 !important;
+        background-color: #002B49 !important;
     }
     
-    /* 5. Memastikan semua teks di Sidebar tetap Putih Bersih */
+    /* 5. Memastikan semua teks di Sidebar berwarna putih bersih */
     [data-testid="stSidebar"] h1, [data-testid="stSidebar"] h2, [data-testid="stSidebar"] h3, 
     [data-testid="stSidebar"] p, [data-testid="stSidebar"] label, [data-testid="stSidebar"] span, [data-testid="stSidebar"] div {
         color: #ffffff !important;
     }
     
-    /* 6. Mengatur kontainer formulir menjadi Biru Donker BMKG yang solid dan kontras */
+    /* 6. Mengatur kontainer formulir agar semi-transparan putih elegan */
     [data-testid="stForm"], .stElementContainer div[data-aria-stable="true"] {
-        background-color: #002B49 !important;
-        border: 1px solid #004080;
+        background-color: rgba(255, 255, 255, 0.95) !important;
         border-radius: 10px;
         padding: 20px;
+        border: 1px solid #cbd5e1;
     }
 
-    /* 7. KUNCI MUTLAK: Memaksa semua elemen teks di halaman utama berwarna Putih/Terang */
+    /* 7. Mengunci semua elemen teks halaman utama agar berwarna Biru Navy Gelap */
     section.main h1, section.main h2, section.main h3, section.main h4, section.main h5, section.main h6,
     section.main label, section.main p, section.main span,
     section.main div[data-testid="stMarkdownContainer"] p,
     section.main div[data-testid="stWidgetLabel"] p {
-        color: #ffffff !important;
+        color: #003366 !important;
     }
     
-    /* Memastikan teks penjelasan atau caption berwarna abu-abu terang agar terbaca */
+    /* Memastikan teks penjelasan atau caption tetap berwarna abu-abu tua */
     section.main .stCaptionContainer, section.main div[data-testid="stCaptionContainer"] p {
-        color: #cbd5e1 !important;
+        color: #334155 !important;
     }
     
-    /* Kolom inputan tetap dibikin putih bersih di dalamnya dengan tulisan hitam agar kontras saat diketik */
+    /* Memastikan tulisan yang sedang diketik di dalam kolom input berwarna gelap tajam */
     section.main input {
-        background-color: #ffffff !important;
-        color: #111111 !important;
-    }
-    
-    /* Mengubah warna teks tab menu agar tetap terlihat jelas */
-    button[data-baseweb="tab"] p {
-        color: #ffffff !important;
+        color: #000000 !important;
     }
     </style>
 """, unsafe_allow_html=True)
@@ -138,13 +132,13 @@ if menu == "FORMULIR KUNJUNGAN PUBLIK":
     with col_text:
         st.markdown("""
             <div style='text-align: center; padding-top: 5px; line-height: 1.2;'>
-                <div style='color: #38bdf8; font-size: 30px; font-weight: 900; letter-spacing: 1px; margin-bottom: 2px;'>
+                <div style='color: #003366; font-size: 30px; font-weight: 900; letter-spacing: 1px; margin-bottom: 2px;'>
                     PORTAL LAYANAN PUBLIK TERINTEGRASI
                 </div>
-                <div style='color: #4ade80; font-size: 18px; font-weight: 800; letter-spacing: 0.5px; margin-bottom: 2px;'>
+                <div style='color: #1b5e20; font-size: 18px; font-weight: 800; letter-spacing: 0.5px; margin-bottom: 2px;'>
                     STASIUN METEOROLOGI KELAS III SULTAN MUHAMMAD SALAHUDDIN BIMA
                 </div>
-                <div style='color: #e2e8f0; font-size: 14px; font-weight: 700; letter-spacing: 1px; margin-top: 0px;'>
+                <div style='color: #444444; font-size: 14px; font-weight: 700; letter-spacing: 1px; margin-top: 0px;'>
                     BADAN METEOROLOGI, KLIMATOLOGI, DAN GEOFISIKA
                 </div>
             </div>
@@ -152,7 +146,7 @@ if menu == "FORMULIR KUNJUNGAN PUBLIK":
         
     with col_clock:
         components.html("""
-            <div id="clock" style="font-family: 'Arial', sans-serif; font-size: 14px; font-weight: bold; color: #facc15; text-align: right; padding-top: 25px;"></div>
+            <div id="clock" style="font-family: 'Arial', sans-serif; font-size: 14px; font-weight: bold; color: #003366; text-align: right; padding-top: 25px;"></div>
             <script>
                 function updateTime() {
                     const now = new Date();
@@ -263,46 +257,132 @@ if menu == "FORMULIR KUNJUNGAN PUBLIK":
                 st.session_state.ikm_selesai = False
                 st.rerun()
 
-    # --- TAB 2: E-KATALOG PNBP RESMI (KATEGORI ROMAWI I PTSP) ---
+    # --- TAB 2: E-KATALOG PNBP TABEL DATA DINAMIS & RESPONSIF ---
     with tab2:
-        st.subheader("KATALOG JENIS LAYANAN DATA DAN INFORMASI")
-        st.caption("Klasifikasi Resmi Berdasarkan Peraturan Pemerintah Nomor 47 Tahun 2018 yang Berlaku pada PTSP BMKG.")
+        st.subheader("KATALOG TARIF RESMI JASA DATA DAN INFORMASI (ROMAWI I)")
+        st.info("Dasar Hukum: Peraturan Pemerintah Nomor 47 Tahun 2018 tentang Jenis dan Tarif atas Penerimaan Negara Bukan Pajak yang Berlaku pada BMKG.")
         
-        with st.expander("I.A. INFORMASI KHUSUS METEOROLOGI, KLIMATOLOGI, DAN GEOFISIKA"):
-            st.markdown("""
-            Layanan informasi data rutin yang disediakan dan diolah sesuai dengan standar operasional instansi:
-            * **1. Informasi Cuaca Penerbangan:** Layanan informasi meteorologi penunjang keselamatan rute penerbangan.
-            * **2. Informasi Cuaca Pelayaran:** Layanan prakiraan cuaca maritim, tinggi gelombang, dan kecepatan angin laut.
-            * **3. Informasi Cuaca Pelabuhan:** Laporan meteorologi lokal khusus kawasan operasional dermaga/pelabuhan.
-            * **4. Informasi Cuaca Pengeboran Lepas Pantai:** Analisis kondisi iklim makro dan mikro titik pengeboran minyak/gas bumi.
-            * **5. Informasi Iklim Agro Industri:** * *a. Analisis dan Prakiraan Hujan Bulanan*
-                * *b. Prakiraan Musim Kemarau dan Musim Hujan*
-                * *c. Dokumen Atlas Kesesuaian Agroklimat serta Normal Temperatur*
-                * *d. Atlas Curah Hujan dan Windrose Wilayah Indonesia*
-            * **6. Informasi Kualitas Udara Rata-Rata Mingguan:** Laporan data polutan atmosfer (PM10, PM2.5, SO2, NOx, O3, CO, CO2, CH4).
-            * **7. Informasi Peta Kegempaan Perencanaan Konstruksi:** Peta spasial kegempaan nasional dan nilai percepatan tanah.
-            * **8. Informasi Keperluan Klaim Asuransi:** Penerbitan dokumen bukti rekaman fenomena cuaca atau gempa untuk asuransi.
-            """)
-            
+        # --- TABEL 1: KATEGORI I.A ---
+        st.markdown("### **A. Informasi Khusus Meteorologi, Klimatologi, dan Geofisika**")
+        
+        raw_data_ia = {
+            "Jenis Penerimaan Negara Bukan Pajak": [
+                "1. Informasi Cuaca untuk Penerbangan",
+                "2. Informasi Cuaca untuk Pelayaran",
+                "3. Informasi Cuaca untuk Pelabuhan",
+                "4. Informasi Cuaca untuk Pengeboran Lepas Pantai",
+                "5.a. Analisis dan Prakiraan Hujan Bulanan",
+                "5.b. Prakiraan Musim Kemarau",
+                "5.c. Prakiraan Musim Hujan",
+                "5.d. Atlas Kesesuaian Agroklimat",
+                "5.e. Atlas Normal Temperatur Periode 1981-2010",
+                "5.f. Atlas Windrose Wilayah Indonesia Periode 1981-2010",
+                "5.g. Atlas Curah Hujan di Indonesia Rata-rata Periode 1981-2010",
+                "6.a. Kualitas Udara: Particulate Matter (PM10)",
+                "6.b. Kualitas Udara: Particulate Matter (PM2.5)",
+                "6.c. Kualitas Udara: Sulfur Dioksida (SO2)",
+                "6.d. Kualitas Udara: Nitrogen Oksida (NOx)",
+                "6.e. Kualitas Udara: Ozon (O3)",
+                "6.f. Kualitas Udara: Karbon Monoksida (CO)",
+                "6.g. Kualitas Udara: Karbon Dioksida (CO2)",
+                "6.h. Kualitas Udara: Methan (CH4)",
+                "7.a. Peta Kegempaan",
+                "7.b. Peta Percepatan Tanah",
+                "8.a. Klaim Asuransi: Informasi Meteorologi",
+                "8.b. Klaim Asuransi: Informasi Geofisika"
+            ],
+            "Satuan": [
+                "per route unit", "per route per hari", "per lokasi per hari", "per dokumen per lokasi per hari",
+                "per buku", "per buku", "per buku", "per buku", "per buku", "per buku", "per buku",
+                "per stasiun per tahun", "per stasiun per tahun", "per stasiun per tahun", "per stasiun per tahun",
+                "per stasiun per tahun", "per stasiun per tahun", "per sampel", "per sampel",
+                "per provinsi per tahun", "per provinsi per tahun", "per lokasi per hari", "per lokasi per hari"
+            ],
+            "Tarif": [
+                "4% dari biaya navigasi", "Rp 250.000,00", "Rp 225.000,00", "Rp 330.000,00",
+                "Rp 65.000,00", "Rp 230.000,00", "Rp 230.000,00", "Rp 470.000,00", "Rp 1.500.000,00", "Rp 1.500.000,00", "Rp 1.500.000,00",
+                "Rp 70.000,00", "Rp 70.000,00", "Rp 60.000,00", "Rp 60.000,00", "Rp 60.000,00", "Rp 60.000,00", "Rp 80.000,00", "Rp 80.000,00",
+                "Rp 250.000,00", "Rp 250.000,00", "Rp 175.000,00", "Rp 185.000,00"
+            ]
+        }
+        df_ia = pd.DataFrame(raw_data_ia)
+        st.dataframe(df_ia, use_container_width=True, hide_index=True)
+        
+        st.write("")
+        st.divider()
         st.write("")
         
-        with st.expander("I.B. INFORMASI KHUSUS METEOROLOGI, KLIMATOLOGI, DAN GEOFISIKA SESUAI PERMINTAAN"):
-            st.markdown("""
-            Layanan pengolahan data atau analisa spasial sektoral yang dikustomisasi berdasarkan permohonan pemohon:
-            * **1. Informasi Meteorologi Khusus:** Informasi cuaca kegiatan olahraga, kegiatan komersial outdoor/indoor, dan data radar cuaca terperinci (per 10 menit).
-            * **2. Informasi Klimatologi Khusus:** Analisis iklim maritim tabular/grafik dan dokumen peta atlas potensi rawan banjir.
-            * **3. Informasi Perubahan Iklim & Kualitas Udara:** Penerbitan atlas kerentanan iklim, potensi energi matahari/angin, serta jasa pengambilan dan pengujian laboratorium sampel kimia air hujan/polutan udara.
-            * **4. Informasi Geofisika Khusus:** Buku variasi magnet bumi, peta tingkat kerawanan petir, waktu terbit/terbenam benda langit, almanak resmi BMKG, peta ketinggian hilal, dan data titik gaya berat (gravitasi).
-            """)
-            
+        # --- TABEL 2: KATEGORI I.B ---
+        st.markdown("### **B. Informasi Khusus Meteorologi, Klimatologi, dan Geofisika Sesuai Permintaan**")
+        
+        raw_data_ib = {
+            "Jenis Penerimaan Negara Bukan Pajak": [
+                "1.a. Cuaca Khusus untuk Kegiatan Olah Raga",
+                "1.b. Cuaca Khusus untuk Kegiatan Komersial Outdoor/Indoor",
+                "1.c. Informasi Radar Cuaca (per 10 menit)",
+                "2.a.1) Peta Spasial Informasi Maritim",
+                "2.a.2) Informasi Tabular dan Grafik Maritim",
+                "2.b. Atlas Potensi Rawan Banjir",
+                "3.a.1) Publikasi Informasi Perubahan Iklim dan Kualitas Udara",
+                "3.a.2.a) Atlas Kerentanan Perubahan Iklim",
+                "3.a.2.b) Atlas Potensi Energi Matahari di Indonesia",
+                "3.a.2.c) Atlas Potensi Energi Angin di Indonesia",
+                "3.b.1) Pengambilan Sampel: Sulfur Dioksida (SO2)",
+                "3.b.2) Pengambilan Sampel: Nitrogen Oksida (NO2)",
+                "3.b.3) Pengambilan Sampel: Karbon Dioksida (CO2)",
+                "3.b.4) Pengambilan Sampel: Ozon (O3)",
+                "3.b.5) Pengambilan Sampel: Suspended Particulate Matter (SPM)",
+                "3.b.6) Pengambilan Sampel: Debu Particulate Matter (PM10)",
+                "3.b.7) Pengambilan Sampel: Debu Particulate Matter (PM2.5)",
+                "3.b.8) Pengambilan Sampel: Kimia Air Hujan",
+                "3.b.9) Pengambilan Sampel: Methan (CH4)",
+                "3.c.1) Pengujian Sampel: Sulfur Dioksida (SO2)",
+                "3.c.2) Pengujian Sampel: Nitrogen Oksida (NO2)",
+                "3.c.3) Pengujian Sampel: Karbon Dioksida (CO2)",
+                "3.c.4) Pengujian Sampel: Ozon (O3)",
+                "3.c.5) Pengujian Sampel: Suspended Particulate Matter (SPM)",
+                "3.c.6) Pengujian Sampel: Debu Particulate Matter (PM10)",
+                "3.c.7) Pengujian Sampel: Debu Particulate Matter (PM2.5)",
+                "3.c.8) Pengujian Sampel: Kimia Air Hujan",
+                "3.c.9) Pengujian Sampel: Methan (CH4)",
+                "4.a. Buku dan Peta Variasi Magnet Bumi (Epoch)",
+                "4.b. Peta Tingkat Kerawanan Petir",
+                "4.c. Waktu Terbit dan Terbenam Matahari atau Bulan",
+                "4.d. Buku Almanak BMKG",
+                "4.e. Buku Peta Ketinggian Hilal",
+                "4.f. Titik Dasar Gaya Berat (Gravitasi)",
+                "4.g. Kejadian Petir"
+            ],
+            "Satuan": [
+                "per lokasi per hari", "per lokasi per hari", "per data per lokasi", "per peta per bulan",
+                "per tabel per bulan", "per atlas", "per buku", "per atlas", "per atlas", "per atlas",
+                "per sampel", "per sampel", "per sampel", "per sampel", "per sampel", "per sampel",
+                "per sampel", "per sampel", "per sampel", "per sampel", "per sampel", "per sampel",
+                "per sampel", "per sampel", "per sampel", "per sampel", "per sampel", "per sampel",
+                "per buku", "per lokasi per tahun", "per lokasi per tahun", "per buku per tahun",
+                "per buku per tahun", "per titik dasar gaya berat", "per lokasi per hari"
+            ],
+            "Tarif": [
+                "Rp 100.000,00", "Rp 100.000,00", "Rp 70.000,00", "Rp 300.000,00",
+                "Rp 350.000,00", "Rp 350.000,00", "Rp 100.000,00", "Rp 450.000,00", "Rp 300.000,00", "Rp 300.000,00",
+                "Rp 30.000,00", "Rp 30.000,00", "Rp 40.000,00", "Rp 30.000,00", "Rp 60.000,00", "Rp 60.000,00",
+                "Rp 90.000,00", "Rp 230.000,00", "Rp 40.000,00", "Rp 20.000,00", "Rp 20.000,00", "Rp 30.000,00",
+                "Rp 20.000,00", "Rp 50.000,00", "Rp 50.000,00", "Rp 70.000,00", "Rp 240.000,00", "Rp 30.000,00",
+                "Rp 300.000,00", "Rp 200.000,00", "Rp 50.000,00", "Rp 150.000,00", "Rp 150.000,00", "Rp 150.000,00", "Rp 75.000,00"
+            ]
+        }
+        df_ib = pd.DataFrame(raw_data_ib)
+        st.dataframe(df_ib, use_container_width=True, hide_index=True)
+        
         st.write("")
         
+        # --- INFORMASI BEBAS BIAYA ---
         with st.container(border=True):
-            st.markdown("### **KETENTUAN TARIF KHUSUS RP 0,00 (GRATIS)**")
+            st.markdown("### **KETENTUAN KHUSUS BEBAS BIAYA (TARIF RP 0,00 / GRATIS)**")
             st.markdown("""
-            Berdasarkan aturan internal PTSP, layanan kategori Romawi I di atas dapat diberikan dengan tarif **Rp 0,00 (Nol Rupiah)** apabila digunakan untuk kepentingan:
-            1. **Pendidikan dan Penelitian Non-Komersial:** Pengajuan tugas akhir, skripsi, tesis, dan disertasi mahasiswa dengan melampirkan surat pengantar resmi dekan universitas.
-            2. **Penanggulangan Bencana & Kegiatan Sosial:** Keperluan koordinasi SAR, BMKG warning bencana, pertahanan negara (TNI/POLRI), serta agenda keagamaan non-profit.
+            Seluruh tarif kategori Romawi I di atas dapat dibebaskan menjadi **Rp 0,00 (Gratis 100%)** apabila ditujukan demi pemenuhan kebutuhan non-komersial berikut:
+            1. **Pendidikan dan Penelitian:** Guna pembuatan Tugas Akhir, Skripsi, Tesis, atau Disertasi pelajar/mahasiswa dengan menyertakan Surat Pengantar Resmi dari Sekolah/Kampus.
+            2. **Keselamatan dan Penanggulangan:** Keperluan darurat evakuasi bencana alam, kegiatan sosial keagamaan non-profit, serta operasional kedaulatan TNI/POLRI.
             """)
 
 # ==========================================
