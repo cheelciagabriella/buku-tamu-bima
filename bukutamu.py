@@ -200,6 +200,7 @@ if menu == "FORMULIR KUNJUNGAN PUBLIK":
                 else:
                     tujuan_final = alasan_lainnya if tujuan == "Lain-lain" else tujuan
                     waktu_sekarang = datetime.now(timezone(timedelta(hours=8))).strftime("%Y-%m-%d %H:%M:%S")
+                    
                     row_tamu = [waktu_sekarang, nama, identitas, no_hp, instansi, tujuan_final, "Pelayanan Terdaftar"]
                     
                     if simpan_ke_google_sheets("Tamu", row_tamu):
@@ -246,7 +247,7 @@ if menu == "FORMULIR KUNJUNGAN PUBLIK":
                 st.session_state.ikm_selesai = False
                 st.rerun()
 
-    # --- TAB 2: PORTAL DATA KHUSUS (UPLOAD FILE) ---
+    # --- TAB 2: PORTAL DATA KHUSUS (UPLOAD FILE BAWAAN STREAMLIT) ---
     with tab2:
         st.subheader("FORMULIR PERMOHONAN DATA BEBAS TARIF (RP 0,00)")
         st.info("Sesuai aturan PP No. 47 Tahun 2018, layanan ini dikhususkan untuk keperluan Pendidikan, Penelitian non-komersial, dan Instansi Pemerintah.")
@@ -289,7 +290,6 @@ if menu == "FORMULIR KUNJUNGAN PUBLIK":
                     
                     nama_file_surat = "Tidak Ada Surat"
                     if file_surat is not None:
-                        # Kita amankan ekstensi filenya
                         ext = file_surat.name.split('.')[-1]
                         nama_file_surat = f"Surat_{nama_khusus.replace(' ', '_')}_{datetime.now().strftime('%Y%m%d_%H%M%S')}.{ext}"
                         path_simpan_surat = os.path.join(folder_arsip, nama_file_surat)
@@ -325,7 +325,7 @@ if menu == "FORMULIR KUNJUNGAN PUBLIK":
             ]
         }
         st.dataframe(pd.DataFrame(raw_data_ia), use_container_width=True, hide_index=True)
-        st.write("*(Tabel dipersingkat untuk preview, silakan tambahkan data lengkapnya sesuai script sebelumnya)*")
+        st.write("*(Tabel dipersingkat untuk preview, pastikan data PNBP sudah diisi penuh)*")
         
         with st.container(border=True):
             st.markdown("### **KETENTUAN KHUSUS BEBAS BIAYA (TARIF RP 0,00 / GRATIS)**")
@@ -374,7 +374,6 @@ elif menu == "🔒 PORTAL ADMIN & REKAP LAPORAN":
     st.write("Area khusus petugas dan pimpinan untuk audit dan rekapitulasi data.")
     st.divider()
 
-    # Sistem Login Sederhana
     if not st.session_state.admin_logged_in:
         with st.container(border=True):
             st.markdown("### 🔐 Otorisasi Akses Dibutuhkan")
@@ -382,13 +381,12 @@ elif menu == "🔒 PORTAL ADMIN & REKAP LAPORAN":
             btn_login = st.button("Masuk / Login", type="primary")
             
             if btn_login:
-                if password_input == "adminbima2026":  # <-- Password Default
+                if password_input == "adminbima2026":  
                     st.session_state.admin_logged_in = True
                     st.rerun()
                 else:
                     st.error("❌ Akses Ditolak: Password Salah!")
     else:
-        # Jika berhasil login
         col_A, col_B = st.columns([8, 2])
         with col_A:
             st.success("✔️ Otorisasi Berhasil. Selamat bertugas, Admin!")
@@ -409,7 +407,6 @@ elif menu == "🔒 PORTAL ADMIN & REKAP LAPORAN":
                 if not df_tamu.empty:
                     st.dataframe(df_tamu, use_container_width=True)
                     
-                    # Tombol Download CSV
                     csv_tamu = df_tamu.to_csv(index=False).encode('utf-8')
                     st.download_button(
                         label="📥 Unduh Laporan (.csv)",
@@ -440,27 +437,52 @@ elif menu == "🔒 PORTAL ADMIN & REKAP LAPORAN":
                 else:
                     st.info("Database Survei IKM masih kosong atau gagal ditarik.")
                     
-        # --- SUB-TAB 3: LIHAT FOTO KTP LOKAL ---
+        # --- SUB-TAB 3: LIHAT FOTO KTP LOKAL (MODE GALERI PROFIL) ---
         with tab_arsip:
-            st.subheader("Viewer Arsip Dokumen Digital (Lokal)")
-            folder_arsip = "arsip_dokumen_pnbp"
+            st.subheader("Galeri Audit Arsip Pemohon Bebas Biaya")
+            st.write("Daftar di bawah ini secara otomatis menyandingkan data dari Cloud dengan Foto KTP dari laptop Anda.")
+            st.write("")
             
-            if os.path.exists(folder_arsip):
-                daftar_file = os.listdir(folder_arsip)
-                if len(daftar_file) > 0:
-                    file_pilihan = st.selectbox("Pilih dokumen untuk diaudit (Foto KTP / Surat):", ["-- Pilih File --"] + daftar_file)
+            folder_arsip = "arsip_dokumen_pnbp"
+            df_tamu = ambil_data_google_sheets("Tamu")
+            
+            if not df_tamu.empty:
+                # Menggunakan kolom "Detail Keperluan" yang berisi teks "Arsip KTP:" untuk memfilter
+                if "Detail Keperluan" in df_tamu.columns:
+                    df_khusus = df_tamu[df_tamu["Detail Keperluan"].str.contains("Arsip KTP:", na=False)]
                     
-                    if file_pilihan != "-- Pilih File --":
-                        path_lengkap = os.path.join(folder_arsip, file_pilihan)
-                        
-                        if file_pilihan.lower().endswith(('.png', '.jpg', '.jpeg')):
-                            st.image(path_lengkap, caption=f"Menampilkan: {file_pilihan}", width=600)
-                        elif file_pilihan.lower().endswith('.pdf'):
-                            st.info(f"📄 File PDF ({file_pilihan}) tersimpan dengan aman di server stasiun.")
-                            # Menambahkan tombol download untuk PDF agar bisa di-review
-                            with open(path_lengkap, "rb") as pdf_file:
-                                st.download_button(label="Unduh Dokumen PDF", data=pdf_file, file_name=file_pilihan, mime='application/pdf')
+                    if not df_khusus.empty:
+                        for index, row in df_khusus.iterrows():
+                            with st.container(border=True):
+                                col_img, col_info = st.columns([1, 2])
+                                
+                                teks_detail = row["Detail Keperluan"]
+                                # Memotong text "Arsip KTP: " untuk mengambil nama filenya saja
+                                try:
+                                    nama_file = teks_detail.split("Arsip KTP: ")[1].strip()
+                                except IndexError:
+                                    nama_file = ""
+                                
+                                # Sisi Kiri (Gambar)
+                                with col_img:
+                                    path_gambar = os.path.join(folder_arsip, nama_file)
+                                    if os.path.exists(path_gambar) and nama_file != "":
+                                        st.image(path_gambar, use_container_width=True)
+                                    else:
+                                        st.error(f"⚠️ Gambar tidak ditemukan atau belum diunggah.")
+                                
+                                # Sisi Kanan (Informasi Teks)
+                                with col_info:
+                                    st.markdown(f"### 👤 {row.get('Nama Lengkap', 'N/A')}")
+                                    st.write(f"**⏰ Tanggal & Waktu:** {row.get('Waktu Kunjungan', 'N/A')}")
+                                    st.write(f"**🏢 Asal Instansi:** {row.get('Asal Instansi / Lembaga', 'N/A')}")
+                                    st.write(f"**📱 Kontak WA:** {row.get('Nomor Telepon / WhatsApp', 'N/A')}")
+                                    st.write(f"**📂 Layanan Diminta:** {row.get('Tujuan Utama Kunjungan', 'N/A')}")
+                                    
+                                    st.success("✔️ Dokumen KTP tervalidasi dan tersinkronisasi.")
+                    else:
+                        st.info("Belum ada data pemohon khusus yang mengunggah KTP.")
                 else:
-                    st.info("Belum ada dokumen KTP/Surat yang diunggah oleh pemohon.")
+                    st.warning("Struktur kolom Google Sheets (Detail Keperluan) belum sesuai.")
             else:
-                st.info("Folder arsip belum terbentuk karena belum ada transaksi permohonan data khusus.")
+                st.info("Database Tamu masih kosong.")
