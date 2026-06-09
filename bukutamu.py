@@ -11,7 +11,8 @@ import os
 # ==========================================
 st.set_page_config(
     page_title="E-Buku Tamu Stamet Bima", 
-    layout="wide"
+    layout="wide",
+    initial_sidebar_state="expanded"
 )
 
 # ==========================================
@@ -19,26 +20,43 @@ st.set_page_config(
 # ==========================================
 st.markdown("""
     <style>
-    [data-testid="stHeader"] { display: none !important; }
+    /* 1. Menghilangkan Tombol Deploy dan Menu 3 Titik saja (Tombol panah sidebar tetap aman!) */
+    .stAppDeployButton { display: none !important; }
+    [data-testid="stToolbar"] { display: none !important; }
+    [data-testid="stHeader"] { background-color: transparent !important; }
+    
+    /* 2. Menghilangkan Footer Bawaan Streamlit (Made with Streamlit) */
     footer { visibility: hidden !important; }
+    
+    /* 3. Latar Belakang Halaman Utama (Gradasi Biru-Hijau Lembut) */
     [data-testid="stAppViewContainer"] { background: linear-gradient(135deg, #e0f2fe 0%, #e8f5e9 100%) !important; }
+    
+    /* 4. Latar Belakang Menu Samping (Sidebar) tetap Biru Tua BMKG */
     [data-testid="stSidebar"] { background-color: #002B49 !important; }
+    
+    /* 5. Teks Sidebar menjadi putih */
     [data-testid="stSidebar"] h1, [data-testid="stSidebar"] h2, [data-testid="stSidebar"] h3, 
     [data-testid="stSidebar"] p, [data-testid="stSidebar"] label, [data-testid="stSidebar"] span, [data-testid="stSidebar"] div {
         color: #ffffff !important;
     }
+    
+    /* 6. Kontainer formulir transparan putih elegan */
     [data-testid="stForm"], .stElementContainer div[data-aria-stable="true"] {
         background-color: rgba(255, 255, 255, 0.95) !important;
         border-radius: 10px;
         padding: 20px;
         border: 1px solid #cbd5e1;
     }
+
+    /* 7. Mengunci elemen teks utama warna Navy Gelap */
     section.main h1, section.main h2, section.main h3, section.main h4, section.main h5, section.main h6,
     section.main label, section.main p, section.main span,
     section.main div[data-testid="stMarkdownContainer"] p,
     section.main div[data-testid="stWidgetLabel"] p {
         color: #003366 !important;
     }
+    
+    /* 8. Teks caption & input box */
     section.main .stCaptionContainer, section.main div[data-testid="stCaptionContainer"] p { color: #334155 !important; }
     section.main input { color: #000000 !important; }
     </style>
@@ -200,7 +218,6 @@ if menu == "FORMULIR KUNJUNGAN PUBLIK":
                 else:
                     tujuan_final = alasan_lainnya if tujuan == "Lain-lain" else tujuan
                     waktu_sekarang = datetime.now(timezone(timedelta(hours=8))).strftime("%Y-%m-%d %H:%M:%S")
-                    
                     row_tamu = [waktu_sekarang, nama, identitas, no_hp, instansi, tujuan_final, "Pelayanan Terdaftar"]
                     
                     if simpan_ke_google_sheets("Tamu", row_tamu):
@@ -313,19 +330,75 @@ if menu == "FORMULIR KUNJUNGAN PUBLIK":
             "Jenis Penerimaan Negara Bukan Pajak": [
                 "1. Informasi Cuaca untuk Penerbangan", "2. Informasi Cuaca untuk Pelayaran",
                 "3. Informasi Cuaca untuk Pelabuhan", "4. Informasi Cuaca untuk Pengeboran Lepas Pantai",
-                "5.a. Analisis dan Prakiraan Hujan Bulanan", "5.b. Prakiraan Musim Kemarau"
+                "5.a. Analisis dan Prakiraan Hujan Bulanan", "5.b. Prakiraan Musim Kemarau",
+                "5.c. Prakiraan Musim Hujan", "5.d. Atlas Kesesuaian Agroklimat",
+                "5.e. Atlas Normal Temperatur Periode 1981-2010", "5.f. Atlas Windrose Wilayah Indonesia Periode 1981-2010",
+                "5.g. Atlas Curah Hujan di Indonesia Rata-rata Periode 1981-2010", "6.a. Kualitas Udara: Particulate Matter (PM10)",
+                "6.b. Kualitas Udara: Particulate Matter (PM2.5)", "6.c. Kualitas Udara: Sulfur Dioksida (SO2)",
+                "6.d. Kualitas Udara: Nitrogen Oksida (NOx)", "6.e. Kualitas Udara: Ozon (O3)",
+                "6.f. Kualitas Udara: Karbon Monoksida (CO)", "6.g. Kualitas Udara: Karbon Dioksida (CO2)",
+                "6.h. Kualitas Udara: Methan (CH4)", "7.a. Peta Kegempaan", "7.b. Peta Percepatan Tanah",
+                "8.a. Klaim Asuransi: Informasi Meteorologi", "8.b. Klaim Asuransi: Informasi Geofisika"
             ],
             "Satuan": [
                 "per route unit", "per route per hari", "per lokasi per hari", "per dokumen per lokasi per hari",
-                "per buku", "per buku"
+                "per buku", "per buku", "per buku", "per buku", "per buku", "per buku", "per buku",
+                "per stasiun per tahun", "per stasiun per tahun", "per stasiun per tahun", "per stasiun per tahun",
+                "per stasiun per tahun", "per stasiun per tahun", "per sampel", "per sampel",
+                "per provinsi per tahun", "per provinsi per tahun", "per lokasi per hari", "per lokasi per hari"
             ],
             "Tarif": [
                 "4% dari biaya navigasi", "Rp 250.000,00", "Rp 225.000,00", "Rp 330.000,00",
-                "Rp 65.000,00", "Rp 230.000,00"
+                "Rp 65.000,00", "Rp 230.000,00", "Rp 230.000,00", "Rp 470.000,00", "Rp 1.500.000,00", "Rp 1.500.000,00", "Rp 1.500.000,00",
+                "Rp 70.000,00", "Rp 70.000,00", "Rp 60.000,00", "Rp 60.000,00", "Rp 60.000,00", "Rp 60.000,00", "Rp 80.000,00", "Rp 80.000,00",
+                "Rp 250.000,00", "Rp 250.000,00", "Rp 175.000,00", "Rp 185.000,00"
             ]
         }
         st.dataframe(pd.DataFrame(raw_data_ia), use_container_width=True, hide_index=True)
-        st.write("*(Tabel dipersingkat untuk preview, pastikan data PNBP sudah diisi penuh)*")
+        
+        st.write("")
+        st.divider()
+        
+        st.markdown("### **B. Informasi Khusus Meteorologi, Klimatologi, dan Geofisika Sesuai Permintaan**")
+        raw_data_ib = {
+            "Jenis Penerimaan Negara Bukan Pajak": [
+                "1.a. Cuaca Khusus untuk Kegiatan Olah Raga", "1.b. Cuaca Khusus untuk Kegiatan Komersial Outdoor/Indoor",
+                "1.c. Informasi Radar Cuaca (per 10 menit)", "2.a.1) Peta Spasial Informasi Maritim",
+                "2.a.2) Informasi Tabular dan Grafik Maritim", "2.b. Atlas Potensi Rawan Banjir",
+                "3.a.1) Publikasi Informasi Perubahan Iklim dan Kualitas Udara", "3.a.2.a) Atlas Kerentanan Perubahan Iklim",
+                "3.a.2.b) Atlas Potensi Energi Matahari di Indonesia", "3.a.2.c) Atlas Potensi Energi Angin di Indonesia",
+                "3.b.1) Pengambilan Sampel: Sulfur Dioksida (SO2)", "3.b.2) Pengambilan Sampel: Nitrogen Oksida (NO2)",
+                "3.b.3) Pengambilan Sampel: Karbon Dioksida (CO2)", "3.b.4) Pengambilan Sampel: Ozon (O3)",
+                "3.b.5) Pengambilan Sampel: Suspended Particulate Matter (SPM)", "3.b.6) Pengambilan Sampel: Debu Particulate Matter (PM10)",
+                "3.b.7) Pengambilan Sampel: Debu Particulate Matter (PM2.5)", "3.b.8) Pengambilan Sampel: Kimia Air Hujan",
+                "3.b.9) Pengambilan Sampel: Methan (CH4)", "3.c.1) Pengujian Sampel: Sulfur Dioksida (SO2)",
+                "3.c.2) Pengujian Sampel: Nitrogen Oksida (NO2)", "3.c.3) Pengujian Sampel: Karbon Dioksida (CO2)",
+                "3.c.4) Pengujian Sampel: Ozon (O3)", "3.c.5) Pengujian Sampel: Suspended Particulate Matter (SPM)",
+                "3.c.6) Pengujian Sampel: Debu Particulate Matter (PM10)", "3.c.7) Pengujian Sampel: Debu Particulate Matter (PM2.5)",
+                "3.c.8) Pengujian Sampel: Kimia Air Hujan", "3.c.9) Pengujian Sampel: Methan (CH4)",
+                "4.a. Buku dan Peta Variasi Magnet Bumi (Epoch)", "4.b. Peta Tingkat Kerawanan Petir",
+                "4.c. Waktu Terbit dan Terbenam Matahari atau Bulan", "4.d. Buku Almanak BMKG",
+                "4.e. Buku Peta Ketinggian Hilal", "4.f. Titik Dasar Gaya Berat (Gravitasi)", "4.g. Kejadian Petir"
+            ],
+            "Satuan": [
+                "per lokasi per hari", "per lokasi per hari", "per data per lokasi", "per peta per bulan",
+                "per tabel per bulan", "per atlas", "per buku", "per atlas", "per atlas", "per atlas",
+                "per sampel", "per sampel", "per sampel", "per sampel", "per sampel", "per sampel",
+                "per sampel", "per sampel", "per sampel", "per sampel", "per sampel", "per sampel",
+                "per sampel", "per sampel", "per sampel", "per sampel", "per sampel", "per sampel",
+                "per buku", "per lokasi per tahun", "per lokasi per tahun", "per buku per tahun",
+                "per buku per tahun", "per titik dasar gaya berat", "per lokasi per hari"
+            ],
+            "Tarif": [
+                "Rp 100.000,00", "Rp 100.000,00", "Rp 70.000,00", "Rp 300.000,00",
+                "Rp 350.000,00", "Rp 350.000,00", "Rp 100.000,00", "Rp 450.000,00", "Rp 300.000,00", "Rp 300.000,00",
+                "Rp 30.000,00", "Rp 30.000,00", "Rp 40.000,00", "Rp 30.000,00", "Rp 60.000,00", "Rp 60.000,00",
+                "Rp 90.000,00", "Rp 230.000,00", "Rp 40.000,00", "Rp 20.000,00", "Rp 20.000,00", "Rp 30.000,00",
+                "Rp 20.000,00", "Rp 50.000,00", "Rp 50.000,00", "Rp 70.000,00", "Rp 240.000,00", "Rp 30.000,00",
+                "Rp 300.000,00", "Rp 200.000,00", "Rp 50.000,00", "Rp 150.000,00", "Rp 150.000,00", "Rp 150.000,00", "Rp 75.000,00"
+            ]
+        }
+        st.dataframe(pd.DataFrame(raw_data_ib), use_container_width=True, hide_index=True)
         
         with st.container(border=True):
             st.markdown("### **KETENTUAN KHUSUS BEBAS BIAYA (TARIF RP 0,00 / GRATIS)**")
@@ -447,7 +520,6 @@ elif menu == "🔒 PORTAL ADMIN & REKAP LAPORAN":
             df_tamu = ambil_data_google_sheets("Tamu")
             
             if not df_tamu.empty:
-                # Menggunakan kolom "Detail Keperluan" yang berisi teks "Arsip KTP:" untuk memfilter
                 if "Detail Keperluan" in df_tamu.columns:
                     df_khusus = df_tamu[df_tamu["Detail Keperluan"].str.contains("Arsip KTP:", na=False)]
                     
@@ -457,7 +529,6 @@ elif menu == "🔒 PORTAL ADMIN & REKAP LAPORAN":
                                 col_img, col_info = st.columns([1, 2])
                                 
                                 teks_detail = row["Detail Keperluan"]
-                                # Memotong text "Arsip KTP: " untuk mengambil nama filenya saja
                                 try:
                                     nama_file = teks_detail.split("Arsip KTP: ")[1].strip()
                                 except IndexError:
@@ -467,22 +538,4 @@ elif menu == "🔒 PORTAL ADMIN & REKAP LAPORAN":
                                 with col_img:
                                     path_gambar = os.path.join(folder_arsip, nama_file)
                                     if os.path.exists(path_gambar) and nama_file != "":
-                                        st.image(path_gambar, use_container_width=True)
-                                    else:
-                                        st.error(f"⚠️ Gambar tidak ditemukan atau belum diunggah.")
-                                
-                                # Sisi Kanan (Informasi Teks)
-                                with col_info:
-                                    st.markdown(f"### 👤 {row.get('Nama Lengkap', 'N/A')}")
-                                    st.write(f"**⏰ Tanggal & Waktu:** {row.get('Waktu Kunjungan', 'N/A')}")
-                                    st.write(f"**🏢 Asal Instansi:** {row.get('Asal Instansi / Lembaga', 'N/A')}")
-                                    st.write(f"**📱 Kontak WA:** {row.get('Nomor Telepon / WhatsApp', 'N/A')}")
-                                    st.write(f"**📂 Layanan Diminta:** {row.get('Tujuan Utama Kunjungan', 'N/A')}")
-                                    
-                                    st.success("✔️ Dokumen KTP tervalidasi dan tersinkronisasi.")
-                    else:
-                        st.info("Belum ada data pemohon khusus yang mengunggah KTP.")
-                else:
-                    st.warning("Struktur kolom Google Sheets (Detail Keperluan) belum sesuai.")
-            else:
-                st.info("Database Tamu masih kosong.")
+                                        st.image(path_gambar
