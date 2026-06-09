@@ -161,7 +161,8 @@ if menu == "FORMULIR KUNJUNGAN PUBLIK":
     
     st.divider()
     
-    tab1, tab2 = st.tabs(["E-BUKU TAMU DIGITAL", "E-KATALOG PNBP"])
+    # MODIFIKASI: Menambahkan tab ke-2 untuk Permohonan Data Khusus yang butuh upload file arsip KTP
+    tab1, tab2, tab3 = st.tabs(["E-BUKU TAMU DIGITAL", "PERMOHONAN DATA KHUSUS (RP 0,00)", "E-KATALOG PNBP"])
     
     # --- TAB 1: E-BUKU TAMU ---
     with tab1:
@@ -257,8 +258,25 @@ if menu == "FORMULIR KUNJUNGAN PUBLIK":
                 st.session_state.ikm_selesai = False
                 st.rerun()
 
-    # --- TAB 2: E-KATALOG PNBP TABEL DATA DINAMIS & RESPONSIF ---
+    # --- BARU! TAB 2: PORTAL PERMOHONAN DATA RP 0,00 (DENGAN FITUR UPLOAD FILE KTP) ---
     with tab2:
+        st.subheader("FORMULIR PERMOHONAN DATA BEBAS TARIF (RP 0,00)")
+        st.info("Sesuai aturan PP No. 47 Tahun 2018, layanan ini dikhususkan untuk keperluan Pendidikan, Penelitian non-komersial, dan Instansi Pemerintah.")
+        st.warning("⚠️ PENTING: Anda WAJIB mengunggah foto KTP dan Surat Pengantar resmi dari Kampus/Sekolah untuk validasi arsip negara.")
+        
+        # JALUR PINTAS AMAN: Menempelkan Google Forms yang punya fitur upload file.
+        # Ganti teks 'https://docs.google.com/forms/d/e/FAIPQLS_CONTOH_LINK_FORM_KAMU/viewform?embedded=true' dengan link embed form asli milikmu nanti ya!
+        link_google_form_arsip_ktp = "https://docs.google.com/forms/d/e/1FAIpQLSfxxxx/viewform?embedded=true"
+        
+        with st.container(border=True):
+            components.html(
+                f'<iframe src="{link_google_form_arsip_ktp}" width="100%" height="800" frameborder="0" marginheight="0" marginwidth="0">Loading…</iframe>', 
+                height=820, 
+                scrolling=True
+            )
+
+    # --- TAB 3: E-KATALOG PNBP TABEL DATA DINAMIS & RESPONSIF ---
+    with tab3:
         st.subheader("KATALOG TARIF RESMI JASA DATA DAN INFORMASI (ROMAWI I)")
         st.info("Dasar Hukum: Peraturan Pemerintah Nomor 47 Tahun 2018 tentang Jenis dan Tarif atas Penerimaan Negara Bukan Pajak yang Berlaku pada BMKG.")
         
@@ -417,4 +435,4 @@ elif menu == "SURVEI KEPUASAN (IKM)":
             row_survei = [waktu_survei, identitas_survei, layanan, sikap, fasilitas, saran]
             
             if simpan_ke_google_sheets("Survei", row_survei):
-                st.success("TERIMA KASIH: Penilaian Anda telah kami terima untuk bahan evaluasi pelayanan.")
+                st.success("TERIMA KASIH: Penilaian Anda telah kami terima untuk bahan evaluation pelayanan.")
