@@ -7,29 +7,23 @@ from oauth2client.service_account import ServiceAccountCredentials
 import os
 
 # ==========================================
-# 1. KONFIGURASI HALAMAN
+# 1. KONFIGURASI HALAMAN (MEMAKSA SIDEBAR TERBUKA)
 # ==========================================
 st.set_page_config(
     page_title="E-Buku Tamu Stamet Bima", 
     layout="wide",
-    initial_sidebar_state="expanded"
+    initial_sidebar_state="expanded" # Ini yang memaksa menu biru langsung muncul!
 )
 
 # ==========================================
-# 2. KUSTOMISASI DESAIN WARNA (TEMA TERANG RESPONSIF)
+# 2. KUSTOMISASI DESAIN WARNA (VERSI PALING AMAN)
 # ==========================================
 st.markdown("""
     <style>
-    /* --- PERBAIKAN HEADER & PANAH SIDEBAR --- */
-    /* Menyembunyikan Tombol Deploy dan Menu 3 Titik, TAPI membiarkan Header & Panah Sidebar tetap hidup! */
+    /* HANYA menghilangkan tombol Deploy, Header & Sidebar Toggle dibiarkan 100% utuh! */
     .stAppDeployButton { display: none !important; }
-    [data-testid="stToolbar"] { display: none !important; }
-    [data-testid="stHeader"] { background-color: transparent !important; box-shadow: none !important; }
     
-    /* Menghilangkan Footer Bawaan Streamlit */
-    footer { visibility: hidden !important; }
-    
-    /* Latar Belakang Halaman Utama (Gradasi Biru-Hijau Lembut) */
+    /* Latar Belakang Halaman Utama */
     [data-testid="stAppViewContainer"] { background: linear-gradient(135deg, #e0f2fe 0%, #e8f5e9 100%) !important; }
     
     /* Latar Belakang Menu Samping (Sidebar) Biru Tua BMKG */
@@ -48,18 +42,6 @@ st.markdown("""
         padding: 20px;
         border: 1px solid #cbd5e1;
     }
-
-    /* Mengunci elemen teks utama warna Navy Gelap */
-    section.main h1, section.main h2, section.main h3, section.main h4, section.main h5, section.main h6,
-    section.main label, section.main p, section.main span,
-    section.main div[data-testid="stMarkdownContainer"] p,
-    section.main div[data-testid="stWidgetLabel"] p {
-        color: #003366 !important;
-    }
-    
-    /* Teks caption & input box */
-    section.main .stCaptionContainer, section.main div[data-testid="stCaptionContainer"] p { color: #334155 !important; }
-    section.main input { color: #000000 !important; }
     </style>
 """, unsafe_allow_html=True)
 
@@ -455,7 +437,7 @@ elif menu == "🔒 PORTAL ADMIN & REKAP LAPORAN":
                 else:
                     st.info("Database Survei IKM masih kosong atau gagal ditarik.")
                     
-        # --- SUB-TAB 3: LIHAT FOTO KTP LOKAL (MODE GALERI PROFIL) ---
+        # --- SUB-TAB 3: LIHAT FOTO KTP LOKAL (MODE GALERI ANTI-ERROR) ---
         with tab_arsip:
             st.subheader("Galeri Audit Arsip Pemohon Bebas Biaya")
             st.write("Daftar di bawah ini secara otomatis menyandingkan data dari Cloud dengan Foto KTP dari laptop Anda.")
@@ -465,15 +447,17 @@ elif menu == "🔒 PORTAL ADMIN & REKAP LAPORAN":
             df_tamu = ambil_data_google_sheets("Tamu")
             
             if not df_tamu.empty:
-                if "Detail Keperluan" in df_tamu.columns:
-                    df_khusus = df_tamu[df_tamu["Detail Keperluan"].str.contains("Arsip KTP:", na=False)]
+                # Menggunakan deteksi urutan kolom (Kolom ke-7 / index 6) agar tidak bergantung pada nama judul kolom tertentu
+                if len(df_tamu.columns) >= 7:
+                    kolom_target = df_tamu.columns[6]
+                    df_khusus = df_tamu[df_tamu[kolom_target].astype(str).str.contains("Arsip KTP:", na=False)]
                     
                     if not df_khusus.empty:
                         for index, row in df_khusus.iterrows():
                             with st.container(border=True):
                                 col_img, col_info = st.columns([1, 2])
                                 
-                                teks_detail = row["Detail Keperluan"]
+                                teks_detail = str(row[kolom_target])
                                 try:
                                     nama_file = teks_detail.split("Arsip KTP: ")[1].strip()
                                 except IndexError:
@@ -485,20 +469,20 @@ elif menu == "🔒 PORTAL ADMIN & REKAP LAPORAN":
                                     if os.path.exists(path_gambar) and nama_file != "":
                                         st.image(path_gambar, use_container_width=True)
                                     else:
-                                        st.error(f"⚠️ Gambar tidak ditemukan atau belum diunggah.")
+                                        st.error(f"⚠️ Gambar tidak ditemukan di folder lokal laptop ini.")
                                 
                                 # Sisi Kanan (Informasi Teks)
                                 with col_info:
-                                    st.markdown(f"### 👤 {row.get('Nama Lengkap', 'N/A')}")
-                                    st.write(f"**⏰ Tanggal & Waktu:** {row.get('Waktu Kunjungan', 'N/A')}")
-                                    st.write(f"**🏢 Asal Instansi:** {row.get('Asal Instansi / Lembaga', 'N/A')}")
-                                    st.write(f"**📱 Kontak WA:** {row.get('Nomor Telepon / WhatsApp', 'N/A')}")
-                                    st.write(f"**📂 Layanan Diminta:** {row.get('Tujuan Utama Kunjungan', 'N/A')}")
+                                    st.markdown(f"### 👤 {row[df_tamu.columns[1]]}")
+                                    st.write(f"**⏰ Tanggal & Waktu:** {row[df_tamu.columns[0]]}")
+                                    st.write(f"**🏢 Asal Instansi:** {row[df_tamu.columns[4]]}")
+                                    st.write(f"**📱 Kontak WA:** {row[df_tamu.columns[3]]}")
+                                    st.write(f"**📂 Layanan Diminta:** {row[df_tamu.columns[5]]}")
                                     
                                     st.success("✔️ Dokumen KTP tervalidasi dan tersinkronisasi.")
                     else:
                         st.info("Belum ada data pemohon khusus yang mengunggah KTP.")
                 else:
-                    st.warning("Struktur kolom Google Sheets (Detail Keperluan) belum sesuai.")
+                    st.warning("Struktur Google Sheets belum sesuai. Pastikan ada minimal 7 kolom data.")
             else:
                 st.info("Database Tamu masih kosong.")
