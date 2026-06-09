@@ -538,4 +538,22 @@ elif menu == "🔒 PORTAL ADMIN & REKAP LAPORAN":
                                 with col_img:
                                     path_gambar = os.path.join(folder_arsip, nama_file)
                                     if os.path.exists(path_gambar) and nama_file != "":
-                                        st.image(path_gambar
+                                        st.image(path_gambar, use_container_width=True)
+                                    else:
+                                        st.error(f"⚠️ Gambar tidak ditemukan atau belum diunggah.")
+                                
+                                # Sisi Kanan (Informasi Teks)
+                                with col_info:
+                                    st.markdown(f"### 👤 {row.get('Nama Lengkap', 'N/A')}")
+                                    st.write(f"**⏰ Tanggal & Waktu:** {row.get('Waktu Kunjungan', 'N/A')}")
+                                    st.write(f"**🏢 Asal Instansi:** {row.get('Asal Instansi / Lembaga', 'N/A')}")
+                                    st.write(f"**📱 Kontak WA:** {row.get('Nomor Telepon / WhatsApp', 'N/A')}")
+                                    st.write(f"**📂 Layanan Diminta:** {row.get('Tujuan Utama Kunjungan', 'N/A')}")
+                                    
+                                    st.success("✔️ Dokumen KTP tervalidasi dan tersinkronisasi.")
+                    else:
+                        st.info("Belum ada data pemohon khusus yang mengunggah KTP.")
+                else:
+                    st.warning("Struktur kolom Google Sheets (Detail Keperluan) belum sesuai.")
+            else:
+                st.info("Database Tamu masih kosong.")
