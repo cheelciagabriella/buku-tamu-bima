@@ -19,45 +19,72 @@ st.set_page_config(
 )
 
 # ==========================================
-# 2. KUSTOMISASI DESAIN WARNA (TEMA TERANG RESPONSIF)
+# 2. KUSTOMISASI DESAIN WARNA (SUPER FIX PANAH SIDEBAR LATSAR)
 # ==========================================
 st.markdown("""
     <style>
     .stAppDeployButton { display: none !important; }
     [data-testid="stToolbar"] { display: none !important; }
-    [data-testid="stHeader"] { background-color: transparent !important; box-shadow: none !important; }
     footer { visibility: hidden !important; }
     
-    /* --- FIXED MUTLAK: Memaksa Tombol Buka Sidebar Muncul Tegas Saat Tertutup --- */
-    button[aria-label="Expand sidebar"] {
+    /* --- 1. MEMAKSA KONTAINER HEADER AGAR TIDAK MEMOTONG TOMBOL PANAH --- */
+    [data-testid="stHeader"] { 
+        background-color: transparent !important; 
+        box-shadow: none !important;
+        overflow: visible !important;
+        z-index: 999999 !important;
+    }
+    
+    /* --- 2. TEMBAK KONTROL SIDEBAR SAAT TERTUTUP (VERSI STREAMLIT BARU) --- */
+    [data-testid="stSidebarCollapsedControl"], 
+    .stSidebarCollapsedControl {
         display: flex !important;
         visibility: visible !important;
         opacity: 1 !important;
-        background-color: #002B49 !important; /* Warna biru gelap khas BMKG */
         position: fixed !important;
         top: 12px !important;
         left: 12px !important;
         z-index: 99999999 !important;
-        border-radius: 8px !important;
-        padding: 8px 12px !important;
-        box-shadow: 0px 4px 12px rgba(0,0,0,0.35) !important;
-        border: 1px solid rgba(255,255,255,0.2) !important;
     }
     
-    /* Memaksa ikon panah di dalam tombol buka berwarna putih terang */
-    button[aria-label="Expand sidebar"] svg {
+    /* --- 3. STYLING TOMBOL PANAH (KEBAL VERSI & KEBAL BAHASA BROWSER) --- */
+    [data-testid="stSidebarCollapsedControl"] button,
+    .stSidebarCollapsedControl button,
+    button[aria-label="Expand sidebar"],
+    button[aria-label="Buka bilah sisi"] {
+        display: flex !important;
+        visibility: visible !important;
+        opacity: 1 !important;
+        background-color: #002B49 !important; /* Warna biru gelap resmi BMKG */
+        color: #ffffff !important;
+        border-radius: 8px !important;
+        padding: 10px 14px !important;
+        box-shadow: 0px 4px 15px rgba(0,0,0,0.4) !important;
+        border: 1px solid rgba(255,255,255,0.3) !important;
+        width: auto !important;
+        height: auto !important;
+    }
+    
+    /* --- 4. MEMAKSA IKON SVG PANAH DI DALAMNYA BERWARNA PUTIH MENYALA --- */
+    [data-testid="stSidebarCollapsedControl"] button svg,
+    .stSidebarCollapsedControl button svg,
+    button[aria-label="Expand sidebar"] svg,
+    button[aria-label="Buka bilah sisi"] svg {
         fill: #ffffff !important; 
         color: #ffffff !important;
+        stroke: #ffffff !important;
         width: 24px !important;
         height: 24px !important;
     }
     
     /* --- DESIGN UTK TOMBOL TUTUP (Saat Sidebar Terbuka) --- */
-    [data-testid="stSidebar"] button[aria-label="Close sidebar"] {
+    [data-testid="stSidebar"] button[aria-label="Close sidebar"],
+    [data-testid="stSidebar"] button[aria-label="Tutup bilah sisi"] {
         background-color: rgba(255, 255, 255, 0.15) !important;
         border-radius: 8px !important;
     }
-    [data-testid="stSidebar"] button[aria-label="Close sidebar"] svg {
+    [data-testid="stSidebar"] button[aria-label="Close sidebar"] svg,
+    [data-testid="stSidebar"] button[aria-label="Tutup bilah sisi"] svg {
         fill: #ffffff !important;
         color: #ffffff !important;
     }
@@ -341,12 +368,10 @@ if menu == "FORMULIR KUNJUNGAN PUBLIK":
                     st.error("❌ PROSES GAGAL: Kolom Nama, Instansi, dan Berkas Foto KTP wajib diisi serta diunggah untuk kelengkapan arsip!")
                 else:
                     with st.spinner("🔄 Sedang mengamankan dokumen arsip ke Google Drive Cloud..."):
-                        # Upload KTP ke Google Drive
                         ext_ktp = file_ktp.name.split('.')[-1]
                         nama_file_ktp = f"KTP_{nama_khusus.replace(' ', '_')}_{datetime.now().strftime('%Y%m%d_%H%M%S')}.{ext_ktp}"
                         link_ktp = upload_ke_google_drive(file_ktp, nama_file_ktp, file_ktp.type)
                         
-                        # Upload Surat (Jika Ada) ke Google Drive
                         link_surat = "Tidak Ada Surat"
                         if file_surat is not None:
                             ext_surat = file_surat.name.split('.')[-1]
@@ -354,8 +379,6 @@ if menu == "FORMULIR KUNJUNGAN PUBLIK":
                             link_surat = upload_ke_google_drive(file_surat, nama_file_surat, file_surat.type)
                         
                         waktu_khusus = datetime.now(timezone(timedelta(hours=8))).strftime("%Y-%m-%d %H:%M:%S")
-                        
-                        # Menyimpan URL Google Drive ke Google Sheets
                         teks_database = f"Link KTP: {link_ktp} | Link Surat: {link_surat}"
                         row_khusus = [waktu_khusus, nama_khusus, "Pemohon Khusus (Rp 0,00)", kontak_khusus, instansi_khusus, jenis_data_khusus, teks_database]
                         
@@ -385,7 +408,6 @@ if menu == "FORMULIR KUNJUNGAN PUBLIK":
             ]
         }
         st.dataframe(pd.DataFrame(raw_data_ia), use_container_width=True, hide_index=True)
-        st.write("*(Tabel dipersingkat untuk preview, pastikan data PNBP sudah diisi penuh)*")
 
 # ==========================================
 # 7. HALAMAN 2: SURVEI KEPUASAN (IKM)
@@ -473,7 +495,6 @@ elif menu == "🔒 PORTAL ADMIN & REKAP LAPORAN":
                 else:
                     st.info("Database Survei IKM masih kosong atau gagal ditarik.")
                     
-        # --- SUB-TAB 3: LIHAT DOKUMEN VIA LINK CLOUD ---
         with tab_arsip:
             st.subheader("Galeri Audit Berkas Pemohon Bebas Biaya (Cloud Storage)")
             st.write("Daftar di bawah ini secara otomatis menyandingkan data Sheets dengan arsip dokumen fisik di Google Drive.")
@@ -503,7 +524,6 @@ elif menu == "🔒 PORTAL ADMIN & REKAP LAPORAN":
                                 except Exception:
                                     pass
                                 
-                                # Sisi Kiri (Informasi Biodata Responden)
                                 with col_info:
                                     st.markdown(f"### 👤 {row[df_tamu.columns[1]]}")
                                     st.write(f"**⏰ Waktu Kunjungan:** {row[df_tamu.columns[0]]}")
@@ -511,10 +531,8 @@ elif menu == "🔒 PORTAL ADMIN & REKAP LAPORAN":
                                     st.write(f"**📱 Kontak WA:** {row[df_tamu.columns[3]]}")
                                     st.write(f"**📂 Layanan Diminta:** {row[df_tamu.columns[5]]}")
                                 
-                                # Sisi Kanan (Tombol Navigasi Cloud)
                                 with col_links:
                                     st.markdown("**📂 Akses Berkas Google Drive:**")
-                                    
                                     if "http" in link_ktp:
                                         st.link_button("👁️ Lihat Identitas / KTP", link_ktp, use_container_width=True, type="primary")
                                     else:
@@ -527,8 +545,6 @@ elif menu == "🔒 PORTAL ADMIN & REKAP LAPORAN":
                                         st.info("❌ Pemohon tidak melampirkan Surat.")
                                     else:
                                         st.error("⚠️ File Surat menggunakan sistem lama lokal.")
-                                        
-                                    st.success("✔️ Validasi Sinkronisasi Cloud Berhasil.")
                     else:
                         st.info("Belum ada data pemohon khusus yang terekam.")
                 else:
