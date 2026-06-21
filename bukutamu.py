@@ -26,7 +26,11 @@ st.markdown("""
     .stAppDeployButton { display: none !important; }
     [data-testid="stToolbar"] { display: none !important; }
     [data-testid="stHeader"] { background-color: transparent !important; box-shadow: none !important; }
-    footer { visibility: hidden !important; }
+    
+    /* 🔥 FIX SUPER AGRESIF: Melenyapkan Total Tulisan "Hosted with Streamlit" di Pojok Kanan Bawah 🔥 */
+    footer { display: none !important; visibility: hidden !important; }
+    [data-testid="stEmbedHoverBadge"] { display: none !important; visibility: hidden !important; }
+    div[class*="viewerBadge"] { display: none !important; visibility: hidden !important; }
     
     /* Paksa Sembunyikan Tombol "Manage app" di Pojok Kanan Bawah */
     [data-testid="manage-app-button"],
@@ -317,7 +321,7 @@ if menu == "FORMULIR KUNJUNGAN PUBLIK":
                 st.markdown(f"Nama Responden: **{st.session_state.nama_pendaftar}**")
                 st.write("")
                 
-                layanan = st.slider("1. Kemudahan prosedur dan persyaratan layanan di stasiun kami?", 1, 5, 5)
+                layanan = st.slider("1. Kemudahan prosedur and persyaratan layanan di stasiun kami?", 1, 5, 5)
                 sikap = st.slider("2. Keramahan dan kecepatan petugas pelayanan?", 1, 5, 5)
                 fasilitas = st.slider("3. Pemanfaatan inovasi E-Buku Tamu & E-Katalog ini?", 1, 5, 5)
                 
@@ -465,11 +469,11 @@ if menu == "FORMULIR KUNJUNGAN PUBLIK":
                             
                             st.markdown("#### **Progress Alur Kerja Layanan:**")
                             if status_proses == "Sedang Diproses":
-                                st.warning("🔄 **STATUS: SEDANG DIPROSES**  \nBerkas fisik/dokumen pendukung Anda sukses diverifikasi. Saat ini tim teknis data Stamet Bima sedang menyiapkan arsip data meteorologi yang Anda butuhkan.")
+                                st.warning("🔄 **STATUS: SEDANG DIPROSES** \nBerkas fisik/dokumen pendukung Anda sukses diverifikasi. Saat ini tim teknis data Stamet Bima sedang menyiapkan arsip data meteorologi yang Anda butuhkan.")
                             elif status_proses == "Data Siap Diambil / Dikirim":
-                                st.success("🎉 **STATUS: DATA SELESAI / SIAP DIAMBIL**  \nKabar baik! Permintaan data Anda telah selesai dikerjakan. Silakan cek berkas masuk di email/WhatsApp Anda atau datang langsung ke ruang PTSP Stasiun.")
+                                st.success("🎉 **STATUS: DATA SELESAI / SIAP DIAMBIL** \nKabar baik! Permintaan data Anda telah selesai dikerjakan. Silakan cek berkas masuk di email/WhatsApp Anda atau datang langsung ke ruang PTSP Stasiun.")
                             elif status_proses == "Ditolak / Berkas Tidak Lengkap":
-                                st.error("❌ **STATUS: PERMOHONAN DITOLAK**  \nMohon maaf, permohonan Anda ditolak karena berkas bukti pendukung (KTP/Surat Pengantar) buram, tidak jelas, atau tidak sesuai peruntukan Rp 0,-. Silakan lakukan registrasi ulang.")
+                                st.error("❌ **STATUS: PERMOHONAN DITOLAK** \nMohon maaf, permohonan Anda ditolak karena berkas bukti pendukung (KTP/Surat Pengantar) buram, tidak jelas, atau tidak sesuai peruntukan Rp 0,-. Silakan lakukan registrasi ulang.")
                         else:
                             st.error("❌ Data Tidak Ditemukan. Pastikan nomor WhatsApp yang Anda masukkan sama persis dengan yang diisi pada formulir.")
                     else:
