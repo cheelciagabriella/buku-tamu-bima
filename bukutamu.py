@@ -62,8 +62,7 @@ st.markdown("""
 # ==========================================
 # 2.b TOMBOL WHATSAPP MELAYANG (CUSTOMER SERVICE)
 # ==========================================
-# ⚠️ SILAKAN GANTI NOMOR DI BAWAH INI DENGAN NOMOR CS STASIUN (Wajib awali dengan kode negara 62)
-NOMOR_WA_CS = "628123456789" 
+NOMOR_WA_CS = "628113908535" 
 PESAN_OTOMATIS = "Halo%20Admin%20PTSP%20Stamet%20Bima,%20saya%20ingin%20bertanya%20mengenai%20layanan%20data..."
 
 st.markdown(f"""
