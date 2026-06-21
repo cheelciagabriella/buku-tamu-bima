@@ -29,7 +29,7 @@ st.markdown("""
     footer { display: none !important; visibility: hidden !important; }
     [data-testid="stEmbedHoverBadge"], div[class*="viewerBadge"], div[class*="styles_viewerBadge"] { display: none !important; }
     
-    /* 🛠️ SOLUSI TOTAL: Bikin wadah tombol panah jadi KOTAK NAVY SOLID di pojok kiri atas */
+    /* 🛠️ WADAH SIDEBAR KETIKA TERTUTUP: Berbentuk Kotak Navy Solid di Pojok Kiri Atas */
     div[data-testid="stSidebarCollapsedControl"] {
         display: flex !important;
         visibility: visible !important;
@@ -38,9 +38,9 @@ st.markdown("""
         top: 0 !important;
         left: 0 !important;
         z-index: 999999 !important;
-        background-color: #002B49 !important; /* Navy kokoh */
+        background-color: #002B49 !important; 
         padding: 10px 14px !important;
-        border-radius: 0 0 12px 0 !important; /* Lengkungan manis di pojok kanan bawah */
+        border-radius: 0 0 12px 0 !important; 
         box-shadow: 3px 3px 12px rgba(0, 0, 0, 0.35) !important;
     }
     
@@ -517,7 +517,7 @@ elif menu == "🔒 PORTAL ADMIN & REKAP LAPORAN":
                 kolom_nama = df_tamu.columns[1]
                 kolom_waktu = df_tamu.columns[0]
                 kolom_instansi = df_tamu.columns[4]
-                kolom_kont class=df_tamu.columns[3]
+                kolom_kontak = df_tamu.columns[3]
                 kolom_layanan = df_tamu.columns[5]
                 
                 df_khusus = df_tamu[df_tamu[kolom_keperluan].astype(str).str.contains("KTP", na=False)]
