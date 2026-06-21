@@ -19,7 +19,7 @@ st.set_page_config(
 )
 
 # ==========================================
-# 2. KUSTOMISASI DESAIN WARNA (TEMA TERANG RESPONSIF)
+# 2. KUSTOMISASI DESAIN WARNA & FIXING PANAH SIDEBAR
 # ==========================================
 st.markdown("""
     <style>
@@ -28,28 +28,35 @@ st.markdown("""
     [data-testid="stHeader"] { background-color: transparent !important; box-shadow: none !important; }
     footer { visibility: hidden !important; }
     
-    /* --- FIXED MUTLAK: Memaksa Tombol Buka Sidebar Muncul Tegas Saat Tertutup --- */
-    button[aria-label="Expand sidebar"] {
+    /* 🔥 FIX MUTLAK: Memaksa Kontainer Tombol Buka Sidebar Muncul Berbentuk Kotak Biru BMKG 🔥 */
+    [data-testid="stSidebarCollapsedControl"] {
         display: flex !important;
         visibility: visible !important;
         opacity: 1 !important;
-        background-color: #002B49 !important; /* Warna biru gelap khas BMKG */
+        background-color: #002B49 !important; /* Warna biru gelap BMKG */
         position: fixed !important;
-        top: 12px !important;
-        left: 12px !important;
+        top: 15px !important;
+        left: 0 !important;
         z-index: 99999999 !important;
-        border-radius: 8px !important;
-        padding: 8px 12px !important;
-        box-shadow: 0px 4px 12px rgba(0,0,0,0.35) !important;
-        border: 1px solid rgba(255,255,255,0.2) !important;
+        border-radius: 0px 10px 10px 0px !important; /* Melengkung di sisi kanan saja seperti tab */
+        box-shadow: 4px 4px 12px rgba(0, 0, 0, 0.35) !important;
+        padding: 6px 10px 6px 6px !important;
     }
     
-    /* Memaksa ikon panah di dalam tombol buka berwarna putih terang */
-    button[aria-label="Expand sidebar"] svg {
+    /* Memaksa tombol di dalam kontainer transparan agar warna dasar biru BMKG-nya terlihat jelas */
+    [data-testid="stSidebarCollapsedControl"] button {
+        background-color: transparent !important;
+        border: none !important;
+        color: #ffffff !important;
+    }
+    
+    /* Memaksa ikon panah di dalam tombol berwarna putih terang & berukuran tegas */
+    [data-testid="stSidebarCollapsedControl"] svg {
         fill: #ffffff !important; 
         color: #ffffff !important;
-        width: 24px !important;
-        height: 24px !important;
+        stroke: #ffffff !important;
+        width: 26px !important;
+        height: 26px !important;
     }
     
     /* --- DESIGN UTK TOMBOL TUTUP (Saat Sidebar Terbuka) --- */
@@ -307,7 +314,7 @@ if menu == "FORMULIR KUNJUNGAN PUBLIK":
                 st.session_state.ikm_selesai = False
                 st.rerun()
 
-    # --- TAB 2: PORTAL DATA KHUSUS (UPLOAD KE GOOGLE DRIVE CLOUD) ---
+    # --- TAB 2: PERMOHONAN DATA KHUSUS (UPLOAD KE GOOGLE DRIVE CLOUD) ---
     with tab2:
         st.subheader("FORMULIR PERMOHONAN DATA BEBAS TARIF (RP 0,00)")
         st.info("Sesuai aturan PP No. 47 Tahun 2018, layanan ini dikhususkan untuk keperluan Pendidikan, Penelitian non-komersial, dan Instansi Pemerintah.")
