@@ -10,7 +10,7 @@ from googleapiclient.http import MediaIoBaseUpload
 import io
 
 # ==========================================
-# 1. KONFIGURASI HALAMAN (SIDEBAR PERMANEN)
+# 1. KONFIGURASI HALAMAN
 # ==========================================
 st.set_page_config(
     page_title="E-Buku Tamu Stamet Bima", 
@@ -19,43 +19,55 @@ st.set_page_config(
 )
 
 # ==========================================
-# 2. KUSTOMISASI CSS (KOTAK SAKELAR NAVI & ADAPTIVE MODE)
+# 2. KUSTOMISASI CSS (KUNCI TOMBOL SIDEBAR & ADAPTIVE)
 # ==========================================
 st.markdown("""
     <style>
-    /* Bersihkan komponen komersial / deploy bawaan */
+    /* Sembunyikan tombol komersial bawaan Streamlit */
     .stAppDeployButton { display: none !important; }
-    [data-testid="stToolbar"] { display: none !important; }
+    [data-testid="stActionButton"] { display: none !important; }
     footer { display: none !important; visibility: hidden !important; }
     [data-testid="stEmbedHoverBadge"], div[class*="viewerBadge"], div[class*="styles_viewerBadge"] { display: none !important; }
     
-    /* 🛠️ WADAH SIDEBAR KETIKA TERTUTUP: Berbentuk Kotak Navy Solid di Pojok Kiri Atas */
+    /* 🛠️ MEKANISME PAKSA: Jika sidebar tertutup di browser, buat tombol pembukanya jadi lingkaran Navy mencolok */
     div[data-testid="stSidebarCollapsedControl"] {
         display: flex !important;
         visibility: visible !important;
         opacity: 1 !important;
         position: fixed !important;
-        top: 0 !important;
-        left: 0 !important;
+        top: 15px !important;
+        left: 15px !important;
         z-index: 999999 !important;
-        background-color: #002B49 !important; 
-        padding: 10px 14px !important;
-        border-radius: 0 0 12px 0 !important; 
-        box-shadow: 3px 3px 12px rgba(0, 0, 0, 0.35) !important;
     }
     
-    /* Paksa tombol dan icon panah di dalamnya berwarna putih bersih agar super kontras */
-    div[data-testid="stSidebarCollapsedControl"] button,
-    div[data-testid="stSidebarCollapsedControl"] button svg,
-    button[aria-label="Open sidebar"] svg {
+    /* Styling Tombol Bulat Buka Sidebar */
+    div[data-testid="stSidebarCollapsedControl"] button {
+        background-color: #002B49 !important; /* Navy Khas BMKG */
+        color: #ffffff !important;
+        border: 2px solid #ffffff !important; /* Bingkai putih tebal */
+        border-radius: 50% !important; 
+        width: 44px !important;
+        height: 44px !important;
+        box-shadow: 0px 4px 12px rgba(0, 0, 0, 0.3) !important;
+        display: flex !important;
+        align-items: center !important;
+        justify-content: center !important;
+    }
+    
+    /* Paksa Icon Panah bawaan berwarna putih bersih */
+    div[data-testid="stSidebarCollapsedControl"] button svg {
         color: #ffffff !important;
         fill: #ffffff !important;
-        stroke: #ffffff !important;
-        width: 24px !important;
-        height: 24px !important;
+        width: 22px !important;
+        height: 22px !important;
+    }
+    
+    div[data-testid="stSidebarCollapsedControl"] button:hover {
+        transform: scale(1.08) !important;
+        background-color: #003a63 !important;
     }
 
-    /* Modifikasi tombol silang (X) saat sidebar sedang posisi terbuka */
+    /* Modifikasi tombol silang (X) saat posisi terbuka */
     button[data-testid="stSidebarCollapseButton"] {
         color: #ffffff !important;
         background-color: rgba(255, 255, 255, 0.1) !important;
@@ -65,7 +77,7 @@ st.markdown("""
         fill: #ffffff !important;
     }
     
-    /* SIDEBAR KIRI: Selalu Navy Biru Dongker dengan Tulisan Putih */
+    /* SIDEBAR KIRI: Tema Gelap Navy */
     [data-testid="stSidebar"] {
         background-color: #002B49 !important;
         border-right: 1px solid #001f36;
@@ -74,7 +86,7 @@ st.markdown("""
         color: #ffffff !important;
     }
     
-    /* Kasih ruang atas container agar tidak mepet sakelar menu */
+    /* Jarak atas halaman utama */
     .block-container {
         padding-top: 4rem !important;
         padding-bottom: 2rem !important;
