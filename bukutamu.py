@@ -19,7 +19,7 @@ st.set_page_config(
 )
 
 # ==========================================
-# 2. KUSTOMISASI DESAIN WARNA & LOCK SIDEBAR
+# 2. KUSTOMISASI DESAIN WARNA (TEMA HIJAU ELEGAN BMKG)
 # ==========================================
 st.markdown("""
     <style>
@@ -40,26 +40,41 @@ st.markdown("""
         visibility: hidden !important;
     }
 
-    [data-testid="stAppViewContainer"] { background: linear-gradient(135deg, #e0f2fe 0%, #e8f5e9 100%) !important; }
-    [data-testid="stSidebar"] { background-color: #002B49 !important; }
+    /* BACKGROUND UTAMA: Gradasi Putih ke Abu-abu sangat muda (Clean look) */
+    [data-testid="stAppViewContainer"] { background: linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%) !important; }
+    
+    /* SIDEBAR KIRI: Hijau Zamrud (Emerald Green) Khas BMKG */
+    [data-testid="stSidebar"] { background-color: #064e3b !important; border-right: 2px solid #047857; }
     [data-testid="stSidebar"] h1, [data-testid="stSidebar"] h2, [data-testid="stSidebar"] h3, 
     [data-testid="stSidebar"] p, [data-testid="stSidebar"] label, [data-testid="stSidebar"] span, [data-testid="stSidebar"] div {
-        color: #ffffff !important;
+        color: #ffffff !important; /* Tulisan di Sidebar PUTIH TERANG agar kontras sempurna */
     }
+    
+    /* KOTAK FORMULIR: Putih Solid dengan Bayangan Halus */
     [data-testid="stForm"], .stElementContainer div[data-aria-stable="true"] {
-        background-color: rgba(255, 255, 255, 0.95) !important;
-        border-radius: 10px;
+        background-color: rgba(255, 255, 255, 1) !important;
+        border-radius: 12px;
         padding: 20px;
         border: 1px solid #cbd5e1;
+        box-shadow: 0px 4px 6px rgba(0, 0, 0, 0.05); /* Efek melayang elegan */
     }
+    
+    /* TULISAN DI LAYAR UTAMA: Abu-abu Sangat Gelap (Hampir Hitam) agar mudah dibaca */
     section.main h1, section.main h2, section.main h3, section.main h4, section.main h5, section.main h6,
     section.main label, section.main p, section.main span,
     section.main div[data-testid="stMarkdownContainer"] p,
     section.main div[data-testid="stWidgetLabel"] p {
-        color: #003366 !important;
+        color: #0f172a !important; 
     }
-    section.main .stCaptionContainer, section.main div[data-testid="stCaptionContainer"] p { color: #334155 !important; }
-    section.main input { color: #000000 !important; }
+    
+    /* Warna sub-teks (Caption) */
+    section.main .stCaptionContainer, section.main div[data-testid="stCaptionContainer"] p { color: #475569 !important; }
+    
+    /* Warna teks ketikan User */
+    section.main input, section.main textarea { color: #000000 !important; background-color: #f8fafc !important; border: 1px solid #94a3b8 !important; }
+    
+    /* Kustomisasi Tab Menu Aktif menjadi Hijau */
+    .stTabs [data-baseweb="tab-list"] button[aria-selected="true"] { color: #047857 !important; border-bottom-color: #047857 !important; }
     </style>
 """, unsafe_allow_html=True)
 
@@ -215,13 +230,13 @@ if menu == "FORMULIR KUNJUNGAN PUBLIK":
     with col_text:
         st.markdown("""
             <div style='text-align: center; padding-top: 5px; line-height: 1.2;'>
-                <div style='color: #003366; font-size: 30px; font-weight: 900; letter-spacing: 1px; margin-bottom: 2px;'>
+                <div style='color: #047857; font-size: 30px; font-weight: 900; letter-spacing: 1px; margin-bottom: 2px;'>
                     PORTAL LAYANAN PUBLIK TERINTEGRASI
                 </div>
-                <div style='color: #1b5e20; font-size: 18px; font-weight: 800; letter-spacing: 0.5px; margin-bottom: 2px;'>
+                <div style='color: #064e3b; font-size: 18px; font-weight: 800; letter-spacing: 0.5px; margin-bottom: 2px;'>
                     STASIUN METEOROLOGI KELAS II SULTAN MUHAMMAD SALAHUDDIN BIMA
                 </div>
-                <div style='color: #444444; font-size: 14px; font-weight: 700; letter-spacing: 1px; margin-top: 0px;'>
+                <div style='color: #475569; font-size: 14px; font-weight: 700; letter-spacing: 1px; margin-top: 0px;'>
                     BADAN METEOROLOGI, KLIMATOLOGI, DAN GEOFISIKA
                 </div>
             </div>
@@ -229,7 +244,7 @@ if menu == "FORMULIR KUNJUNGAN PUBLIK":
         
     with col_clock:
         components.html("""
-            <div id="clock" style="font-family: 'Arial', sans-serif; font-size: 14px; font-weight: bold; color: #003366; text-align: right; padding-top: 25px;"></div>
+            <div id="clock" style="font-family: 'Arial', sans-serif; font-size: 14px; font-weight: bold; color: #047857; text-align: right; padding-top: 25px;"></div>
             <script>
                 function updateTime() {
                     const now = new Date();
@@ -315,17 +330,17 @@ if menu == "FORMULIR KUNJUNGAN PUBLIK":
         
         with st.container(border=True):
             st.markdown("""
-            <div style='background-color: #f0fdf4; padding: 15px; border-radius: 8px; border-left: 5px solid #16a34a;'>
-                <h4 style='color: #166534; margin-top: 0px;'>📋 PENDAHULUAN & PERSYARATAN LAYANAN</h4>
+            <div style='background-color: #f0fdf4; padding: 15px; border-radius: 8px; border-left: 5px solid #047857;'>
+                <h4 style='color: #064e3b; margin-top: 0px;'>📋 PENDAHULUAN & PERSYARATAN LAYANAN</h4>
                 <p style='font-size: 14px; line-height: 1.5; color: #1e293b;'>
                     Berdasarkan Peraturan Pemerintah yang berlaku, Stasiun Meteorologi Kelas II Sultan Muhammad Salahuddin Bima menyediakan layanan informasi Meteorologi secara <b>Bebas Tarif (Gratis)</b> yang ditujukan khusus demi mendukung keperluan <b>Pendidikan, Penelitian Non-Komersial, serta Instansi Pemerintah</b>.
                 </p>
-                <h5 style='color: #166534; margin-bottom: 5px;'>⚠️ Dokumen Wajib yang Harus Dilampirkan:</h5>
+                <h5 style='color: #064e3b; margin-bottom: 5px;'>⚠️ Dokumen Wajib yang Harus Dilampirkan:</h5>
                 <ol style='font-size: 14px; color: #1e293b; margin-top: 0px;'>
                     <li><b>Kartu Identitas Sah:</b> Foto KTP atau Kartu Tanda Mahasiswa (KTM) yang masih berlaku resmi.</li>
                     <li><b>Surat Pengantar Resmi:</b> Surat permohonan dari Dekan/Sekolah/Kampus asli (untuk keperluan pendidikan) atau Surat Dinas Resmi bertanda tangan pimpinan (untuk Instansi Pemerintah).</li>
                 </ol>
-                <p style='font-size: 13px; color: #64748b; font-style: italic; margin-bottom: 0px;'>
+                <p style='font-size: 13px; color: #475569; font-style: italic; margin-bottom: 0px;'>
                     *Catatan: Seluruh dokumen akan diperiksa secara berkala oleh tim audit internal stasiun sebelum berkas data dirilis.
                 </p>
             </div>
