@@ -19,7 +19,7 @@ st.set_page_config(
 )
 
 # ==========================================
-# 2. KUSTOMISASI DESAIN WARNA & FIXING PANAH SIDEBAR
+# 2. KUSTOMISASI DESAIN WARNA (ANTI-TRANSLATION SIDEBAR FIX)
 # ==========================================
 st.markdown("""
     <style>
@@ -28,35 +28,33 @@ st.markdown("""
     [data-testid="stHeader"] { background-color: transparent !important; box-shadow: none !important; }
     footer { visibility: hidden !important; }
     
-    /* 🔥 FIX MUTLAK: Memaksa Kontainer Tombol Buka Sidebar Muncul Berbentuk Kotak Biru BMKG 🔥 */
+    /* --- 🔥 FIX MUTLAK KEBAL BAHASA: Memaksa Tombol Buka Sidebar Muncul Menggunakan data-testid 🔥 --- */
     [data-testid="stSidebarCollapsedControl"] {
         display: flex !important;
         visibility: visible !important;
         opacity: 1 !important;
-        background-color: #002B49 !important; /* Warna biru gelap BMKG */
         position: fixed !important;
-        top: 15px !important;
-        left: 0 !important;
+        top: 12px !important;
+        left: 12px !important;
         z-index: 99999999 !important;
-        border-radius: 0px 10px 10px 0px !important; /* Melengkung di sisi kanan saja seperti tab */
-        box-shadow: 4px 4px 12px rgba(0, 0, 0, 0.35) !important;
-        padding: 6px 10px 6px 6px !important;
     }
     
-    /* Memaksa tombol di dalam kontainer transparan agar warna dasar biru BMKG-nya terlihat jelas */
+    /* Styling tombol di dalam kontainer control agar berwarna biru gelap BMKG */
     [data-testid="stSidebarCollapsedControl"] button {
-        background-color: transparent !important;
-        border: none !important;
-        color: #ffffff !important;
+        display: flex !important;
+        background-color: #002B49 !important; /* Warna biru gelap khas BMKG */
+        border-radius: 8px !important;
+        padding: 8px 12px !important;
+        box-shadow: 0px 4px 12px rgba(0,0,0,0.35) !important;
+        border: 1px solid rgba(255,255,255,0.2) !important;
     }
     
-    /* Memaksa ikon panah di dalam tombol berwarna putih terang & berukuran tegas */
-    [data-testid="stSidebarCollapsedControl"] svg {
+    /* Memaksa ikon panah di dalamnya berwarna putih terang benderang */
+    [data-testid="stSidebarCollapsedControl"] button svg {
         fill: #ffffff !important; 
         color: #ffffff !important;
-        stroke: #ffffff !important;
-        width: 26px !important;
-        height: 26px !important;
+        width: 24px !important;
+        height: 24px !important;
     }
     
     /* --- DESIGN UTK TOMBOL TUTUP (Saat Sidebar Terbuka) --- */
@@ -314,7 +312,7 @@ if menu == "FORMULIR KUNJUNGAN PUBLIK":
                 st.session_state.ikm_selesai = False
                 st.rerun()
 
-    # --- TAB 2: PERMOHONAN DATA KHUSUS (UPLOAD KE GOOGLE DRIVE CLOUD) ---
+    # --- TAB 2: PORTAL DATA KHUSUS (UPLOAD KE GOOGLE DRIVE CLOUD) ---
     with tab2:
         st.subheader("FORMULIR PERMOHONAN DATA BEBAS TARIF (RP 0,00)")
         st.info("Sesuai aturan PP No. 47 Tahun 2018, layanan ini dikhususkan untuk keperluan Pendidikan, Penelitian non-komersial, dan Instansi Pemerintah.")
@@ -329,7 +327,7 @@ if menu == "FORMULIR KUNJUNGAN PUBLIK":
                 instansi_khusus = st.text_input("ASAL KAMPUS / SEKOLAH / INSTANSI:", placeholder="Contoh: Universitas Mataram")
             with col_k2:
                 kontak_khusus = st.text_input("NOMOR WHATSAPP AKTIF:", placeholder="Contoh: 081234xxxxxx")
-                jenis_data_khusus = st.text_input("JENIS DATA YANG DIMINTA:", placeholder="Contoh: Data Cuaca 2015-2025")
+                jenis_data_khusus = st.text_input("JENIS DATA YANG DIMINTA:", placeholder="Contoh: Data Curah Hujan 2015-2025")
             
             st.write("")
             st.markdown("#### **II. UNGGAH BERKAS BUKTI PENDUKUNG (ARSIP CLOUD STASIUN)**")
@@ -348,12 +346,10 @@ if menu == "FORMULIR KUNJUNGAN PUBLIK":
                     st.error("❌ PROSES GAGAL: Kolom Nama, Instansi, dan Berkas Foto KTP wajib diisi serta diunggah untuk kelengkapan arsip!")
                 else:
                     with st.spinner("🔄 Sedang mengamankan dokumen arsip ke Google Drive Cloud..."):
-                        # Upload KTP ke Google Drive
                         ext_ktp = file_ktp.name.split('.')[-1]
                         nama_file_ktp = f"KTP_{nama_khusus.replace(' ', '_')}_{datetime.now().strftime('%Y%m%d_%H%M%S')}.{ext_ktp}"
                         link_ktp = upload_ke_google_drive(file_ktp, nama_file_ktp, file_ktp.type)
                         
-                        # Upload Surat (Jika Ada) ke Google Drive
                         link_surat = "Tidak Ada Surat"
                         if file_surat is not None:
                             ext_surat = file_surat.name.split('.')[-1]
@@ -361,8 +357,6 @@ if menu == "FORMULIR KUNJUNGAN PUBLIK":
                             link_surat = upload_ke_google_drive(file_surat, nama_file_surat, file_surat.type)
                         
                         waktu_khusus = datetime.now(timezone(timedelta(hours=8))).strftime("%Y-%m-%d %H:%M:%S")
-                        
-                        # Menyimpan URL Google Drive ke Google Sheets
                         teks_database = f"Link KTP: {link_ktp} | Link Surat: {link_surat}"
                         row_khusus = [waktu_khusus, nama_khusus, "Pemohon Khusus (Rp 0,00)", kontak_khusus, instansi_khusus, jenis_data_khusus, teks_database]
                         
@@ -392,7 +386,6 @@ if menu == "FORMULIR KUNJUNGAN PUBLIK":
             ]
         }
         st.dataframe(pd.DataFrame(raw_data_ia), use_container_width=True, hide_index=True)
-        st.write("*(Tabel dipersingkat untuk preview, pastikan data PNBP sudah diisi penuh)*")
 
 # ==========================================
 # 7. HALAMAN 2: SURVEI KEPUASAN (IKM)
@@ -480,7 +473,6 @@ elif menu == "🔒 PORTAL ADMIN & REKAP LAPORAN":
                 else:
                     st.info("Database Survei IKM masih kosong atau gagal ditarik.")
                     
-        # --- SUB-TAB 3: LIHAT DOKUMEN VIA LINK CLOUD ---
         with tab_arsip:
             st.subheader("Galeri Audit Berkas Pemohon Bebas Biaya (Cloud Storage)")
             st.write("Daftar di bawah ini secara otomatis menyandingkan data Sheets dengan arsip dokumen fisik di Google Drive.")
@@ -510,7 +502,6 @@ elif menu == "🔒 PORTAL ADMIN & REKAP LAPORAN":
                                 except Exception:
                                     pass
                                 
-                                # Sisi Kiri (Informasi Biodata Responden)
                                 with col_info:
                                     st.markdown(f"### 👤 {row[df_tamu.columns[1]]}")
                                     st.write(f"**⏰ Waktu Kunjungan:** {row[df_tamu.columns[0]]}")
@@ -518,10 +509,8 @@ elif menu == "🔒 PORTAL ADMIN & REKAP LAPORAN":
                                     st.write(f"**📱 Kontak WA:** {row[df_tamu.columns[3]]}")
                                     st.write(f"**📂 Layanan Diminta:** {row[df_tamu.columns[5]]}")
                                 
-                                # Sisi Kanan (Tombol Navigasi Cloud)
                                 with col_links:
                                     st.markdown("**📂 Akses Berkas Google Drive:**")
-                                    
                                     if "http" in link_ktp:
                                         st.link_button("👁️ Lihat Identitas / KTP", link_ktp, use_container_width=True, type="primary")
                                     else:
@@ -534,8 +523,6 @@ elif menu == "🔒 PORTAL ADMIN & REKAP LAPORAN":
                                         st.info("❌ Pemohon tidak melampirkan Surat.")
                                     else:
                                         st.error("⚠️ File Surat menggunakan sistem lama lokal.")
-                                        
-                                    st.success("✔️ Validasi Sinkronisasi Cloud Berhasil.")
                     else:
                         st.info("Belum ada data pemohon khusus yang terekam.")
                 else:
