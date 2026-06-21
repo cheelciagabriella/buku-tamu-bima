@@ -5,48 +5,53 @@ import streamlit.components.v1 as components
 import gspread
 from oauth2client.service_account import ServiceAccountCredentials
 import os
+from googleapiclient.discovery import build
+from googleapiclient.http import MediaIoBaseUpload
+import io
 
 # ==========================================
-# 1. KONFIGURASI HALAMAN (MEMAKSA SIDEBAR TERBUKA)
+# 1. KONFIGURASI HALAMAN
 # ==========================================
 st.set_page_config(
     page_title="E-Buku Tamu Stamet Bima", 
     layout="wide",
-    initial_sidebar_state="expanded" # Ini yang memaksa menu biru langsung muncul!
+    initial_sidebar_state="expanded"
 )
 
 # ==========================================
-# 2. KUSTOMISASI DESAIN WARNA (VERSI PALING AMAN)
+# 2. KUSTOMISASI DESAIN WARNA (TEMA TERANG RESPONSIF)
 # ==========================================
 st.markdown("""
     <style>
-    /* HANYA menghilangkan tombol Deploy, Header & Sidebar Toggle dibiarkan 100% utuh! */
     .stAppDeployButton { display: none !important; }
-    
-    /* Latar Belakang Halaman Utama */
+    [data-testid="stToolbar"] { display: none !important; }
+    [data-testid="stHeader"] { background-color: transparent !important; box-shadow: none !important; }
+    footer { visibility: hidden !important; }
     [data-testid="stAppViewContainer"] { background: linear-gradient(135deg, #e0f2fe 0%, #e8f5e9 100%) !important; }
-    
-    /* Latar Belakang Menu Samping (Sidebar) Biru Tua BMKG */
     [data-testid="stSidebar"] { background-color: #002B49 !important; }
-    
-    /* Teks Sidebar menjadi putih */
     [data-testid="stSidebar"] h1, [data-testid="stSidebar"] h2, [data-testid="stSidebar"] h3, 
     [data-testid="stSidebar"] p, [data-testid="stSidebar"] label, [data-testid="stSidebar"] span, [data-testid="stSidebar"] div {
         color: #ffffff !important;
     }
-    
-    /* Kontainer formulir transparan putih elegan */
     [data-testid="stForm"], .stElementContainer div[data-aria-stable="true"] {
         background-color: rgba(255, 255, 255, 0.95) !important;
         border-radius: 10px;
         padding: 20px;
         border: 1px solid #cbd5e1;
     }
+    section.main h1, section.main h2, section.main h3, section.main h4, section.main h5, section.main h6,
+    section.main label, section.main p, section.main span,
+    section.main div[data-testid="stMarkdownContainer"] p,
+    section.main div[data-testid="stWidgetLabel"] p {
+        color: #003366 !important;
+    }
+    section.main .stCaptionContainer, section.main div[data-testid="stCaptionContainer"] p { color: #334155 !important; }
+    section.main input { color: #000000 !important; }
     </style>
 """, unsafe_allow_html=True)
 
 # ==========================================
-# 3. FUNGSI INTEGRASI GOOGLE SHEETS (CLOUD)
+# 3. FUNGSI INTEGRASI GOOGLE CLOUD (SHEETS & DRIVE)
 # ==========================================
 def dapatkan_kredensial():
     scope = ["https://spreadsheets.google.com/feeds", "https://www.googleapis.com/auth/drive"]
@@ -84,6 +89,27 @@ def ambil_data_google_sheets(nama_tab):
         st.error(f"Gagal mengambil data: {e}")
         return pd.DataFrame()
 
+def upload_ke_google_drive(file_buffer, nama_file, mime_type):
+    try:
+        creds = dapatkan_kredensial()
+        service = build('drive', 'v3', credentials=creds)
+        
+        # ⚠️ GANTI DENGAN ID FOLDER GOOGLE DRIVE KAMU ⚠️
+        FOLDER_ID = "MASUKKAN_ID_FOLDER_GOOGLE_DRIVE_DISINI" 
+
+        file_metadata = {
+            'name': nama_file,
+            'parents': [FOLDER_ID]
+        }
+        
+        media = MediaIoBaseUpload(io.BytesIO(file_buffer.getvalue()), mimetype=mime_type, resumable=True)
+        file = service.files().create(body=file_metadata, media_body=media, fields='id, webViewLink').execute()
+        
+        return file.get('webViewLink')
+    except Exception as e:
+        st.error(f"Gagal mengunggah arsip berkas ke Cloud Storage: {e}")
+        return "Gagal Upload"
+
 # ==========================================
 # 4. INISIALISASI KONTROL ALUR (SESSION STATE)
 # ==========================================
@@ -112,7 +138,7 @@ menu = st.sidebar.radio("PILIH MENU LAYANAN:", [
 ])
 st.sidebar.divider()
 st.sidebar.caption("SISTEM ADMINISTRASI TERPADU")
-st.sidebar.caption("STASIUN METEOROLOGI KELAS III SULTAN MUHAMMAD SALAHUDDIN BIMA")
+st.sidebar.caption("STASIUN METEOROLOGI KELAS II SULTAN MUHAMMAD SALAHUDDIN BIMA")
 
 # ==========================================
 # 6. HALAMAN 1: FORMULIR KUNJUNGAN PUBLIK
@@ -132,7 +158,7 @@ if menu == "FORMULIR KUNJUNGAN PUBLIK":
                     PORTAL LAYANAN PUBLIK TERINTEGRASI
                 </div>
                 <div style='color: #1b5e20; font-size: 18px; font-weight: 800; letter-spacing: 0.5px; margin-bottom: 2px;'>
-                    STASIUN METEOROLOGI KELAS III SULTAN MUHAMMAD SALAHUDDIN BIMA
+                    STASIUN METEOROLOGI KELAS II SULTAN MUHAMMAD SALAHUDDIN BIMA
                 </div>
                 <div style='color: #444444; font-size: 14px; font-weight: 700; letter-spacing: 1px; margin-top: 0px;'>
                     BADAN METEOROLOGI, KLIMATOLOGI, DAN GEOFISIKA
@@ -239,7 +265,6 @@ if menu == "FORMULIR KUNJUNGAN PUBLIK":
 
         else:
             st.success("PROSES SELESAI: Terima kasih atas partisipasi Anda dalam mengisi Buku Tamu dan Survei IKM.")
-            st.info("Kontribusi penilaian Anda sangat berharga bagi peningkatan mutu dan akuntabilitas pelayanan publik kami.")
             st.write("")
             if st.button("KEMBALI KE HALAMAN UTAMA (REGISTRASI TAMU BARU)", type="primary", use_container_width=True):
                 st.session_state.tamu_terdaftar = False
@@ -247,7 +272,7 @@ if menu == "FORMULIR KUNJUNGAN PUBLIK":
                 st.session_state.ikm_selesai = False
                 st.rerun()
 
-    # --- TAB 2: PORTAL DATA KHUSUS (UPLOAD FILE BAWAAN STREAMLIT) ---
+    # --- TAB 2: PORTAL DATA KHUSUS (UPLOAD KE GOOGLE DRIVE CLOUD) ---
     with tab2:
         st.subheader("FORMULIR PERMOHONAN DATA BEBAS TARIF (RP 0,00)")
         st.info("Sesuai aturan PP No. 47 Tahun 2018, layanan ini dikhususkan untuk keperluan Pendidikan, Penelitian non-komersial, dan Instansi Pemerintah.")
@@ -265,7 +290,7 @@ if menu == "FORMULIR KUNJUNGAN PUBLIK":
                 jenis_data_khusus = st.text_input("JENIS DATA YANG DIMINTA:", placeholder="Contoh: Data Curah Hujan 2015-2025")
             
             st.write("")
-            st.markdown("#### **II. UNGGAH BERKAS BUKTI PENDUKUNG (ARSIP DIGITAL STASIUN)**")
+            st.markdown("#### **II. UNGGAH BERKAS BUKTI PENDUKUNG (ARSIP CLOUD STASIUN)**")
             col_f1, col_f2 = st.columns(2)
             
             with col_f1:
@@ -280,33 +305,33 @@ if menu == "FORMULIR KUNJUNGAN PUBLIK":
                 if not nama_khusus or not instansi_khusus or not file_ktp:
                     st.error("❌ PROSES GAGAL: Kolom Nama, Instansi, dan Berkas Foto KTP wajib diisi serta diunggah untuk kelengkapan arsip!")
                 else:
-                    folder_arsip = "arsip_dokumen_pnbp"
-                    os.makedirs(folder_arsip, exist_ok=True)
-                    
-                    nama_file_ktp = f"KTP_{nama_khusus.replace(' ', '_')}_{datetime.now().strftime('%Y%m%d_%H%M%S')}.png"
-                    path_simpan_ktp = os.path.join(folder_arsip, nama_file_ktp)
-                    with open(path_simpan_ktp, "wb") as f:
-                        f.write(file_ktp.getbuffer())
-                    
-                    nama_file_surat = "Tidak Ada Surat"
-                    if file_surat is not None:
-                        ext = file_surat.name.split('.')[-1]
-                        nama_file_surat = f"Surat_{nama_khusus.replace(' ', '_')}_{datetime.now().strftime('%Y%m%d_%H%M%S')}.{ext}"
-                        path_simpan_surat = os.path.join(folder_arsip, nama_file_surat)
-                        with open(path_simpan_surat, "wb") as f:
-                            f.write(file_surat.getbuffer())
-                    
-                    waktu_khusus = datetime.now(timezone(timedelta(hours=8))).strftime("%Y-%m-%d %H:%M:%S")
-                    row_khusus = [waktu_khusus, nama_khusus, "Pemohon Khusus (Rp 0,00)", kontak_khusus, instansi_khusus, jenis_data_khusus, f"Disetujui. Arsip KTP: {nama_file_ktp}"]
-                    
-                    if simpan_ke_google_sheets("Tamu", row_khusus):
-                        st.success(f"✔️ BERHASIL: Dokumen digital Anda telah sukses diarsip secara aman ke sistem lokal kantor, dan data teks permohonan telah tersinkronisasi ke Cloud Database stasiun!")
-                        st.balloons()
+                    with st.spinner("🔄 Sedang mengamankan dokumen arsip ke Google Drive Cloud..."):
+                        # Upload KTP ke Google Drive
+                        ext_ktp = file_ktp.name.split('.')[-1]
+                        nama_file_ktp = f"KTP_{nama_khusus.replace(' ', '_')}_{datetime.now().strftime('%Y%m%d_%H%M%S')}.{ext_ktp}"
+                        link_ktp = upload_ke_google_drive(file_ktp, nama_file_ktp, file_ktp.type)
+                        
+                        # Upload Surat (Jika Ada) ke Google Drive
+                        link_surat = "Tidak Ada Surat"
+                        if file_surat is not None:
+                            ext_surat = file_surat.name.split('.')[-1]
+                            nama_file_surat = f"Surat_{nama_khusus.replace(' ', '_')}_{datetime.now().strftime('%Y%m%d_%H%M%S')}.{ext_surat}"
+                            link_surat = upload_ke_google_drive(file_surat, nama_file_surat, file_surat.type)
+                        
+                        waktu_khusus = datetime.now(timezone(timedelta(hours=8))).strftime("%Y-%m-%d %H:%M:%S")
+                        
+                        # Menyimpan URL Google Drive ke Google Sheets
+                        teks_database = f"Link KTP: {link_ktp} | Link Surat: {link_surat}"
+                        row_khusus = [waktu_khusus, nama_khusus, "Pemohon Khusus (Rp 0,00)", kontak_khusus, instansi_khusus, jenis_data_khusus, teks_database]
+                        
+                        if simpan_ke_google_sheets("Tamu", row_khusus):
+                            st.success(f"✔️ BERHASIL: Dokumen digital Anda telah sukses diarsip secara aman ke Cloud Storage stasiun!")
+                            st.balloons()
 
     # --- TAB 3: E-KATALOG PNBP ---
     with tab3:
         st.subheader("KATALOG TARIF RESMI JASA DATA DAN INFORMASI (ROMAWI I)")
-        st.info("Dasar Hukum: Peraturan Pemerintah Nomor 47 Tahun 2018 tentang Jenis dan Tarif atas Penerimaan Negara Bukan Pajak yang Berlaku pada BMKG.")
+        st.info("Dasar Hukum: Peraturan Pemerintah Nomor 47 Tahun 2018 tentang Jenis dan Tarif atas Penerimaan Negara Bukan Pajak yang Evaluasi pada BMKG.")
         
         st.markdown("### **A. Informasi Khusus Meteorologi, Klimatologi, dan Geofisika**")
         raw_data_ia = {
@@ -326,14 +351,6 @@ if menu == "FORMULIR KUNJUNGAN PUBLIK":
         }
         st.dataframe(pd.DataFrame(raw_data_ia), use_container_width=True, hide_index=True)
         st.write("*(Tabel dipersingkat untuk preview, pastikan data PNBP sudah diisi penuh)*")
-        
-        with st.container(border=True):
-            st.markdown("### **KETENTUAN KHUSUS BEBAS BIAYA (TARIF RP 0,00 / GRATIS)**")
-            st.markdown("""
-            Seluruh tarif kategori Romawi I di atas dapat dibebaskan menjadi **Rp 0,00 (Gratis 100%)** apabila ditujukan demi pemenuhan kebutuhan non-komersial berikut:
-            1. **Pendidikan dan Penelitian:** Guna pembuatan Tugas Akhir, Skripsi, Tesis, atau Disertasi pelajar/mahasiswa dengan menyertakan Surat Pengantar Resmi.
-            2. **Keselamatan dan Penanggulangan:** Keperluan darurat evakuasi bencana alam, kegiatan sosial keagamaan non-profit, serta operasional kedaulatan TNI/POLRI.
-            """)
 
 # ==========================================
 # 7. HALAMAN 2: SURVEI KEPUASAN (IKM)
@@ -397,91 +414,89 @@ elif menu == "🔒 PORTAL ADMIN & REKAP LAPORAN":
         
         st.write("")
         
-        tab_db_tamu, tab_db_ikm, tab_arsip = st.tabs(["DATABASE TAMU & LAYANAN", "DATABASE SURVEI IKM", "AUDIT ARSIP DOKUMEN (KTP/SURAT)"])
+        tab_db_tamu, tab_db_ikm, tab_arsip = st.tabs(["DATABASE TAMU & LAYANAN", "DATABASE SURVEI IKM", "AUDIT ARSIP DOKUMEN CLOUD (GOOGLE DRIVE)"])
         
-        # --- SUB-TAB 1: DATA TAMU ---
         with tab_db_tamu:
             st.subheader("Tabel Rekapitulasi Tamu (Google Sheets Cloud)")
             with st.spinner("Sedang menarik data dari Cloud..."):
                 df_tamu = ambil_data_google_sheets("Tamu")
                 if not df_tamu.empty:
                     st.dataframe(df_tamu, use_container_width=True)
-                    
                     csv_tamu = df_tamu.to_csv(index=False).encode('utf-8')
-                    st.download_button(
-                        label="📥 Unduh Laporan (.csv)",
-                        data=csv_tamu,
-                        file_name=f"Laporan_Tamu_Stamet_Bima_{datetime.now().strftime('%Y%m%d')}.csv",
-                        mime="text/csv",
-                        type="primary"
-                    )
+                    st.download_button("📥 Unduh Laporan (.csv)", data=csv_tamu, file_name=f"Laporan_Tamu_Stamet_Bima_{datetime.now().strftime('%Y%m%d')}.csv", mime="text/csv", type="primary")
                 else:
                     st.info("Database Tamu masih kosong atau gagal ditarik.")
 
-        # --- SUB-TAB 2: DATA IKM ---
         with tab_db_ikm:
             st.subheader("Tabel Rekapitulasi Survei IKM (Google Sheets Cloud)")
             with st.spinner("Sedang menarik data IKM dari Cloud..."):
                 df_ikm = ambil_data_google_sheets("Survei")
                 if not df_ikm.empty:
                     st.dataframe(df_ikm, use_container_width=True)
-                    
                     csv_ikm = df_ikm.to_csv(index=False).encode('utf-8')
-                    st.download_button(
-                        label="📥 Unduh Laporan IKM (.csv)",
-                        data=csv_ikm,
-                        file_name=f"Laporan_IKM_Stamet_Bima_{datetime.now().strftime('%Y%m%d')}.csv",
-                        mime="text/csv",
-                        type="primary"
-                    )
+                    st.download_button("📥 Unduh Laporan IKM (.csv)", data=csv_ikm, file_name=f"Laporan_IKM_Stamet_Bima_{datetime.now().strftime('%Y%m%d')}.csv", mime="text/csv", type="primary")
                 else:
                     st.info("Database Survei IKM masih kosong atau gagal ditarik.")
                     
-        # --- SUB-TAB 3: LIHAT FOTO KTP LOKAL (MODE GALERI ANTI-ERROR) ---
+        # --- SUB-TAB 3: LIHAT DOKUMEN VIA LINK CLOUD ---
         with tab_arsip:
-            st.subheader("Galeri Audit Arsip Pemohon Bebas Biaya")
-            st.write("Daftar di bawah ini secara otomatis menyandingkan data dari Cloud dengan Foto KTP dari laptop Anda.")
+            st.subheader("Galeri Audit Berkas Pemohon Bebas Biaya (Cloud Storage)")
+            st.write("Daftar di bawah ini secara otomatis menyandingkan data Sheets dengan arsip dokumen fisik di Google Drive.")
             st.write("")
             
-            folder_arsip = "arsip_dokumen_pnbp"
             df_tamu = ambil_data_google_sheets("Tamu")
             
             if not df_tamu.empty:
-                # Menggunakan deteksi urutan kolom (Kolom ke-7 / index 6) agar tidak bergantung pada nama judul kolom tertentu
                 if len(df_tamu.columns) >= 7:
                     kolom_target = df_tamu.columns[6]
-                    df_khusus = df_tamu[df_tamu[kolom_target].astype(str).str.contains("Arsip KTP:", na=False)]
+                    # Mendukung sistem lama (Arsip KTP:) dan sistem baru (Link KTP:)
+                    df_khusus = df_tamu[df_tamu[kolom_target].astype(str).str.contains("KTP:", na=False)]
                     
                     if not df_khusus.empty:
                         for index, row in df_khusus.iterrows():
                             with st.container(border=True):
-                                col_img, col_info = st.columns([1, 2])
+                                col_info, col_links = st.columns([2, 1])
                                 
                                 teks_detail = str(row[kolom_target])
+                                link_ktp = ""
+                                link_surat = ""
+                                
                                 try:
-                                    nama_file = teks_detail.split("Arsip KTP: ")[1].strip()
-                                except IndexError:
-                                    nama_file = ""
+                                    if "|" in teks_detail:
+                                        parts = teks_detail.split("|")
+                                        link_ktp = parts[0].split("KTP:")[1].strip()
+                                        link_surat = parts[1].split("Surat:")[1].strip()
+                                except Exception:
+                                    pass
                                 
-                                # Sisi Kiri (Gambar)
-                                with col_img:
-                                    path_gambar = os.path.join(folder_arsip, nama_file)
-                                    if os.path.exists(path_gambar) and nama_file != "":
-                                        st.image(path_gambar, use_container_width=True)
-                                    else:
-                                        st.error(f"⚠️ Gambar tidak ditemukan di folder lokal laptop ini.")
-                                
-                                # Sisi Kanan (Informasi Teks)
+                                # Sisi Kiri (Informasi Biodata Responden)
                                 with col_info:
                                     st.markdown(f"### 👤 {row[df_tamu.columns[1]]}")
-                                    st.write(f"**⏰ Tanggal & Waktu:** {row[df_tamu.columns[0]]}")
+                                    st.write(f"**⏰ Waktu Kunjungan:** {row[df_tamu.columns[0]]}")
                                     st.write(f"**🏢 Asal Instansi:** {row[df_tamu.columns[4]]}")
                                     st.write(f"**📱 Kontak WA:** {row[df_tamu.columns[3]]}")
                                     st.write(f"**📂 Layanan Diminta:** {row[df_tamu.columns[5]]}")
+                                
+                                # Sisi Kanan (Tombol Navigasi Cloud)
+                                with col_links:
+                                    st.markdown("**📂 Akses Berkas Google Drive:**")
                                     
-                                    st.success("✔️ Dokumen KTP tervalidasi dan tersinkronisasi.")
+                                    if "http" in link_ktp:
+                                        st.link_button("👁️ Lihat Identitas / KTP", link_ktp, use_container_width=True, type="primary")
+                                    else:
+                                        st.error("⚠️ File KTP menggunakan sistem lama lokal.")
+                                    
+                                    st.write("")
+                                    if "http" in link_surat:
+                                        st.link_button("👁️ Lihat Surat Pengantar", link_surat, use_container_width=True)
+                                    elif link_surat == "Tidak Ada Surat":
+                                        st.info("❌ Pemohon tidak melampirkan Surat.")
+                                    else:
+                                        st.error("⚠️ File Surat menggunakan sistem lama lokal.")
+                                        
+                                    st.success("✔️ Validasi Sinkronisasi Cloud Berhasil.")
                     else:
-                        st.info("Belum ada data pemohon khusus yang mengunggah KTP.")
+                        st.info("Belum ada data pemohon khusus yang terekam.")
                 else:
                     st.warning("Struktur Google Sheets belum sesuai. Pastikan ada minimal 7 kolom data.")
             else:
