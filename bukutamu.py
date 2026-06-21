@@ -28,6 +28,13 @@ st.markdown("""
     [data-testid="stHeader"] { background-color: transparent !important; box-shadow: none !important; }
     footer { visibility: hidden !important; }
     
+    /* Paksa Sembunyikan Tombol "Manage app" di Pojok Kanan Bawah */
+    [data-testid="manage-app-button"],
+    button[data-testid="manage-app-button"] {
+        display: none !important;
+        visibility: hidden !important;
+    }
+    
     /* Paksa Sidebar Kiri Terbuka Permanen agar Penguji Latsar Mudah Navigasi */
     [data-testid="stSidebarCollapseButton"],
     button[aria-label="Close sidebar"],
