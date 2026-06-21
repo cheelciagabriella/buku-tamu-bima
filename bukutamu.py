@@ -276,7 +276,7 @@ if menu == "FORMULIR KUNJUNGAN PUBLIK":
     st.divider()
     
     tab1, tab2, tab3, tab4 = st.tabs([
-        "E-BUKU TAMU DIGITAL", 
+        "BUKU TAMU", 
         "PERMOHONAN DATA BEBAS TARIF", 
         "E-KATALOG PNBP",
         "🔍 LACAK STATUS DATA"
