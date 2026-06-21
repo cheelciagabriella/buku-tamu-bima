@@ -19,67 +19,43 @@ st.set_page_config(
 )
 
 # ==========================================
-# 2. KUSTOMISASI CSS (ANTI-HILANG & ADAPTIVE MODE)
+# 2. KUSTOMISASI CSS (KOTAK SAKELAR NAVI & ADAPTIVE MODE)
 # ==========================================
 st.markdown("""
     <style>
-    /* 1. Paksa area rumah header tempat tombol berada untuk SELALU AKTIF & transparan */
-    header[data-testid="stHeader"] {
-        display: block !important;
-        visibility: visible !important;
-        background-color: transparent !important;
-        background: transparent !important;
-        box-shadow: none !important;
-    }
-
-    /* 2. Sembunyikan hanya tombol deploy bawaan dan menu opsi kanan */
+    /* Bersihkan komponen komersial / deploy bawaan */
     .stAppDeployButton { display: none !important; }
     [data-testid="stToolbar"] { display: none !important; }
     footer { display: none !important; visibility: hidden !important; }
     [data-testid="stEmbedHoverBadge"], div[class*="viewerBadge"], div[class*="styles_viewerBadge"] { display: none !important; }
     
-    /* 3. PERBAIKAN TOTAL: Tembak tombol buka sidebar dengan semua selector cadangan agar paksa muncul melayang */
-    div[data-testid="stSidebarCollapsedControl"],
-    div[data-testid="stSidebarCollapsedControl"] button,
-    button[aria-label="Open sidebar"],
-    header[data-testid="stHeader"] button:first-child {
+    /* 🛠️ SOLUSI TOTAL: Bikin wadah tombol panah jadi KOTAK NAVY SOLID di pojok kiri atas */
+    div[data-testid="stSidebarCollapsedControl"] {
         display: flex !important;
         visibility: visible !important;
         opacity: 1 !important;
         position: fixed !important;
-        top: 15px !important;
-        left: 15px !important;
+        top: 0 !important;
+        left: 0 !important;
         z-index: 999999 !important;
-        background-color: #002B49 !important; /* Navy Khas BMKG */
-        color: #ffffff !important;
-        border: 2px solid #ffffff !important;
-        border-radius: 8px !important;
-        width: 42px !important;
-        height: 42px !important;
-        align-items: center !important;
-        justify-content: center !important;
-        box-shadow: 0px 4px 12px rgba(0, 0, 0, 0.4) !important;
+        background-color: #002B49 !important; /* Navy kokoh */
+        padding: 10px 14px !important;
+        border-radius: 0 0 12px 0 !important; /* Lengkungan manis di pojok kanan bawah */
+        box-shadow: 3px 3px 12px rgba(0, 0, 0, 0.35) !important;
     }
     
-    /* Paksa icon garis/panah di dalamnya agar berwarna putih bersih dan berukuran pas */
-    div[data-testid="stSidebarCollapsedControl"] svg,
-    button[aria-label="Open sidebar"] svg,
-    header[data-testid="stHeader"] button:first-child svg {
+    /* Paksa tombol dan icon panah di dalamnya berwarna putih bersih agar super kontras */
+    div[data-testid="stSidebarCollapsedControl"] button,
+    div[data-testid="stSidebarCollapsedControl"] button svg,
+    button[aria-label="Open sidebar"] svg {
         color: #ffffff !important;
         fill: #ffffff !important;
+        stroke: #ffffff !important;
         width: 24px !important;
         height: 24px !important;
-        display: block !important;
     }
 
-    /* Beri efek sedikit membesar saat diarahkan kursor */
-    button[aria-label="Open sidebar"]:hover,
-    header[data-testid="stHeader"] button:first-child:hover {
-        transform: scale(1.08) !important;
-        background-color: #003a63 !important;
-    }
-
-    /* Desain tombol close (X) saat sidebar sedang posisi terbuka */
+    /* Modifikasi tombol silang (X) saat sidebar sedang posisi terbuka */
     button[data-testid="stSidebarCollapseButton"] {
         color: #ffffff !important;
         background-color: rgba(255, 255, 255, 0.1) !important;
@@ -98,9 +74,9 @@ st.markdown("""
         color: #ffffff !important;
     }
     
-    /* Naikkan sedikit jarak atas konten agar pas dan tidak tertabrak tombol fixed */
+    /* Kasih ruang atas container agar tidak mepet sakelar menu */
     .block-container {
-        padding-top: 3.5rem !important;
+        padding-top: 4rem !important;
         padding-bottom: 2rem !important;
     }
     </style>
@@ -541,7 +517,7 @@ elif menu == "🔒 PORTAL ADMIN & REKAP LAPORAN":
                 kolom_nama = df_tamu.columns[1]
                 kolom_waktu = df_tamu.columns[0]
                 kolom_instansi = df_tamu.columns[4]
-                kolom_kontak = df_tamu.columns[3]
+                kolom_kont class=df_tamu.columns[3]
                 kolom_layanan = df_tamu.columns[5]
                 
                 df_khusus = df_tamu[df_tamu[kolom_keperluan].astype(str).str.contains("KTP", na=False)]
