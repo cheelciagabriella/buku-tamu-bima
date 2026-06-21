@@ -19,15 +19,64 @@ st.set_page_config(
 )
 
 # ==========================================
-# 2. KUSTOMISASI CSS (ADAPTIVE LIGHT/DARK MODE)
+# 2. KUSTOMISASI CSS (PANAH FIXED FIX & ADAPTIVE MODE)
 # ==========================================
 st.markdown("""
     <style>
-    /* Sembunyikan Header & Footer Bawaan Streamlit */
-    header { visibility: hidden !important; }
-    footer { visibility: hidden !important; }
+    /* Sembunyikan HANYA tombol deploy dan menu opsi kanan */
     .stAppDeployButton { display: none !important; }
+    [data-testid="stToolbar"] { display: none !important; }
+    footer { display: none !important; visibility: hidden !important; }
     [data-testid="stEmbedHoverBadge"], div[class*="viewerBadge"], div[class*="styles_viewerBadge"] { display: none !important; }
+    
+    /* 🛠️ FIX TOTAL: Paksa Kontrol Tombol Buka Sidebar (Saat Tertutup) Muncul Permanen & Melayang di Pojok Kiri Atas */
+    div[data-testid="stSidebarCollapsedControl"] {
+        position: fixed !important;
+        top: 12px !important;
+        left: 12px !important;
+        z-index: 999999 !important;
+        display: flex !important;
+        visibility: visible !important;
+        opacity: 1 !important;
+    }
+    
+    /* Desain Tombol Panah Saat Melayang */
+    div[data-testid="stSidebarCollapsedControl"] button {
+        background-color: #002B49 !important; /* Navy BMKG */
+        color: #ffffff !important;
+        border: 1px solid #001f36 !important;
+        border-radius: 8px !important;
+        box-shadow: 0px 4px 12px rgba(0, 0, 0, 0.3) !important;
+        display: flex !important;
+        align-items: center !important;
+        justify-content: center !important;
+        width: 44px !important;
+        height: 44px !important;
+        transition: transform 0.2s ease !important;
+    }
+    
+    div[data-testid="stSidebarCollapsedControl"] button:hover {
+        transform: scale(1.08) !important;
+        background-color: #003a63 !important;
+    }
+    
+    /* Paksa Icon Panah di Dalamnya Berwarna Putih Bersih */
+    div[data-testid="stSidebarCollapsedControl"] button svg {
+        color: #ffffff !important;
+        fill: #ffffff !important;
+        width: 26px !important;
+        height: 26px !important;
+    }
+
+    /* Ketika Sidebar posisi TERBUKA, pastikan tombol tutupnya juga matching */
+    button[data-testid="stSidebarCollapseButton"] {
+        color: #ffffff !important;
+        background-color: rgba(255, 255, 255, 0.1) !important;
+    }
+    button[data-testid="stSidebarCollapseButton"] svg {
+        color: #ffffff !important;
+        fill: #ffffff !important;
+    }
     
     /* SIDEBAR KIRI: Selalu Navy Biru Dongker dengan Tulisan Putih */
     [data-testid="stSidebar"] {
@@ -38,9 +87,9 @@ st.markdown("""
         color: #ffffff !important;
     }
     
-    /* Mengatasi bug HP layar sempit */
+    /* Beri ruang di atas konten utama agar tidak tertabrak tombol panah fixed */
     .block-container {
-        padding-top: 2rem !important;
+        padding-top: 3.5rem !important;
         padding-bottom: 2rem !important;
     }
     </style>
@@ -196,7 +245,6 @@ if menu == "FORMULIR KUNJUNGAN PUBLIK":
             st.image("https://upload.wikimedia.org/wikipedia/commons/4/44/Logo_BMKG.png", width=120)
             
     with col_text:
-        # Menggunakan var(--text-color) agar otomatis mengikuti mode gelap/terang HP
         st.markdown("""
             <div style='text-align: center; padding-top: 5px; line-height: 1.2;'>
                 <div style='color: var(--text-color); font-size: 28px; font-weight: 900; letter-spacing: 1px; margin-bottom: 2px;'>
