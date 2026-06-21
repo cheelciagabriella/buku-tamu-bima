@@ -198,7 +198,6 @@ def update_status_sheets(nama_pemohon, status_baru):
         sheet = client.open_by_key("1qdrgfAhB_NKPSIxP9p5cY0LF1RmXRzqG-aWUNEx7r94").worksheet("Tamu")
         cell = sheet.find(nama_pemohon)
         if cell:
-            # Karena kolom Identitas dihapus, status maju ke kolom 7
             sheet.update_cell(cell.row, 7, status_baru)
             return True
         return False
@@ -306,7 +305,7 @@ if menu == "FORMULIR KUNJUNGAN PUBLIK":
                 with col3:
                     tujuan = st.selectbox(
                         "LAYANAN YANG DITUJU", 
-                        ["Permintaan Data Cuaca/Iklim", "Konsultasi Teknis Meteorologi", "Kunjungan Kerja / Koordinasi", "Studi Banding / Edukasi Publik", "Lain-lain"]
+                        ["Kunjungan Kerja / Koordinasi", "Studi Banding / Edukasi Publik", "Lain-lain"]
                     )
                 with col4:
                     alasan_lainnya = ""
@@ -325,7 +324,7 @@ if menu == "FORMULIR KUNJUNGAN PUBLIK":
                     tujuan_final = alasan_lainnya if tujuan == "Lain-lain" else tujuan
                     waktu_sekarang = datetime.now(timezone(timedelta(hours=8))).strftime("%Y-%m-%d %H:%M:%S")
                     
-                    # Susunan baru 7 kolom: Waktu, Nama, No WA, Instansi, Keperluan, Keterangan, Status
+                    # Susunan 7 kolom: Waktu, Nama, No WA, Instansi, Keperluan, Keterangan, Status
                     row_tamu = [waktu_sekarang, nama, no_hp, instansi, tujuan_final, "Kunjungan Umum Terdaftar", "-"]
                     
                     if simpan_ke_google_sheets("Tamu", row_tamu):
@@ -406,7 +405,7 @@ if menu == "FORMULIR KUNJUNGAN PUBLIK":
                         waktu_khusus = datetime.now(timezone(timedelta(hours=8))).strftime("%Y-%m-%d %H:%M:%S")
                         teks_database = f"Link KTP: {link_ktp} | Link Surat: {link_surat}"
                         
-                        # Susunan baru 7 kolom
+                        # Susunan 7 kolom
                         row_khusus = [waktu_khusus, nama_khusus, kontak_khusus, instansi_khusus, jenis_data_khusus, teks_database, "Sedang Diproses"]
                         
                         if simpan_ke_google_sheets("Tamu", row_khusus):
@@ -418,7 +417,7 @@ if menu == "FORMULIR KUNJUNGAN PUBLIK":
         st.subheader("KATALOG TARIF RESMI JASA DATA DAN INFORMASI (ROMAWI I)")
         raw_data_ia = {
             "Jenis Penerimaan Negara Bukan Pajak": [
-                "1. Informasi Cuaca untuk Penerbangan", "2. Informasi Cuaca untuk Pelayaran",
+                "1. Information Cuaca untuk Penerbangan", "2. Informasi Cuaca untuk Pelayaran",
                 "3. Informasi Cuaca untuk Pelabuhan", "4. Informasi Cuaca untuk Pengeboran Lepas Pantai",
                 "5.a. Analisis dan Prakiraan Hujan Bulanan", "5.b. Prakiraan Musim Kemarau"
             ],
@@ -447,7 +446,6 @@ if menu == "FORMULIR KUNJUNGAN PUBLIK":
                 with st.spinner("Mencari data di database stasiun..."):
                     df_tamu = ambil_data_google_sheets("Tamu")
                     if not df_tamu.empty:
-                        # Index kolom disesuaikan karena ada 1 kolom dihapus (Maju 1 index)
                         kolom_kontak = df_tamu.columns[2]
                         df_user = df_tamu[df_tamu[kolom_kontak].astype(str) == str(no_hp_cari)]
                         
@@ -529,7 +527,6 @@ elif menu == "🔒 PORTAL ADMIN & REKAP LAPORAN":
             df_tamu = ambil_data_google_sheets("Tamu")
             
             if not df_tamu.empty:
-                # Index kolom disesuaikan karena ada 1 kolom dihapus
                 kolom_keperluan = df_tamu.columns[5]
                 kolom_nama = df_tamu.columns[1]
                 kolom_waktu = df_tamu.columns[0]
