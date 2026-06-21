@@ -39,14 +39,8 @@ st.markdown("""
         display: none !important;
         visibility: hidden !important;
     }
-    
-    /* Paksa Sidebar Kiri Terbuka Permanen agar Penguji Latsar Mudah Navigasi */
-    [data-testid="stSidebarCollapseButton"],
-    button[aria-label="Close sidebar"],
-    button[aria-label="Tutup bilah sisi"] {
-        display: none !important;
-        visibility: hidden !important;
-    }
+
+    /* KODE PENGUNCI SIDEBAR DIHAPUS AGAR BISA DICLOSE DI HP */
 
     [data-testid="stAppViewContainer"] { background: linear-gradient(135deg, #e0f2fe 0%, #e8f5e9 100%) !important; }
     [data-testid="stSidebar"] { background-color: #002B49 !important; }
@@ -72,7 +66,7 @@ st.markdown("""
 """, unsafe_allow_html=True)
 
 # ==========================================
-# 2.b TOMBOL WHATSAPP MELAYANG (POSISI DI ATAS BADGE)
+# 2.b TOMBOL WHATSAPP MELAYANG
 # ==========================================
 NOMOR_WA_CS = "628113908535" 
 PESAN_OTOMATIS = "Halo%20Admin%20PTSP%20Stamet%20Bima,%20saya%20ingin%20bertanya%20mengenai%20layanan%20data..."
@@ -81,10 +75,10 @@ st.markdown(f"""
     <style>
     .float-wa {{
         position: fixed;
-        width: 60px;
-        height: 60px;
-        bottom: 95px; /* 💡 Dinaikkan ke 95px agar lolos dari blokade tulisan Hosted by Streamlit */
-        right: 30px;
+        width: 55px; /* Sedikit dikecilkan agar responsif di HP */
+        height: 55px;
+        bottom: 25px; /* Dikembalikan ke posisi ideal sudut kanan bawah */
+        right: 25px;
         background-color: #25d366;
         color: white;
         border-radius: 50px;
@@ -102,8 +96,8 @@ st.markdown(f"""
         background-color: #20ba5a;
     }}
     .float-wa img {{
-        width: 35px;
-        height: 35px;
+        width: 30px;
+        height: 30px;
     }}
     </style>
     <a href="https://wa.me/{NOMOR_WA_CS}?text={PESAN_OTOMATIS}" class="float-wa" target="_blank" rel="noopener noreferrer" title="Hubungi CS via WhatsApp">
