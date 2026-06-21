@@ -246,13 +246,13 @@ if menu == "FORMULIR KUNJUNGAN PUBLIK":
     with col_text:
         st.markdown("""
             <div style='text-align: center; padding-top: 5px; line-height: 1.2;'>
-                <div style='color: #002B49; font-size: 28px; font-weight: 900; letter-spacing: 1px; margin-bottom: 2px;'>
+                <div style='color: #002B49; font-size: 36px; font-weight: 900; letter-spacing: 1px; margin-bottom: 4px;'>
                     PORTAL LAYANAN PUBLIK TERINTEGRASI
                 </div>
-                <div style='color: #003a63; font-size: 17px; font-weight: 800; letter-spacing: 0.5px; margin-bottom: 2px;'>
+                <div style='color: #003a63; font-size: 22px; font-weight: 800; letter-spacing: 0.5px; margin-bottom: 4px;'>
                     STASIUN METEOROLOGI KELAS II SULTAN MUHAMMAD SALAHUDDIN BIMA
                 </div>
-                <div style='color: var(--text-color); opacity: 0.7; font-size: 13px; font-weight: 700; letter-spacing: 1px; margin-top: 0px;'>
+                <div style='color: var(--text-color); opacity: 0.8; font-size: 16px; font-weight: 700; letter-spacing: 1px; margin-top: 0px;'>
                     BADAN METEOROLOGI, KLIMATOLOGI, DAN GEOFISIKA
                 </div>
             </div>
@@ -276,7 +276,7 @@ if menu == "FORMULIR KUNJUNGAN PUBLIK":
     st.divider()
     
     tab1, tab2, tab3, tab4 = st.tabs([
-        "E-BUKU TAMU", 
+        "BUKU TAMU", 
         "PERMOHONAN DATA BEBAS TARIF", 
         "E-KATALOG PNBP",
         "🔍 LACAK STATUS DATA"
