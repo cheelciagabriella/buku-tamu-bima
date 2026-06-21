@@ -414,7 +414,7 @@ if menu == "FORMULIR KUNJUNGAN PUBLIK":
 
     # --- TAB 3: E-KATALOG PNBP ---
     with tab3:
-        st.subheader("KATALOG TARIF RESMI JASA DATA DAN INFORMASI (ROMAWI I)")
+        st.subheader("KATALOG TARIF RESMI JASA DATA DAN INFORMASI")
         raw_data_ia = {
             "Jenis Penerimaan Negara Bukan Pajak": [
                 "1. Information Cuaca untuk Penerbangan", "2. Informasi Cuaca untuk Pelayaran",
