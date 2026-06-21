@@ -74,7 +74,6 @@ def simpan_ke_google_sheets(nama_tab, data_list):
     try:
         creds = dapatkan_kredensial()
         client = gspread.authorize(creds)
-        # 🔥 DIUBAH: Menggunakan ID Spreadsheet milikmu langsung agar anti-eror
         sheet = client.open_by_key("1qdrgfAhB_NKPSIxP9p5cY0LF1RmXRzqG-aWUNEx7r94").worksheet(nama_tab)
         sheet.append_row(data_list)
         return True
@@ -86,18 +85,16 @@ def ambil_data_google_sheets(nama_tab):
     try:
         creds = dapatkan_kredensial()
         client = gspread.authorize(creds)
-        # 🔥 DIUBAH: Menggunakan ID Spreadsheet milikmu langsung agar anti-eror
         sheet = client.open_by_key("1qdrgfAhB_NKPSIxP9p5cY0LF1RmXRzqG-aWUNEx7r94").worksheet(nama_tab)
         data = sheet.get_all_values()
         if len(data) > 1:
-            df = pd.DataFrame(data[1:], columns=data[0])
-            return df
+            return pd.DataFrame(data[1:], columns=data[0])
         elif len(data) == 1:
             return pd.DataFrame(columns=data[0])
         else:
             return pd.DataFrame()
     except Exception as e:
-        st.error(f"Gagal mengambil data: {e}")
+        st.error(f"Gagal mengambil data database: {e}")
         return pd.DataFrame()
 
 def upload_ke_google_drive(file_buffer, nama_file, mime_type):
@@ -105,8 +102,8 @@ def upload_ke_google_drive(file_buffer, nama_file, mime_type):
         creds = dapatkan_kredensial()
         service = build('drive', 'v3', credentials=creds)
         
-        # ⚠️ JANGAN LUPA: Masukkan ID Folder Google Drive stasiunmu di sini nanti ⚠️
-        FOLDER_ID = "1234567890abcdefghijklmnopqrstuvwxyz" 
+        # ID Folder Google Drive asli milik stasiun bima
+        FOLDER_ID = "1FtwvPLbWcTPpyIOxMRBW88oLHri_rZVH" 
 
         file_metadata = {
             'name': nama_file,
@@ -118,7 +115,7 @@ def upload_ke_google_drive(file_buffer, nama_file, mime_type):
         
         return file.get('webViewLink')
     except Exception as e:
-        st.error(f"Gagal mengunggah arsip berkas ke Cloud Storage: {e}")
+        st.error(f"Gagal mengunggah berkas ke Cloud Storage: {e}")
         return "Gagal Upload"
 
 # ==========================================
@@ -238,7 +235,7 @@ if menu == "FORMULIR KUNJUNGAN PUBLIK":
                 else:
                     tujuan_final = alasan_lainnya if tujuan == "Lain-lain" else tujuan
                     waktu_sekarang = datetime.now(timezone(timedelta(hours=8))).strftime("%Y-%m-%d %H:%M:%S")
-                    row_tamu = [waktu_sekarang, nama, identitas, no_hp, instansi, tujuan_final, "Pelayanan Terdaftar"]
+                    row_tamu = [waktu_sekarang, nama, identitas, no_hp, instansi, tujuan_final, "Kunjungan Umum Terdaftar"]
                     
                     if simpan_ke_google_sheets("Tamu", row_tamu):
                         st.session_state.tamu_terdaftar = True
@@ -250,13 +247,11 @@ if menu == "FORMULIR KUNJUNGAN PUBLIK":
             st.balloons()
             st.divider()
             st.subheader("SURVEI INDEKS KEPUASAN MASYARAKAT (IKM)")
-            st.info("Mohon perkenan waktu Anda sejenak untuk langsung mengisi evaluasi layanan di bawah ini guna peningkatan kualitas pelayanan kami.")
             
             with st.form("form_ikm_otomatis"):
                 st.markdown("#### **FORMULIR EVALUASI KUALITAS LAYANAN**")
                 st.markdown(f"Nama Responden: **{st.session_state.nama_pendaftar}**")
                 st.write("")
-                st.markdown("**PETUNJUK:** Berikan penilaian skala 1 (Sangat Buruk) hingga 5 (Sangat Baik) pada pernyataan berikut.")
                 
                 layanan = st.slider("1. Kemudahan prosedur dan persyaratan layanan di stasiun kami?", 1, 5, 5)
                 sikap = st.slider("2. Keramahan dan kecepatan petugas pelayanan?", 1, 5, 5)
@@ -275,9 +270,8 @@ if menu == "FORMULIR KUNJUNGAN PUBLIK":
                         st.rerun()
 
         else:
-            st.success("PROSES SELESAI: Terima kasih atas partisipasi Anda dalam mengisi Buku Tamu dan Survei IKM.")
-            st.write("")
-            if st.button("KEMBALI KE HALAMAN UTAMA (REGISTRASI TAMU BARU)", type="primary", use_container_width=True):
+            st.success("PROSES SELESAI: Terima kasih atas partisipasi Anda.")
+            if st.button("KEMBALI KE REGISTRASI TAMU BARU", type="primary", use_container_width=True):
                 st.session_state.tamu_terdaftar = False
                 st.session_state.nama_pendaftar = ""
                 st.session_state.ikm_selesai = False
@@ -286,8 +280,7 @@ if menu == "FORMULIR KUNJUNGAN PUBLIK":
     # --- TAB 2: PERMOHONAN DATA KHUSUS ---
     with tab2:
         st.subheader("FORMULIR PERMOHONAN DATA BEBAS TARIF (RP 0,00)")
-        st.info("Sesuai aturan PP No. 47 Tahun 2018, layanan ini dikhususkan untuk keperluan Pendidikan, Penelitian non-komersial, dan Instansi Pemerintah.")
-        st.warning("⚠️ PENTING: Pemohon WAJIB mengunggah berkas identitas resmi untuk validasi tertib administrasi arsip negara.")
+        st.info("Layanan khusus Pendidikan, Penelitian non-komersial, dan Instansi Pemerintah.")
         
         with st.form("form_permohonan_bebas_biaya"):
             st.markdown("#### **I. DATA LAYANAN BEBAS BIAYA**")
@@ -301,7 +294,7 @@ if menu == "FORMULIR KUNJUNGAN PUBLIK":
                 jenis_data_khusus = st.text_input("JENIS DATA YANG DIMINTA:", placeholder="Contoh: Data Curah Hujan 2015-2025")
             
             st.write("")
-            st.markdown("#### **II. UNGGAH BERKAS BUKTI PENDUKUNG (ARSIP CLOUD STASIUN)**")
+            st.markdown("#### **II. UNGGAH BERKAS BUKTI PENDUKUNG**")
             col_f1, col_f2 = st.columns(2)
             
             with col_f1:
@@ -314,7 +307,7 @@ if menu == "FORMULIR KUNJUNGAN PUBLIK":
             
             if submit_khusus:
                 if not nama_khusus or not instansi_khusus or not file_ktp:
-                    st.error("❌ PROSES GAGAL: Kolom Nama, Instansi, dan Berkas Foto KTP wajib diisi serta diunggah untuk kelengkapan arsip!")
+                    st.error("❌ PROSES GAGAL: Kolom Nama, Instansi, dan Berkas Foto KTP wajib diisi!")
                 else:
                     with st.spinner("🔄 Sedang mengamankan dokumen arsip ke Google Drive Cloud..."):
                         ext_ktp = file_ktp.name.split('.')[-1]
@@ -332,15 +325,12 @@ if menu == "FORMULIR KUNJUNGAN PUBLIK":
                         row_khusus = [waktu_khusus, nama_khusus, "Pemohon Khusus (Rp 0,00)", kontak_khusus, instansi_khusus, jenis_data_khusus, teks_database]
                         
                         if simpan_ke_google_sheets("Tamu", row_khusus):
-                            st.success(f"✔️ BERHASIL: Dokumen digital Anda telah sukses diarsip secara aman ke Cloud Storage stasiun!")
+                            st.success(f"✔️ BERHASIL: Dokumen digital Anda telah sukses disimpan ke Cloud Storage stasiun!")
                             st.balloons()
 
     # --- TAB 3: E-KATALOG PNBP ---
     with tab3:
         st.subheader("KATALOG TARIF RESMI JASA DATA DAN INFORMASI (ROMAWI I)")
-        st.info("Dasar Hukum: Peraturan Pemerintah Nomor 47 Tahun 2018 tentang Jenis dan Tarif atas Penerimaan Negara Bukan Pajak yang Berlaku pada BMKG.")
-        
-        st.markdown("### **A. Informasi Khusus Meteorologi, Klimatologi, dan Geofisika**")
         raw_data_ia = {
             "Jenis Penerimaan Negara Bukan Pajak": [
                 "1. Informasi Cuaca untuk Penerbangan", "2. Informasi Cuaca untuk Pelayaran",
@@ -363,21 +353,16 @@ if menu == "FORMULIR KUNJUNGAN PUBLIK":
 # ==========================================
 elif menu == "SURVEI KEPUASAN (IKM)":
     st.title("SURVEI INDEKS KEPUASAN MASYARAKAT (IKM)")
-    st.write("Penilaian Anda sangat berharga untuk meningkatkan kualitas pelayanan publik di Stasiun Meteorologi Bima.")
     st.divider()
     
     with st.form("form_survei_mandiri"):
         st.markdown("#### **FORMULIR EVALUASI KUALITAS LAYANAN**")
         nama_survei = st.text_input("NAMA LENGKAP (OPSIONAL):", placeholder="Boleh Dikosongkan (Anonim)")
         
-        st.write("")
-        st.markdown("**PETUNJUK:** Berikan penilaian skala 1 (Sangat Buruk) hingga 5 (Sangat Baik) pada pernyataan berikut.")
-        
         layanan = st.slider("1. Kemudahan prosedur dan persyaratan layanan di stasiun kami?", 1, 5, 5)
         sikap = st.slider("2. Keramahan dan kecepatan petugas pelayanan?", 1, 5, 5)
         fasilitas = st.slider("3. Pemanfaatan inovasi E-Buku Tamu & E-Katalog ini?", 1, 5, 5)
         
-        st.write("")
         saran = st.text_area("KRITIK DAN SARAN KONSTRUKTIF:")
         submit_survei = st.form_submit_button("KIRIM PENILAIAN", type="primary", use_container_width=True)
         
@@ -387,14 +372,13 @@ elif menu == "SURVEI KEPUASAN (IKM)":
             row_survei = [waktu_survei, identitas_survei, layanan, sikap, fasilitas, saran]
             
             if simpan_ke_google_sheets("Survei", row_survei):
-                st.success("TERIMA KASIH: Penilaian Anda telah kami terima untuk bahan evaluasi pelayanan.")
+                st.success("TERIMA KASIH: Penilaian Anda telah kami terima.")
 
 # ==========================================
 # 8. HALAMAN 3: PORTAL ADMIN & REKAP LAPORAN
 # ==========================================
 elif menu == "🔒 PORTAL ADMIN & REKAP LAPORAN":
     st.title("SISTEM MANAJEMEN DATABASE STASIUN")
-    st.write("Area khusus petugas dan pimpinan untuk audit dan rekapitulasi data.")
     st.divider()
 
     if not st.session_state.admin_logged_in:
@@ -420,7 +404,7 @@ elif menu == "🔒 PORTAL ADMIN & REKAP LAPORAN":
         
         st.write("")
         
-        tab_db_tamu, tab_db_ikm, tab_arsip = st.tabs(["DATABASE TAMU & LAYANAN", "DATABASE SURVEI IKM", "AUDIT ARSIP DOKUMEN CLOUD (GOOGLE DRIVE)"])
+        tab_db_tamu, tab_db_ikm, tab_arsip = st.tabs(["DATABASE TAMU & LAYANAN", "DATABASE SURVEI IKM", "AUDIT ARSIP DOKUMEN CLOUD"])
         
         with tab_db_tamu:
             st.subheader("Tabel Rekapitulasi Tamu (Google Sheets Cloud)")
@@ -431,7 +415,7 @@ elif menu == "🔒 PORTAL ADMIN & REKAP LAPORAN":
                     csv_tamu = df_tamu.to_csv(index=False).encode('utf-8')
                     st.download_button("📥 Unduh Laporan (.csv)", data=csv_tamu, file_name=f"Laporan_Tamu_Stamet_Bima_{datetime.now().strftime('%Y%m%d')}.csv", mime="text/csv", type="primary")
                 else:
-                    st.info("Database Tamu masih kosong atau gagal ditarik.")
+                    st.info("Database Tamu masih kosong.")
 
         with tab_db_ikm:
             st.subheader("Tabel Rekapitulasi Survei IKM (Google Sheets Cloud)")
@@ -442,61 +426,60 @@ elif menu == "🔒 PORTAL ADMIN & REKAP LAPORAN":
                     csv_ikm = df_ikm.to_csv(index=False).encode('utf-8')
                     st.download_button("📥 Unduh Laporan IKM (.csv)", data=csv_ikm, file_name=f"Laporan_IKM_Stamet_Bima_{datetime.now().strftime('%Y%m%d')}.csv", mime="text/csv", type="primary")
                 else:
-                    st.info("Database Survei IKM masih kosong atau gagal ditarik.")
+                    st.info("Database Survei IKM masih kosong.")
                     
         with tab_arsip:
             st.subheader("Galeri Audit Berkas Pemohon Bebas Biaya (Cloud Storage)")
-            st.write("Daftar di bawah ini secara otomatis menyandingkan data Sheets dengan arsip dokumen fisik di Google Drive.")
+            st.write("Sistem otomatis menyandingkan log data dengan berkas digital fisik di Google Drive.")
             st.write("")
             
             df_tamu = ambil_data_google_sheets("Tamu")
             
             if not df_tamu.empty:
-                if len(df_tamu.columns) >= 7:
-                    kolom_target = df_tamu.columns[6]
-                    df_khusus = df_tamu[df_tamu[kolom_target].astype(str).str.contains("KTP:", na=False)]
-                    
-                    if not df_khusus.empty:
-                        for index, row in df_khusus.iterrows():
-                            with st.container(border=True):
-                                col_info, col_links = st.columns([2, 1])
-                                
-                                teks_detail = str(row[kolom_target])
-                                link_ktp = ""
-                                link_surat = ""
-                                
-                                try:
-                                    if "|" in teks_detail:
-                                        parts = teks_detail.split("|")
-                                        link_ktp = parts[0].split("KTP:")[1].strip()
-                                        link_surat = parts[1].split("Surat:")[1].strip()
-                                except Exception:
-                                    pass
-                                
-                                with col_info:
-                                    st.markdown(f"### 👤 {row[df_tamu.columns[1]]}")
-                                    st.write(f"**⏰ Waktu Kunjungan:** {row[df_tamu.columns[0]]}")
-                                    st.write(f"**🏢 Asal Instansi:** {row[df_tamu.columns[4]]}")
-                                    st.write(f"**📱 Kontak WA:** {row[df_tamu.columns[3]]}")
-                                    st.write(f"**📂 Layanan Diminta:** {row[df_tamu.columns[5]]}")
-                                
-                                with col_links:
-                                    st.markdown("**📂 Akses Berkas Google Drive:**")
+                kolom_keperluan = df_tamu.columns[6]
+                kolom_nama = df_tamu.columns[1]
+                kolom_waktu = df_tamu.columns[0]
+                kolom_instansi = df_tamu.columns[4]
+                kolom_kontak = df_tamu.columns[3]
+                kolom_layanan = df_tamu.columns[5]
+                
+                df_khusus = df_tamu[df_tamu[kolom_keperluan].astype(str).str.contains("KTP", na=False)]
+                
+                if not df_khusus.empty:
+                    for index, row in df_khusus.iterrows():
+                        with st.container(border=True):
+                            col_info, col_links = st.columns([2, 1])
+                            teks_detail = str(row[kolom_keperluan])
+                            
+                            with col_info:
+                                st.markdown(f"### 👤 {row[kolom_nama]}")
+                                st.write(f"**⏰ Waktu Kunjungan:** {row[kolom_waktu]}")
+                                st.write(f"**🏢 Asal Instansi:** {row[kolom_instansi]}")
+                                st.write(f"**📱 Kontak WA:** {row[kolom_kontak]}")
+                                st.write(f"**📂 Layanan Diminta:** {row[kolom_layanan]}")
+                            
+                            with col_links:
+                                st.markdown("**📂 Akses Berkas Google Drive:**")
+                                if "http" in teks_detail:
+                                    link_ktp = ""
+                                    link_surat = ""
+                                    try:
+                                        if "|" in teks_detail:
+                                            parts = teks_detail.split("|")
+                                            link_ktp = parts[0].split("KTP:")[1].strip()
+                                            link_surat = parts[1].split("Surat:")[1].strip()
+                                    except:
+                                        pass
+                                    
                                     if "http" in link_ktp:
                                         st.link_button("👁️ Lihat Identitas / KTP", link_ktp, use_container_width=True, type="primary")
-                                    else:
-                                        st.error("⚠️ File KTP menggunakan sistem lama lokal.")
-                                    
-                                    st.write("")
                                     if "http" in link_surat:
+                                        st.write("")
                                         st.link_button("👁️ Lihat Surat Pengantar", link_surat, use_container_width=True)
-                                    elif link_surat == "Tidak Ada Surat":
-                                        st.info("❌ Pemohon tidak melampirkan Surat.")
-                                    else:
-                                        st.error("⚠️ File Surat menggunakan sistem lama lokal.")
-                    else:
-                        st.info("Belum ada data pemohon khusus yang terekam.")
+                                else:
+                                    st.warning("⚠️ Data Pengujian Lama")
+                                    st.caption(f"Nama berkas terdaftar: {teks_detail}")
                 else:
-                    st.warning("Struktur Google Sheets belum sesuai. Pastikan ada minimal 7 kolom data.")
+                    st.info("Belum ada data pemohon khusus baru yang terekam.")
             else:
                 st.info("Database Tamu masih kosong.")
