@@ -27,10 +27,11 @@ st.markdown("""
     [data-testid="stToolbar"] { display: none !important; }
     [data-testid="stHeader"] { background-color: transparent !important; box-shadow: none !important; }
     
-    /* 🔥 FIX SUPER AGRESIF: Melenyapkan Total Tulisan "Hosted with Streamlit" di Pojok Kanan Bawah 🔥 */
+    /* Sembunyikan Elemen Footer Bawaan semaksimal mungkin */
     footer { display: none !important; visibility: hidden !important; }
     [data-testid="stEmbedHoverBadge"] { display: none !important; visibility: hidden !important; }
     div[class*="viewerBadge"] { display: none !important; visibility: hidden !important; }
+    div[class*="styles_viewerBadge"] { display: none !important; visibility: hidden !important; }
     
     /* Paksa Sembunyikan Tombol "Manage app" di Pojok Kanan Bawah */
     [data-testid="manage-app-button"],
@@ -71,7 +72,7 @@ st.markdown("""
 """, unsafe_allow_html=True)
 
 # ==========================================
-# 2.b TOMBOL WHATSAPP MELAYANG (CUSTOMER SERVICE)
+# 2.b TOMBOL WHATSAPP MELAYANG (POSISI DI ATAS BADGE)
 # ==========================================
 NOMOR_WA_CS = "628113908535" 
 PESAN_OTOMATIS = "Halo%20Admin%20PTSP%20Stamet%20Bima,%20saya%20ingin%20bertanya%20mengenai%20layanan%20data..."
@@ -82,7 +83,7 @@ st.markdown(f"""
         position: fixed;
         width: 60px;
         height: 60px;
-        bottom: 30px;
+        bottom: 95px; /* 💡 Dinaikkan ke 95px agar lolos dari blokade tulisan Hosted by Streamlit */
         right: 30px;
         background-color: #25d366;
         color: white;
@@ -321,7 +322,7 @@ if menu == "FORMULIR KUNJUNGAN PUBLIK":
                 st.markdown(f"Nama Responden: **{st.session_state.nama_pendaftar}**")
                 st.write("")
                 
-                layanan = st.slider("1. Kemudahan prosedur and persyaratan layanan di stasiun kami?", 1, 5, 5)
+                layanan = st.slider("1. Kemudahan prosedur dan persyaratan layanan di stasiun kami?", 1, 5, 5)
                 sikap = st.slider("2. Keramahan dan kecepatan petugas pelayanan?", 1, 5, 5)
                 fasilitas = st.slider("3. Pemanfaatan inovasi E-Buku Tamu & E-Katalog ini?", 1, 5, 5)
                 
