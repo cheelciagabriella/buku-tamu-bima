@@ -60,6 +60,47 @@ st.markdown("""
 """, unsafe_allow_html=True)
 
 # ==========================================
+# 2.b TOMBOL WHATSAPP MELAYANG (CUSTOMER SERVICE)
+# ==========================================
+# ⚠️ SILAKAN GANTI NOMOR DI BAWAH INI DENGAN NOMOR CS STASIUN (Wajib awali dengan kode negara 62)
+NOMOR_WA_CS = "628123456789" 
+PESAN_OTOMATIS = "Halo%20Admin%20PTSP%20Stamet%20Bima,%20saya%20ingin%20bertanya%20mengenai%20layanan%20data..."
+
+st.markdown(f"""
+    <style>
+    .float-wa {{
+        position: fixed;
+        width: 60px;
+        height: 60px;
+        bottom: 30px;
+        right: 30px;
+        background-color: #25d366;
+        color: white;
+        border-radius: 50px;
+        text-align: center;
+        box-shadow: 2px 5px 15px rgba(0,0,0,0.3);
+        z-index: 99999;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        text-decoration: none;
+        transition: all 0.3s ease;
+    }}
+    .float-wa:hover {{
+        transform: scale(1.1);
+        background-color: #20ba5a;
+    }}
+    .float-wa img {{
+        width: 35px;
+        height: 35px;
+    }}
+    </style>
+    <a href="https://wa.me/{NOMOR_WA_CS}?text={PESAN_OTOMATIS}" class="float-wa" target="_blank" rel="noopener noreferrer" title="Hubungi CS via WhatsApp">
+        <img src="https://upload.wikimedia.org/wikipedia/commons/6/6b/WhatsApp.svg" alt="WhatsApp CS">
+    </a>
+""", unsafe_allow_html=True)
+
+# ==========================================
 # 3. FUNGSI INTEGRASI GOOGLE CLOUD (SHEETS & DRIVE)
 # ==========================================
 def dapatkan_kredensial():
@@ -101,8 +142,6 @@ def upload_ke_google_drive(file_buffer, nama_file, mime_type):
     try:
         creds = dapatkan_kredensial()
         service = build('drive', 'v3', credentials=creds)
-        
-        # ID Folder Google Drive asli milik stasiun bima
         FOLDER_ID = "1FtwvPLbWcTPpyIOxMRBW88oLHri_rZVH" 
 
         file_metadata = {
@@ -117,6 +156,20 @@ def upload_ke_google_drive(file_buffer, nama_file, mime_type):
     except Exception as e:
         st.error(f"Gagal mengunggah berkas ke Cloud Storage: {e}")
         return "Gagal Upload"
+
+def update_status_sheets(nama_pemohon, status_baru):
+    try:
+        creds = dapatkan_kredensial()
+        client = gspread.authorize(creds)
+        sheet = client.open_by_key("1qdrgfAhB_NKPSIxP9p5cY0LF1RmXRzqG-aWUNEx7r94").worksheet("Tamu")
+        cell = sheet.find(nama_pemohon)
+        if cell:
+            sheet.update_cell(cell.row, 8, status_baru)
+            return True
+        return False
+    except Exception as e:
+        st.error(f"Gagal memperbarui status di sistem Cloud: {e}")
+        return False
 
 # ==========================================
 # 4. INISIALISASI KONTROL ALUR (SESSION STATE)
@@ -191,7 +244,12 @@ if menu == "FORMULIR KUNJUNGAN PUBLIK":
     
     st.divider()
     
-    tab1, tab2, tab3 = st.tabs(["E-BUKU TAMU DIGITAL", "PERMOHONAN DATA KHUSUS (RP 0,00)", "E-KATALOG PNBP"])
+    tab1, tab2, tab3, tab4 = st.tabs([
+        "E-BUKU TAMU DIGITAL", 
+        "PERMOHONAN DATA BEBAS TARIF", 
+        "E-KATALOG PNBP",
+        "🔍 LACAK STATUS DATA"
+    ])
     
     # --- TAB 1: E-BUKU TAMU ---
     with tab1:
@@ -235,7 +293,7 @@ if menu == "FORMULIR KUNJUNGAN PUBLIK":
                 else:
                     tujuan_final = alasan_lainnya if tujuan == "Lain-lain" else tujuan
                     waktu_sekarang = datetime.now(timezone(timedelta(hours=8))).strftime("%Y-%m-%d %H:%M:%S")
-                    row_tamu = [waktu_sekarang, nama, identitas, no_hp, instansi, tujuan_final, "Kunjungan Umum Terdaftar"]
+                    row_tamu = [waktu_sekarang, nama, identitas, no_hp, instansi, tujuan_final, "Kunjungan Umum Terdaftar", "-"]
                     
                     if simpan_ke_google_sheets("Tamu", row_tamu):
                         st.session_state.tamu_terdaftar = True
@@ -277,20 +335,38 @@ if menu == "FORMULIR KUNJUNGAN PUBLIK":
                 st.session_state.ikm_selesai = False
                 st.rerun()
 
-    # --- TAB 2: PERMOHONAN DATA KHUSUS ---
+    # --- TAB 2: PERMOHONAN DATA BEBAS TARIF ---
     with tab2:
-        st.subheader("FORMULIR PERMOHONAN DATA BEBAS TARIF (RP 0,00)")
-        st.info("Layanan khusus Pendidikan, Penelitian non-komersial, dan Instansi Pemerintah.")
+        st.subheader("FORMULIR PERMOHONAN DATA BEBAS TARIF")
+        
+        with st.container(border=True):
+            st.markdown("""
+            <div style='background-color: #f0fdf4; padding: 15px; border-radius: 8px; border-left: 5px solid #16a34a;'>
+                <h4 style='color: #166534; margin-top: 0px;'>📋 PENDAHULUAN & PERSYARATAN LAYANAN</h4>
+                <p style='font-size: 14px; line-height: 1.5; color: #1e293b;'>
+                    Berdasarkan Peraturan Pemerintah yang berlaku, Stasiun Meteorologi Kelas II Sultan Muhammad Salahuddin Bima menyediakan layanan informasi Meteorologi secara <b>Bebas Tarif (Gratis)</b> yang ditujukan khusus demi mendukung keperluan <b>Pendidikan, Penelitian Non-Komersial, serta Instansi Pemerintah</b>.
+                </p>
+                <h5 style='color: #166534; margin-bottom: 5px;'>⚠️ Dokumen Wajib yang Harus Dilampirkan:</h5>
+                <ol style='font-size: 14px; color: #1e293b; margin-top: 0px;'>
+                    <li><b>Kartu Identitas Sah:</b> Foto KTP atau Kartu Tanda Mahasiswa (KTM) yang masih berlaku resmi.</li>
+                    <li><b>Surat Pengantar Resmi:</b> Surat permohonan dari Dekan/Sekolah/Kampus asli (untuk keperluan pendidikan) atau Surat Dinas Resmi bertanda tangan pimpinan (untuk Instansi Pemerintah).</li>
+                </ol>
+                <p style='font-size: 13px; color: #64748b; font-style: italic; margin-bottom: 0px;'>
+                    *Catatan: Seluruh dokumen akan diperiksa secara berkala oleh tim audit internal stasiun sebelum berkas data dirilis.
+                </p>
+            </div>
+            """, unsafe_allow_html=True)
+        st.write("")
         
         with st.form("form_permohonan_bebas_biaya"):
-            st.markdown("#### **I. DATA LAYANAN BEBAS BIAYA**")
+            st.markdown("#### **I. DATA UTAMA PEMOHON**")
             col_k1, col_k2 = st.columns(2)
             
             with col_k1:
                 nama_khusus = st.text_input("NAMA LENGKAP PEMOHON:", placeholder="Masukkan nama lengkap")
                 instansi_khusus = st.text_input("ASAL KAMPUS / SEKOLAH / INSTANSI:", placeholder="Contoh: Universitas Mataram")
             with col_k2:
-                kontak_khusus = st.text_input("NOMOR WHATSAPP AKTIF:", placeholder="Contoh: 081234xxxxxx")
+                kontak_khusus = st.text_input("NOMOR WHATSAPP AKTIF (Untuk Pelacakan Status):", placeholder="Contoh: 081234567xxx")
                 jenis_data_khusus = st.text_input("JENIS DATA YANG DIMINTA:", placeholder="Contoh: Data Curah Hujan 2015-2025")
             
             st.write("")
@@ -300,14 +376,14 @@ if menu == "FORMULIR KUNJUNGAN PUBLIK":
             with col_f1:
                 file_ktp = st.file_uploader("1. Unggah Foto KTP / Kartu Mahasiswa (Format: JPG / PNG)", type=["jpg", "jpeg", "png"])
             with col_f2:
-                file_surat = st.file_uploader("2. Unggah Surat Pengantar (Format: PDF / JPG / PNG)", type=["pdf", "jpg", "jpeg", "png"])
+                file_surat = st.file_uploader("2. Unggah Surat Pengantar Resmi (Format: PDF / JPG / PNG)", type=["pdf", "jpg", "jpeg", "png"])
             
             st.write("")
-            submit_khusus = st.form_submit_button("KIRIM PERMOHONAN DATA KHUSUS", type="primary", use_container_width=True)
+            submit_khusus = st.form_submit_button("KIRIM PERMOHONAN DATA BEBAS TARIF", type="primary", use_container_width=True)
             
             if submit_khusus:
-                if not nama_khusus or not instansi_khusus or not file_ktp:
-                    st.error("❌ PROSES GAGAL: Kolom Nama, Instansi, dan Berkas Foto KTP wajib diisi!")
+                if not nama_khusus or not instansi_khusus or not kontak_khusus or not file_ktp:
+                    st.error("❌ PROSES GAGAL: Kolom Nama, Instansi, Kontak WA, dan Berkas Foto KTP wajib diisi!")
                 else:
                     with st.spinner("🔄 Sedang mengamankan dokumen arsip ke Google Drive Cloud..."):
                         ext_ktp = file_ktp.name.split('.')[-1]
@@ -322,10 +398,11 @@ if menu == "FORMULIR KUNJUNGAN PUBLIK":
                         
                         waktu_khusus = datetime.now(timezone(timedelta(hours=8))).strftime("%Y-%m-%d %H:%M:%S")
                         teks_database = f"Link KTP: {link_ktp} | Link Surat: {link_surat}"
-                        row_khusus = [waktu_khusus, nama_khusus, "Pemohon Khusus (Rp 0,00)", kontak_khusus, instansi_khusus, jenis_data_khusus, teks_database]
+                        
+                        row_khusus = [waktu_khusus, nama_khusus, "Pemohon Khusus (Bebas Tarif)", kontak_khusus, instansi_khusus, jenis_data_khusus, teks_database, "Sedang Diproses"]
                         
                         if simpan_ke_google_sheets("Tamu", row_khusus):
-                            st.success(f"✔️ BERHASIL: Dokumen digital Anda telah sukses disimpan ke Cloud Storage stasiun!")
+                            st.success(f"✔️ BERHASIL: Dokumen digital Anda telah sukses disimpan ke Cloud Storage stasiun! Silakan lacak progresnya di Tab 'LACAK STATUS DATA' menggunakan nomor WhatsApp Anda.")
                             st.balloons()
 
     # --- TAB 3: E-KATALOG PNBP ---
@@ -347,6 +424,50 @@ if menu == "FORMULIR KUNJUNGAN PUBLIK":
             ]
         }
         st.dataframe(pd.DataFrame(raw_data_ia), use_container_width=True, hide_index=True)
+
+    # --- TAB 4: FITUR TRACKING / LACAK DATA UNTUK KONSUMEN ---
+    with tab4:
+        st.subheader("🔍 PORTAL PELACAKAN STATUS PERMOHONAN DATA")
+        st.caption("Transparansi Pelayanan Publik: Lacak status pemrosesan dokumen data khusus Anda secara real-time.")
+        
+        no_hp_cari = st.text_input("Masukkan Nomor WhatsApp yang Anda Daftarkan:", placeholder="Contoh: 081234567xxx")
+        
+        if st.button("CEK PROGRESS SEKARANG", type="primary", use_container_width=True):
+            if not no_hp_cari:
+                st.warning("Silakan isi nomor WhatsApp Anda terlebih dahulu.")
+            else:
+                with st.spinner("Mencari data di database stasiun..."):
+                    df_tamu = ambil_data_google_sheets("Tamu")
+                    if not df_tamu.empty:
+                        kolom_kontak = df_tamu.columns[3]
+                        df_user = df_tamu[df_tamu[kolom_kontak].astype(str) == str(no_hp_cari)]
+                        
+                        if not df_user.empty:
+                            data_terakhir = df_user.iloc[-1]
+                            nama_user = data_terakhir[df_tamu.columns[1]]
+                            jenis_data = data_terakhir[df_tamu.columns[5]]
+                            waktu_minta = data_terakhir[df_tamu.columns[0]]
+                            
+                            status_proses = "Sedang Diproses"
+                            if len(data_terakhir) >= 8:
+                                status_proses = data_terakhir.iloc[7] if data_terakhir.iloc[7] else "Sedang Diproses"
+                            
+                            st.write("")
+                            st.markdown(f"### 📊 Resume Pengajuan: **{nama_user}**")
+                            st.markdown(f"**📂 Dokumen Data:** {jenis_data}  \n**⏰ Waktu Registrasi:** {waktu_minta}")
+                            st.divider()
+                            
+                            st.markdown("#### **Progress Alur Kerja Layanan:**")
+                            if status_proses == "Sedang Diproses":
+                                st.warning("🔄 **STATUS: SEDANG DIPROSES**  \nBerkas fisik/dokumen pendukung Anda sukses diverifikasi. Saat ini tim teknis data Stamet Bima sedang menyiapkan arsip data meteorologi yang Anda butuhkan.")
+                            elif status_proses == "Data Siap Diambil / Dikirim":
+                                st.success("🎉 **STATUS: DATA SELESAI / SIAP DIAMBIL**  \nKabar baik! Permintaan data Anda telah selesai dikerjakan. Silakan cek berkas masuk di email/WhatsApp Anda atau datang langsung ke ruang PTSP Stasiun.")
+                            elif status_proses == "Ditolak / Berkas Tidak Lengkap":
+                                st.error("❌ **STATUS: PERMOHONAN DITOLAK**  \nMohon maaf, permohonan Anda ditolak karena berkas bukti pendukung (KTP/Surat Pengantar) buram, tidak jelas, atau tidak sesuai peruntukan Rp 0,-. Silakan lakukan registrasi ulang.")
+                        else:
+                            st.error("❌ Data Tidak Ditemukan. Pastikan nomor WhatsApp yang Anda masukkan sama persis dengan yang diisi pada formulir.")
+                    else:
+                        st.info("Database kosong.")
 
 # ==========================================
 # 7. HALAMAN 2: SURVEI KEPUASAN (IKM)
@@ -457,6 +578,9 @@ elif menu == "🔒 PORTAL ADMIN & REKAP LAPORAN":
                                 st.write(f"**🏢 Asal Instansi:** {row[kolom_instansi]}")
                                 st.write(f"**📱 Kontak WA:** {row[kolom_kontak]}")
                                 st.write(f"**📂 Layanan Diminta:** {row[kolom_layanan]}")
+                                
+                                current_st = row[7] if len(row) >= 8 else "Sedang Diproses"
+                                st.info(f"🚩 **Status Saat Ini:** {current_st}")
                             
                             with col_links:
                                 st.markdown("**📂 Akses Berkas Google Drive:**")
@@ -479,6 +603,25 @@ elif menu == "🔒 PORTAL ADMIN & REKAP LAPORAN":
                                 else:
                                     st.warning("⚠️ Data Pengujian Lama")
                                     st.caption(f"Nama berkas terdaftar: {teks_detail}")
+                    
+                    st.divider()
+                    st.markdown("### ⚙️ PANEL UPDATE STATUS PROGRESS DATA KONSUMEN")
+                    st.caption("Ubah status di bawah ini agar pemohon dapat melihat progress pencarian datanya secara langsung.")
+                    
+                    list_nama_khusus = df_khusus[kolom_nama].tolist()
+                    if list_nama_khusus:
+                        pilih_nama = st.selectbox("Pilih Nama Pemohon Khusus:", list_nama_khusus)
+                        pilih_status = st.selectbox("Set Status Progres Terbaru:", [
+                            "Sedang Diproses", 
+                            "Data Siap Diambil / Dikirim", 
+                            "Ditolak / Berkas Tidak Lengkap"
+                        ])
+                        
+                        if st.button("SIMPAN PEMBARUAN STATUS", type="primary"):
+                            with st.spinner("Mengupdate status di database cloud..."):
+                                if update_status_sheets(pilih_nama, pilih_status):
+                                    st.success(f"Berhasil mengubah status {pilih_nama} menjadi: {pilih_status}!")
+                                    st.rerun()
                 else:
                     st.info("Belum ada data pemohon khusus baru yang terekam.")
             else:
