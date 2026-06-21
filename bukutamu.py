@@ -289,7 +289,7 @@ if menu == "FORMULIR KUNJUNGAN PUBLIK":
             st.caption("Mohon lengkapi data registrasi di bawah ini untuk kepentingan administrasi pelayanan publik.")
             
             with st.container(border=True):
-                st.markdown("#### **I. IDENTITAS PEMOHON**")
+                st.markdown("#### **I. IDENTITAS PENGUNJUNG**")
                 col1, col2 = st.columns(2)
                 with col1:
                     nama = st.text_input("NAMA LENGKAP (SESUAI KTP/IDENTITAS RESMI)", placeholder="Contoh: Nama Beserta Gelar")
