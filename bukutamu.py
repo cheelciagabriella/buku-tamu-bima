@@ -40,8 +40,6 @@ st.markdown("""
         visibility: hidden !important;
     }
 
-    /* KODE PENGUNCI SIDEBAR DIHAPUS AGAR BISA DICLOSE DI HP */
-
     [data-testid="stAppViewContainer"] { background: linear-gradient(135deg, #e0f2fe 0%, #e8f5e9 100%) !important; }
     [data-testid="stSidebar"] { background-color: #002B49 !important; }
     [data-testid="stSidebar"] h1, [data-testid="stSidebar"] h2, [data-testid="stSidebar"] h3, 
@@ -75,9 +73,9 @@ st.markdown(f"""
     <style>
     .float-wa {{
         position: fixed;
-        width: 55px; /* Sedikit dikecilkan agar responsif di HP */
+        width: 55px; 
         height: 55px;
-        bottom: 25px; /* Dikembalikan ke posisi ideal sudut kanan bawah */
+        bottom: 25px; 
         right: 25px;
         background-color: #25d366;
         color: white;
@@ -183,8 +181,6 @@ if "tamu_terdaftar" not in st.session_state:
     st.session_state.tamu_terdaftar = False
 if "nama_pendaftar" not in st.session_state:
     st.session_state.nama_pendaftar = ""
-if "ikm_selesai" not in st.session_state:
-    st.session_state.ikm_selesai = False
 if "admin_logged_in" not in st.session_state:
     st.session_state.admin_logged_in = False
 
@@ -199,7 +195,6 @@ except:
 st.sidebar.title("NAVIGASI SISTEM")
 menu = st.sidebar.radio("PILIH MENU LAYANAN:", [
     "FORMULIR KUNJUNGAN PUBLIK", 
-    "SURVEI KEPUASAN (IKM)", 
     "🔒 PORTAL ADMIN & REKAP LAPORAN"
 ])
 st.sidebar.divider()
@@ -305,39 +300,13 @@ if menu == "FORMULIR KUNJUNGAN PUBLIK":
                         st.session_state.nama_pendaftar = nama
                         st.rerun()
 
-        elif st.session_state.tamu_terdaftar and not st.session_state.ikm_selesai:
+        elif st.session_state.tamu_terdaftar:
             st.success(f"DATA BERHASIL TERSIMPAN: Terima kasih Bapak/Ibu {st.session_state.nama_pendaftar}, data kunjungan Anda telah sah tercatat.")
             st.balloons()
-            st.divider()
-            st.subheader("SURVEI INDEKS KEPUASAN MASYARAKAT (IKM)")
-            
-            with st.form("form_ikm_otomatis"):
-                st.markdown("#### **FORMULIR EVALUASI KUALITAS LAYANAN**")
-                st.markdown(f"Nama Responden: **{st.session_state.nama_pendaftar}**")
-                st.write("")
-                
-                layanan = st.slider("1. Kemudahan prosedur dan persyaratan layanan di stasiun kami?", 1, 5, 5)
-                sikap = st.slider("2. Keramahan dan kecepatan petugas pelayanan?", 1, 5, 5)
-                fasilitas = st.slider("3. Pemanfaatan inovasi E-Buku Tamu & E-Katalog ini?", 1, 5, 5)
-                
-                st.write("")
-                saran = st.text_area("KRITIK DAN SARAN KONSTRUKTIF:")
-                submit_ikm_otomatis = st.form_submit_button("KIRIM PENILAIAN IKM", type="primary", use_container_width=True)
-                
-                if submit_ikm_otomatis:
-                    waktu_survei = datetime.now(timezone(timedelta(hours=8))).strftime("%Y-%m-%d %H:%M:%S")
-                    row_survei = [waktu_survei, st.session_state.nama_pendaftar, layanan, sikap, fasilitas, saran]
-                    
-                    if simpan_ke_google_sheets("Survei", row_survei):
-                        st.session_state.ikm_selesai = True
-                        st.rerun()
-
-        else:
-            st.success("PROSES SELESAI: Terima kasih atas partisipasi Anda.")
+            st.write("")
             if st.button("KEMBALI KE REGISTRASI TAMU BARU", type="primary", use_container_width=True):
                 st.session_state.tamu_terdaftar = False
                 st.session_state.nama_pendaftar = ""
-                st.session_state.ikm_selesai = False
                 st.rerun()
 
     # --- TAB 2: PERMOHONAN DATA BEBAS TARIF ---
@@ -475,33 +444,7 @@ if menu == "FORMULIR KUNJUNGAN PUBLIK":
                         st.info("Database kosong.")
 
 # ==========================================
-# 7. HALAMAN 2: SURVEI KEPUASAN (IKM)
-# ==========================================
-elif menu == "SURVEI KEPUASAN (IKM)":
-    st.title("SURVEI INDEKS KEPUASAN MASYARAKAT (IKM)")
-    st.divider()
-    
-    with st.form("form_survei_mandiri"):
-        st.markdown("#### **FORMULIR EVALUASI KUALITAS LAYANAN**")
-        nama_survei = st.text_input("NAMA LENGKAP (OPSIONAL):", placeholder="Boleh Dikosongkan (Anonim)")
-        
-        layanan = st.slider("1. Kemudahan prosedur dan persyaratan layanan di stasiun kami?", 1, 5, 5)
-        sikap = st.slider("2. Keramahan dan kecepatan petugas pelayanan?", 1, 5, 5)
-        fasilitas = st.slider("3. Pemanfaatan inovasi E-Buku Tamu & E-Katalog ini?", 1, 5, 5)
-        
-        saran = st.text_area("KRITIK DAN SARAN KONSTRUKTIF:")
-        submit_survei = st.form_submit_button("KIRIM PENILAIAN", type="primary", use_container_width=True)
-        
-        if submit_survei:
-            waktu_survei = datetime.now(timezone(timedelta(hours=8))).strftime("%Y-%m-%d %H:%M:%S")
-            identitas_survei = nama_survei if nama_survei else "Anonim"
-            row_survei = [waktu_survei, identitas_survei, layanan, sikap, fasilitas, saran]
-            
-            if simpan_ke_google_sheets("Survei", row_survei):
-                st.success("TERIMA KASIH: Penilaian Anda telah kami terima.")
-
-# ==========================================
-# 8. HALAMAN 3: PORTAL ADMIN & REKAP LAPORAN
+# 7. PORTAL ADMIN & REKAP LAPORAN
 # ==========================================
 elif menu == "🔒 PORTAL ADMIN & REKAP LAPORAN":
     st.title("SISTEM MANAJEMEN DATABASE STASIUN")
@@ -530,7 +473,7 @@ elif menu == "🔒 PORTAL ADMIN & REKAP LAPORAN":
         
         st.write("")
         
-        tab_db_tamu, tab_db_ikm, tab_arsip = st.tabs(["DATABASE TAMU & LAYANAN", "DATABASE SURVEI IKM", "AUDIT ARSIP DOKUMEN CLOUD"])
+        tab_db_tamu, tab_arsip = st.tabs(["DATABASE TAMU & LAYANAN", "AUDIT ARSIP DOKUMEN CLOUD"])
         
         with tab_db_tamu:
             st.subheader("Tabel Rekapitulasi Tamu (Google Sheets Cloud)")
@@ -542,17 +485,6 @@ elif menu == "🔒 PORTAL ADMIN & REKAP LAPORAN":
                     st.download_button("📥 Unduh Laporan (.csv)", data=csv_tamu, file_name=f"Laporan_Tamu_Stamet_Bima_{datetime.now().strftime('%Y%m%d')}.csv", mime="text/csv", type="primary")
                 else:
                     st.info("Database Tamu masih kosong.")
-
-        with tab_db_ikm:
-            st.subheader("Tabel Rekapitulasi Survei IKM (Google Sheets Cloud)")
-            with st.spinner("Sedang menarik data IKM dari Cloud..."):
-                df_ikm = ambil_data_google_sheets("Survei")
-                if not df_ikm.empty:
-                    st.dataframe(df_ikm, use_container_width=True)
-                    csv_ikm = df_ikm.to_csv(index=False).encode('utf-8')
-                    st.download_button("📥 Unduh Laporan IKM (.csv)", data=csv_ikm, file_name=f"Laporan_IKM_Stamet_Bima_{datetime.now().strftime('%Y%m%d')}.csv", mime="text/csv", type="primary")
-                else:
-                    st.info("Database Survei IKM masih kosong.")
                     
         with tab_arsip:
             st.subheader("Galeri Audit Berkas Pemohon Bebas Biaya (Cloud Storage)")
