@@ -19,66 +19,30 @@ st.set_page_config(
 )
 
 # ==========================================
-# 2. KUSTOMISASI DESAIN WARNA (SIDEBAR NAVY & TENGAH PLATINUM GRAY)
+# 2. KUSTOMISASI CSS (ADAPTIVE LIGHT/DARK MODE)
 # ==========================================
 st.markdown("""
     <style>
+    /* Sembunyikan Header & Footer Bawaan Streamlit */
+    header { visibility: hidden !important; }
+    footer { visibility: hidden !important; }
     .stAppDeployButton { display: none !important; }
-    [data-testid="stToolbar"] { display: none !important; }
-    [data-testid="stHeader"] { background-color: transparent !important; box-shadow: none !important; }
+    [data-testid="stEmbedHoverBadge"], div[class*="viewerBadge"], div[class*="styles_viewerBadge"] { display: none !important; }
     
-    /* Sembunyikan Elemen Footer Bawaan semaksimal mungkin */
-    footer { display: none !important; visibility: hidden !important; }
-    [data-testid="stEmbedHoverBadge"] { display: none !important; visibility: hidden !important; }
-    div[class*="viewerBadge"] { display: none !important; visibility: hidden !important; }
-    div[class*="styles_viewerBadge"] { display: none !important; visibility: hidden !important; }
-    
-    /* Paksa Sembunyikan Tombol "Manage app" di Pojok Kanan Bawah */
-    [data-testid="manage-app-button"],
-    button[data-testid="manage-app-button"] {
-        display: none !important;
-        visibility: hidden !important;
+    /* SIDEBAR KIRI: Selalu Navy Biru Dongker dengan Tulisan Putih */
+    [data-testid="stSidebar"] {
+        background-color: #002B49 !important;
+        border-right: 1px solid #001f36;
     }
-
-    /* BACKGROUND UTAMA: Platinum / Silver Gray (Elegan, tidak putih, tidak biru) */
-    [data-testid="stAppViewContainer"] { background: linear-gradient(135deg, #e2e8f0 0%, #cbd5e1 100%) !important; }
-    
-    /* SIDEBAR KIRI: Biru Dongker / Navy Elegan */
-    [data-testid="stSidebar"] { background-color: #002B49 !important; border-right: 1px solid #001f36; }
-    [data-testid="stSidebar"] h1, [data-testid="stSidebar"] h2, [data-testid="stSidebar"] h3, 
-    [data-testid="stSidebar"] p, [data-testid="stSidebar"] label, [data-testid="stSidebar"] span, [data-testid="stSidebar"] div {
-        color: #ffffff !important; 
+    [data-testid="stSidebar"] * {
+        color: #ffffff !important;
     }
     
-    /* KOTAK FORMULIR: Putih Solid dengan Bayangan Agak Tebal biar Pop-Up */
-    [data-testid="stForm"], .stElementContainer div[data-aria-stable="true"], .stMarkdown {
-        background-color: rgba(255, 255, 255, 0.95) !important;
-        border-radius: 12px;
-        padding: 20px;
-        border: 1px solid #94a3b8;
-        box-shadow: 0px 6px 12px rgba(0, 0, 0, 0.1); 
+    /* Mengatasi bug HP layar sempit */
+    .block-container {
+        padding-top: 2rem !important;
+        padding-bottom: 2rem !important;
     }
-    
-    /* TULISAN DI LAYAR UTAMA: Hitam / Abu Gelap agar 100% Terbaca di Background Silver */
-    section.main h1, section.main h2, section.main h3, section.main h4, section.main h5, section.main h6,
-    section.main label, section.main p, section.main span,
-    section.main div[data-testid="stMarkdownContainer"] p,
-    section.main div[data-testid="stWidgetLabel"] p {
-        color: #1e293b !important; 
-    }
-    
-    /* Warna sub-teks (Caption) */
-    section.main .stCaptionContainer, section.main div[data-testid="stCaptionContainer"] p { color: #475569 !important; }
-    
-    /* Warna teks ketikan User di dalam kotak isian */
-    section.main input, section.main textarea, section.main select { 
-        color: #0f172a !important; 
-        background-color: #f8fafc !important; 
-        border: 1px solid #cbd5e1 !important; 
-    }
-    
-    /* Kustomisasi Tab Menu Aktif */
-    .stTabs [data-baseweb="tab-list"] button[aria-selected="true"] { color: #002B49 !important; border-bottom-color: #002B49 !important; }
     </style>
 """, unsafe_allow_html=True)
 
@@ -232,15 +196,16 @@ if menu == "FORMULIR KUNJUNGAN PUBLIK":
             st.image("https://upload.wikimedia.org/wikipedia/commons/4/44/Logo_BMKG.png", width=120)
             
     with col_text:
+        # Menggunakan var(--text-color) agar otomatis mengikuti mode gelap/terang HP
         st.markdown("""
             <div style='text-align: center; padding-top: 5px; line-height: 1.2;'>
-                <div style='color: #003366; font-size: 30px; font-weight: 900; letter-spacing: 1px; margin-bottom: 2px;'>
+                <div style='color: var(--text-color); font-size: 28px; font-weight: 900; letter-spacing: 1px; margin-bottom: 2px;'>
                     PORTAL LAYANAN PUBLIK TERINTEGRASI
                 </div>
-                <div style='color: #1b5e20; font-size: 18px; font-weight: 800; letter-spacing: 0.5px; margin-bottom: 2px;'>
+                <div style='color: #059669; font-size: 17px; font-weight: 800; letter-spacing: 0.5px; margin-bottom: 2px;'>
                     STASIUN METEOROLOGI KELAS II SULTAN MUHAMMAD SALAHUDDIN BIMA
                 </div>
-                <div style='color: #444444; font-size: 14px; font-weight: 700; letter-spacing: 1px; margin-top: 0px;'>
+                <div style='color: var(--text-color); opacity: 0.7; font-size: 13px; font-weight: 700; letter-spacing: 1px; margin-top: 0px;'>
                     BADAN METEOROLOGI, KLIMATOLOGI, DAN GEOFISIKA
                 </div>
             </div>
@@ -248,7 +213,7 @@ if menu == "FORMULIR KUNJUNGAN PUBLIK":
         
     with col_clock:
         components.html("""
-            <div id="clock" style="font-family: 'Arial', sans-serif; font-size: 14px; font-weight: bold; color: #003366; text-align: right; padding-top: 25px;"></div>
+            <div id="clock" style="font-family: 'Arial', sans-serif; font-size: 14px; font-weight: bold; color: #059669; text-align: right; padding-top: 25px;"></div>
             <script>
                 function updateTime() {
                     const now = new Date();
@@ -334,17 +299,17 @@ if menu == "FORMULIR KUNJUNGAN PUBLIK":
         
         with st.container(border=True):
             st.markdown("""
-            <div style='background-color: #f0f4f8; padding: 15px; border-radius: 8px; border-left: 5px solid #003366;'>
-                <h4 style='color: #003366; margin-top: 0px;'>📋 PENDAHULUAN & PERSYARATAN LAYANAN</h4>
-                <p style='font-size: 14px; line-height: 1.5; color: #1e293b;'>
+            <div style='background-color: rgba(5, 150, 105, 0.1); padding: 15px; border-radius: 8px; border-left: 5px solid #059669;'>
+                <h4 style='color: var(--text-color); margin-top: 0px;'>📋 PENDAHULUAN & PERSYARATAN LAYANAN</h4>
+                <p style='font-size: 14px; line-height: 1.5; color: var(--text-color);'>
                     Berdasarkan Peraturan Pemerintah yang berlaku, Stasiun Meteorologi Kelas II Sultan Muhammad Salahuddin Bima menyediakan layanan informasi Meteorologi secara <b>Bebas Tarif (Gratis)</b> yang ditujukan khusus demi mendukung keperluan <b>Pendidikan, Penelitian Non-Komersial, serta Instansi Pemerintah</b>.
                 </p>
-                <h5 style='color: #003366; margin-bottom: 5px;'>⚠️ Dokumen Wajib yang Harus Dilampirkan:</h5>
-                <ol style='font-size: 14px; color: #1e293b; margin-top: 0px;'>
+                <h5 style='color: var(--text-color); margin-bottom: 5px;'>⚠️ Dokumen Wajib yang Harus Dilampirkan:</h5>
+                <ol style='font-size: 14px; color: var(--text-color); margin-top: 0px;'>
                     <li><b>Kartu Identitas Sah:</b> Foto KTP atau Kartu Tanda Mahasiswa (KTM) yang masih berlaku resmi.</li>
                     <li><b>Surat Pengantar Resmi:</b> Surat permohonan dari Dekan/Sekolah/Kampus asli (untuk keperluan pendidikan) atau Surat Dinas Resmi bertanda tangan pimpinan (untuk Instansi Pemerintah).</li>
                 </ol>
-                <p style='font-size: 13px; color: #475569; font-style: italic; margin-bottom: 0px;'>
+                <p style='font-size: 13px; color: var(--text-color); opacity: 0.7; font-style: italic; margin-bottom: 0px;'>
                     *Catatan: Seluruh dokumen akan diperiksa secara berkala oleh tim audit internal stasiun sebelum berkas data dirilis.
                 </p>
             </div>
