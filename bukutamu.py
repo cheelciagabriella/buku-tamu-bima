@@ -10,7 +10,7 @@ from googleapiclient.http import MediaIoBaseUpload
 import io
 
 # ==========================================
-# 1. KONFIGURASI HALAMAN (SIDEBAR SELALU TERBUKA)
+# 1. KONFIGURASI HALAMAN (SIDEBAR PERMANEN)
 # ==========================================
 st.set_page_config(
     page_title="E-Buku Tamu Stamet Bima", 
@@ -19,7 +19,7 @@ st.set_page_config(
 )
 
 # ==========================================
-# 2. KUSTOMISASI DESAIN WARNA & LOCK SIDEBAR PERMANEN
+# 2. KUSTOMISASI DESAIN WARNA & LOCK SIDEBAR
 # ==========================================
 st.markdown("""
     <style>
@@ -28,8 +28,7 @@ st.markdown("""
     [data-testid="stHeader"] { background-color: transparent !important; box-shadow: none !important; }
     footer { visibility: hidden !important; }
     
-    /* 🔥 TRICK PAMUNGKAS: Sembunyikan Tombol Silang (X) Penutup Sidebar 🔥 */
-    /* Ini akan memaksa sidebar kiri selalu terbuka permanen dan tidak bisa ditutup */
+    /* Paksa Sidebar Kiri Terbuka Permanen agar Penguji Latsar Mudah Navigasi */
     [data-testid="stSidebarCollapseButton"],
     button[aria-label="Close sidebar"],
     button[aria-label="Tutup bilah sisi"] {
@@ -37,7 +36,6 @@ st.markdown("""
         visibility: hidden !important;
     }
 
-    /* Pengaturan Tema Warna Terang */
     [data-testid="stAppViewContainer"] { background: linear-gradient(135deg, #e0f2fe 0%, #e8f5e9 100%) !important; }
     [data-testid="stSidebar"] { background-color: #002B49 !important; }
     [data-testid="stSidebar"] h1, [data-testid="stSidebar"] h2, [data-testid="stSidebar"] h3, 
@@ -76,7 +74,8 @@ def simpan_ke_google_sheets(nama_tab, data_list):
     try:
         creds = dapatkan_kredensial()
         client = gspread.authorize(creds)
-        sheet = client.open("Buku Tamu Stamet Bima").worksheet(nama_tab)
+        # 🔥 DIUBAH: Menggunakan ID Spreadsheet milikmu langsung agar anti-eror
+        sheet = client.open_by_key("1qdrgfAhB_NKPSIxP9p5cY0LF1RmXRzqG-aWUNEx7r94").worksheet(nama_tab)
         sheet.append_row(data_list)
         return True
     except Exception as e:
@@ -87,7 +86,8 @@ def ambil_data_google_sheets(nama_tab):
     try:
         creds = dapatkan_kredensial()
         client = gspread.authorize(creds)
-        sheet = client.open("Buku Tamu Stamet Bima").worksheet(nama_tab)
+        # 🔥 DIUBAH: Menggunakan ID Spreadsheet milikmu langsung agar anti-eror
+        sheet = client.open_by_key("1qdrgfAhB_NKPSIxP9p5cY0LF1RmXRzqG-aWUNEx7r94").worksheet(nama_tab)
         data = sheet.get_all_values()
         if len(data) > 1:
             df = pd.DataFrame(data[1:], columns=data[0])
@@ -105,7 +105,7 @@ def upload_ke_google_drive(file_buffer, nama_file, mime_type):
         creds = dapatkan_kredensial()
         service = build('drive', 'v3', credentials=creds)
         
-        # ID Folder Cloud Google Drive
+        # ⚠️ JANGAN LUPA: Masukkan ID Folder Google Drive stasiunmu di sini nanti ⚠️
         FOLDER_ID = "1234567890abcdefghijklmnopqrstuvwxyz" 
 
         file_metadata = {
@@ -134,7 +134,7 @@ if "admin_logged_in" not in st.session_state:
     st.session_state.admin_logged_in = False
 
 # ==========================================
-# 5. NAVIGASI SAMPING (SIDEBAR PERMANEN)
+# 5. NAVIGASI SAMPING
 # ==========================================
 try:
     st.sidebar.image("logo.png", width=90) 
@@ -283,7 +283,7 @@ if menu == "FORMULIR KUNJUNGAN PUBLIK":
                 st.session_state.ikm_selesai = False
                 st.rerun()
 
-    # --- TAB 2: PERMOHONAN DATA KHUSUS (UPLOAD KE GOOGLE DRIVE CLOUD) ---
+    # --- TAB 2: PERMOHONAN DATA KHUSUS ---
     with tab2:
         st.subheader("FORMULIR PERMOHONAN DATA BEBAS TARIF (RP 0,00)")
         st.info("Sesuai aturan PP No. 47 Tahun 2018, layanan ini dikhususkan untuk keperluan Pendidikan, Penelitian non-komersial, dan Instansi Pemerintah.")
