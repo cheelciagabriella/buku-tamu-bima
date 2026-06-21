@@ -19,11 +19,13 @@ st.set_page_config(
 )
 
 # ==========================================
-# 2. KUSTOMISASI CSS (KUNCI TOMBOL SIDEBAR & ADAPTIVE)
+# 2. KUSTOMISASI CSS (KUNCI SIDEBAR, HAPUS FORK GITHUB & UKURAN)
 # ==========================================
 st.markdown("""
     <style>
-    /* Sembunyikan tombol komersial bawaan Streamlit */
+    /* 🚫 HAPUS TOTAL FORK, GITHUB ICON & TOOLBAR BAWAAN DI KANAN ATAS */
+    [data-testid="stHeaderToolbar"] { display: none !important; }
+    header { background-color: transparent !important; }
     .stAppDeployButton { display: none !important; }
     [data-testid="stActionButton"] { display: none !important; }
     footer { display: none !important; visibility: hidden !important; }
@@ -95,7 +97,7 @@ st.markdown("""
 """, unsafe_allow_html=True)
 
 # ==========================================
-# 2.b TOMBOL WHATSAPP MELAYANG
+# 2.b TOMBOL WHATSAPP MELAYANG (POSISI DIAMAN KAN DARI OVERLAP)
 # ==========================================
 NOMOR_WA_CS = "628113908535" 
 PESAN_OTOMATIS = "Halo%20Admin%20PTSP%20Stamet%20Bima,%20saya%20ingin%20bertanya%20mengenai%20layanan%20data..."
@@ -106,7 +108,7 @@ st.markdown(f"""
         position: fixed;
         width: 55px; 
         height: 55px;
-        bottom: 25px; 
+        bottom: 85px; /* DIKOREKSI: Dinaikkan agar tidak menimpa ribbon host/badge bawah */
         right: 25px;
         background-color: #25d366;
         color: white;
@@ -246,13 +248,13 @@ if menu == "FORMULIR KUNJUNGAN PUBLIK":
     with col_text:
         st.markdown("""
             <div style='text-align: center; padding-top: 5px; line-height: 1.2;'>
-                <div style='color: #002B49; font-size: 36px; font-weight: 900; letter-spacing: 1px; margin-bottom: 4px;'>
+                <div style='color: #002B49; font-size: 40px; font-weight: 900; letter-spacing: 1px; margin-bottom: 5px;'>
                     PORTAL LAYANAN PUBLIK TERINTEGRASI
                 </div>
-                <div style='color: #003a63; font-size: 22px; font-weight: 800; letter-spacing: 0.5px; margin-bottom: 4px;'>
+                <div style='color: #003a63; font-size: 25px; font-weight: 800; letter-spacing: 0.5px; margin-bottom: 5px;'>
                     STASIUN METEOROLOGI KELAS II SULTAN MUHAMMAD SALAHUDDIN BIMA
                 </div>
-                <div style='color: var(--text-color); opacity: 0.8; font-size: 16px; font-weight: 700; letter-spacing: 1px; margin-top: 0px;'>
+                <div style='color: var(--text-color); opacity: 0.8; font-size: 18px; font-weight: 700; letter-spacing: 1px; margin-top: 0px;'>
                     BADAN METEOROLOGI, KLIMATOLOGI, DAN GEOFISIKA
                 </div>
             </div>
@@ -324,7 +326,6 @@ if menu == "FORMULIR KUNJUNGAN PUBLIK":
                     tujuan_final = alasan_lainnya if tujuan == "Lain-lain" else tujuan
                     waktu_sekarang = datetime.now(timezone(timedelta(hours=8))).strftime("%Y-%m-%d %H:%M:%S")
                     
-                    # Susunan 7 kolom: Waktu, Nama, No WA, Instansi, Keperluan, Keterangan, Status
                     row_tamu = [waktu_sekarang, nama, no_hp, instansi, tujuan_final, "Kunjungan Umum Terdaftar", "-"]
                     
                     if simpan_ke_google_sheets("Tamu", row_tamu):
@@ -373,7 +374,7 @@ if menu == "FORMULIR KUNJUNGAN PUBLIK":
                 instansi_khusus = st.text_input("ASAL KAMPUS / SEKOLAH / INSTANSI:", placeholder="Contoh: Universitas Mataram")
             with col_k2:
                 kontak_khusus = st.text_input("NOMOR WHATSAPP AKTIF (Untuk Pelacakan Status):", placeholder="Contoh: 081234567xxx")
-                jenis_data_khusus = st.text_input("JENIS DATA YANG DIMINTA:", placeholder="Contoh: Data Curah Hujan 2015-2025")
+                jenis_data_khusus = st.text_input("JENIS DATA YANG DIMINTA:", placeholder="Contoh: Data Cuaca/Iklim Berkas Pendidikan")
             
             st.write("")
             st.markdown("#### **II. UNGGAH BERKAS BUKTI PENDUKUNG**")
@@ -405,7 +406,6 @@ if menu == "FORMULIR KUNJUNGAN PUBLIK":
                         waktu_khusus = datetime.now(timezone(timedelta(hours=8))).strftime("%Y-%m-%d %H:%M:%S")
                         teks_database = f"Link KTP: {link_ktp} | Link Surat: {link_surat}"
                         
-                        # Susunan 7 kolom
                         row_khusus = [waktu_khusus, nama_khusus, kontak_khusus, instansi_khusus, jenis_data_khusus, teks_database, "Sedang Diproses"]
                         
                         if simpan_ke_google_sheets("Tamu", row_khusus):
@@ -417,7 +417,7 @@ if menu == "FORMULIR KUNJUNGAN PUBLIK":
         st.subheader("KATALOG TARIF RESMI JASA DATA DAN INFORMASI")
         raw_data_ia = {
             "Jenis Penerimaan Negara Bukan Pajak": [
-                "1. Information Cuaca untuk Penerbangan", "2. Informasi Cuaca untuk Pelayaran",
+                "1. Informasi Cuaca untuk Penerbangan", "2. Informasi Cuaca untuk Pelayaran",
                 "3. Informasi Cuaca untuk Pelabuhan", "4. Informasi Cuaca untuk Pengeboran Lepas Pantai",
                 "5.a. Analisis dan Prakiraan Hujan Bulanan", "5.b. Prakiraan Musim Kemarau"
             ],
