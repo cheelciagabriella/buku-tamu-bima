@@ -10,7 +10,7 @@ from googleapiclient.http import MediaIoBaseUpload
 import io
 
 # ==========================================
-# 1. KONFIGURASI HALAMAN
+# 1. KONFIGURASI HALAMAN (SIDEBAR SELALU TERBUKA)
 # ==========================================
 st.set_page_config(
     page_title="E-Buku Tamu Stamet Bima", 
@@ -19,76 +19,25 @@ st.set_page_config(
 )
 
 # ==========================================
-# 2. KUSTOMISASI DESAIN WARNA (SUPER FIX PANAH SIDEBAR LATSAR)
+# 2. KUSTOMISASI DESAIN WARNA & LOCK SIDEBAR PERMANEN
 # ==========================================
 st.markdown("""
     <style>
     .stAppDeployButton { display: none !important; }
     [data-testid="stToolbar"] { display: none !important; }
+    [data-testid="stHeader"] { background-color: transparent !important; box-shadow: none !important; }
     footer { visibility: hidden !important; }
     
-    /* --- 1. MEMAKSA KONTAINER HEADER AGAR TIDAK MEMOTONG TOMBOL PANAH --- */
-    [data-testid="stHeader"] { 
-        background-color: transparent !important; 
-        box-shadow: none !important;
-        overflow: visible !important;
-        z-index: 999999 !important;
-    }
-    
-    /* --- 2. TEMBAK KONTROL SIDEBAR SAAT TERTUTUP (VERSI STREAMLIT BARU) --- */
-    [data-testid="stSidebarCollapsedControl"], 
-    .stSidebarCollapsedControl {
-        display: flex !important;
-        visibility: visible !important;
-        opacity: 1 !important;
-        position: fixed !important;
-        top: 12px !important;
-        left: 12px !important;
-        z-index: 99999999 !important;
-    }
-    
-    /* --- 3. STYLING TOMBOL PANAH (KEBAL VERSI & KEBAL BAHASA BROWSER) --- */
-    [data-testid="stSidebarCollapsedControl"] button,
-    .stSidebarCollapsedControl button,
-    button[aria-label="Expand sidebar"],
-    button[aria-label="Buka bilah sisi"] {
-        display: flex !important;
-        visibility: visible !important;
-        opacity: 1 !important;
-        background-color: #002B49 !important; /* Warna biru gelap resmi BMKG */
-        color: #ffffff !important;
-        border-radius: 8px !important;
-        padding: 10px 14px !important;
-        box-shadow: 0px 4px 15px rgba(0,0,0,0.4) !important;
-        border: 1px solid rgba(255,255,255,0.3) !important;
-        width: auto !important;
-        height: auto !important;
-    }
-    
-    /* --- 4. MEMAKSA IKON SVG PANAH DI DALAMNYA BERWARNA PUTIH MENYALA --- */
-    [data-testid="stSidebarCollapsedControl"] button svg,
-    .stSidebarCollapsedControl button svg,
-    button[aria-label="Expand sidebar"] svg,
-    button[aria-label="Buka bilah sisi"] svg {
-        fill: #ffffff !important; 
-        color: #ffffff !important;
-        stroke: #ffffff !important;
-        width: 24px !important;
-        height: 24px !important;
-    }
-    
-    /* --- DESIGN UTK TOMBOL TUTUP (Saat Sidebar Terbuka) --- */
-    [data-testid="stSidebar"] button[aria-label="Close sidebar"],
-    [data-testid="stSidebar"] button[aria-label="Tutup bilah sisi"] {
-        background-color: rgba(255, 255, 255, 0.15) !important;
-        border-radius: 8px !important;
-    }
-    [data-testid="stSidebar"] button[aria-label="Close sidebar"] svg,
-    [data-testid="stSidebar"] button[aria-label="Tutup bilah sisi"] svg {
-        fill: #ffffff !important;
-        color: #ffffff !important;
+    /* 🔥 TRICK PAMUNGKAS: Sembunyikan Tombol Silang (X) Penutup Sidebar 🔥 */
+    /* Ini akan memaksa sidebar kiri selalu terbuka permanen dan tidak bisa ditutup */
+    [data-testid="stSidebarCollapseButton"],
+    button[aria-label="Close sidebar"],
+    button[aria-label="Tutup bilah sisi"] {
+        display: none !important;
+        visibility: hidden !important;
     }
 
+    /* Pengaturan Tema Warna Terang */
     [data-testid="stAppViewContainer"] { background: linear-gradient(135deg, #e0f2fe 0%, #e8f5e9 100%) !important; }
     [data-testid="stSidebar"] { background-color: #002B49 !important; }
     [data-testid="stSidebar"] h1, [data-testid="stSidebar"] h2, [data-testid="stSidebar"] h3, 
@@ -156,7 +105,7 @@ def upload_ke_google_drive(file_buffer, nama_file, mime_type):
         creds = dapatkan_kredensial()
         service = build('drive', 'v3', credentials=creds)
         
-        # ⚠️ MASUKKAN ID FOLDER GOOGLE DRIVE MU DI SINI ⚠️
+        # ID Folder Cloud Google Drive
         FOLDER_ID = "1234567890abcdefghijklmnopqrstuvwxyz" 
 
         file_metadata = {
@@ -185,7 +134,7 @@ if "admin_logged_in" not in st.session_state:
     st.session_state.admin_logged_in = False
 
 # ==========================================
-# 5. NAVIGASI SAMPING (SIDEBAR)
+# 5. NAVIGASI SAMPING (SIDEBAR PERMANEN)
 # ==========================================
 try:
     st.sidebar.image("logo.png", width=90) 
@@ -334,7 +283,7 @@ if menu == "FORMULIR KUNJUNGAN PUBLIK":
                 st.session_state.ikm_selesai = False
                 st.rerun()
 
-    # --- TAB 2: PORTAL DATA KHUSUS (UPLOAD KE GOOGLE DRIVE CLOUD) ---
+    # --- TAB 2: PERMOHONAN DATA KHUSUS (UPLOAD KE GOOGLE DRIVE CLOUD) ---
     with tab2:
         st.subheader("FORMULIR PERMOHONAN DATA BEBAS TARIF (RP 0,00)")
         st.info("Sesuai aturan PP No. 47 Tahun 2018, layanan ini dikhususkan untuk keperluan Pendidikan, Penelitian non-komersial, dan Instansi Pemerintah.")
