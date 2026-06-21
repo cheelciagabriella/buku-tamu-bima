@@ -246,10 +246,10 @@ if menu == "FORMULIR KUNJUNGAN PUBLIK":
     with col_text:
         st.markdown("""
             <div style='text-align: center; padding-top: 5px; line-height: 1.2;'>
-                <div style='color: var(--text-color); font-size: 28px; font-weight: 900; letter-spacing: 1px; margin-bottom: 2px;'>
+                <div style='color: #002B49; font-size: 28px; font-weight: 900; letter-spacing: 1px; margin-bottom: 2px;'>
                     PORTAL LAYANAN PUBLIK TERINTEGRASI
                 </div>
-                <div style='color: #059669; font-size: 17px; font-weight: 800; letter-spacing: 0.5px; margin-bottom: 2px;'>
+                <div style='color: #003a63; font-size: 17px; font-weight: 800; letter-spacing: 0.5px; margin-bottom: 2px;'>
                     STASIUN METEOROLOGI KELAS II SULTAN MUHAMMAD SALAHUDDIN BIMA
                 </div>
                 <div style='color: var(--text-color); opacity: 0.7; font-size: 13px; font-weight: 700; letter-spacing: 1px; margin-top: 0px;'>
@@ -260,7 +260,7 @@ if menu == "FORMULIR KUNJUNGAN PUBLIK":
         
     with col_clock:
         components.html("""
-            <div id="clock" style="font-family: 'Arial', sans-serif; font-size: 14px; font-weight: bold; color: #059669; text-align: right; padding-top: 25px;"></div>
+            <div id="clock" style="font-family: 'Arial', sans-serif; font-size: 14px; font-weight: bold; color: #002B49; text-align: right; padding-top: 25px;"></div>
             <script>
                 function updateTime() {
                     const now = new Date();
@@ -289,7 +289,7 @@ if menu == "FORMULIR KUNJUNGAN PUBLIK":
             st.caption("Mohon lengkapi data registrasi di bawah ini untuk kepentingan administrasi pelayanan publik.")
             
             with st.container(border=True):
-                st.markdown("#### **I. IDENTITAS**")
+                st.markdown("#### **I. IDENTITAS PEMOHON**")
                 col1, col2 = st.columns(2)
                 with col1:
                     nama = st.text_input("NAMA LENGKAP (SESUAI KTP/IDENTITAS RESMI)", placeholder="Contoh: Nama Beserta Gelar")
@@ -346,12 +346,12 @@ if menu == "FORMULIR KUNJUNGAN PUBLIK":
         
         with st.container(border=True):
             st.markdown("""
-            <div style='background-color: rgba(5, 150, 105, 0.1); padding: 15px; border-radius: 8px; border-left: 5px solid #059669;'>
-                <h4 style='color: var(--text-color); margin-top: 0px;'>📋 PENDAHULUAN & PERSYARATAN LAYANAN</h4>
+            <div style='background-color: rgba(0, 43, 73, 0.05); padding: 15px; border-radius: 8px; border-left: 5px solid #002B49;'>
+                <h4 style='color: #002B49; margin-top: 0px;'>📋 PENDAHULUAN & PERSYARATAN LAYANAN</h4>
                 <p style='font-size: 14px; line-height: 1.5; color: var(--text-color);'>
                     Berdasarkan Peraturan Pemerintah yang berlaku, Stasiun Meteorologi Kelas II Sultan Muhammad Salahuddin Bima menyediakan layanan informasi Meteorologi secara <b>Bebas Tarif (Gratis)</b> yang ditujukan khusus demi mendukung keperluan <b>Pendidikan, Penelitian Non-Komersial, serta Instansi Pemerintah</b>.
                 </p>
-                <h5 style='color: var(--text-color); margin-bottom: 5px;'>⚠️ Dokumen Wajib yang Harus Dilampirkan:</h5>
+                <h5 style='color: #002B49; margin-bottom: 5px;'>⚠️ Dokumen Wajib yang Harus Dilampirkan:</h5>
                 <ol style='font-size: 14px; color: var(--text-color); margin-top: 0px;'>
                     <li><b>Kartu Identitas Sah:</b> Foto KTP atau Kartu Tanda Mahasiswa (KTM) yang masih berlaku resmi.</li>
                     <li><b>Surat Pengantar Resmi:</b> Surat permohonan dari Dekan/Sekolah/Kampus asli (untuk keperluan pendidikan) atau Surat Dinas Resmi bertanda tangan pimpinan (untuk Instansi Pemerintah).</li>
