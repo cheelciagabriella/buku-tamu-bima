@@ -19,56 +19,67 @@ st.set_page_config(
 )
 
 # ==========================================
-# 2. KUSTOMISASI CSS (PANAH FIXED FIX & ADAPTIVE MODE)
+# 2. KUSTOMISASI CSS (ANTI-HILANG & ADAPTIVE MODE)
 # ==========================================
 st.markdown("""
     <style>
-    /* Sembunyikan HANYA tombol deploy dan menu opsi kanan */
+    /* 1. Paksa area rumah header tempat tombol berada untuk SELALU AKTIF & transparan */
+    header[data-testid="stHeader"] {
+        display: block !important;
+        visibility: visible !important;
+        background-color: transparent !important;
+        background: transparent !important;
+        box-shadow: none !important;
+    }
+
+    /* 2. Sembunyikan hanya tombol deploy bawaan dan menu opsi kanan */
     .stAppDeployButton { display: none !important; }
     [data-testid="stToolbar"] { display: none !important; }
     footer { display: none !important; visibility: hidden !important; }
     [data-testid="stEmbedHoverBadge"], div[class*="viewerBadge"], div[class*="styles_viewerBadge"] { display: none !important; }
     
-    /* 🛠️ FIX TOTAL: Paksa Kontrol Tombol Buka Sidebar (Saat Tertutup) Muncul Permanen & Melayang di Pojok Kiri Atas */
-    div[data-testid="stSidebarCollapsedControl"] {
-        position: fixed !important;
-        top: 12px !important;
-        left: 12px !important;
-        z-index: 999999 !important;
+    /* 3. PERBAIKAN TOTAL: Tembak tombol buka sidebar dengan semua selector cadangan agar paksa muncul melayang */
+    div[data-testid="stSidebarCollapsedControl"],
+    div[data-testid="stSidebarCollapsedControl"] button,
+    button[aria-label="Open sidebar"],
+    header[data-testid="stHeader"] button:first-child {
         display: flex !important;
         visibility: visible !important;
         opacity: 1 !important;
-    }
-    
-    /* Desain Tombol Panah Saat Melayang */
-    div[data-testid="stSidebarCollapsedControl"] button {
-        background-color: #002B49 !important; /* Navy BMKG */
+        position: fixed !important;
+        top: 15px !important;
+        left: 15px !important;
+        z-index: 999999 !important;
+        background-color: #002B49 !important; /* Navy Khas BMKG */
         color: #ffffff !important;
-        border: 1px solid #001f36 !important;
+        border: 2px solid #ffffff !important;
         border-radius: 8px !important;
-        box-shadow: 0px 4px 12px rgba(0, 0, 0, 0.3) !important;
-        display: flex !important;
+        width: 42px !important;
+        height: 42px !important;
         align-items: center !important;
         justify-content: center !important;
-        width: 44px !important;
-        height: 44px !important;
-        transition: transform 0.2s ease !important;
+        box-shadow: 0px 4px 12px rgba(0, 0, 0, 0.4) !important;
     }
     
-    div[data-testid="stSidebarCollapsedControl"] button:hover {
+    /* Paksa icon garis/panah di dalamnya agar berwarna putih bersih dan berukuran pas */
+    div[data-testid="stSidebarCollapsedControl"] svg,
+    button[aria-label="Open sidebar"] svg,
+    header[data-testid="stHeader"] button:first-child svg {
+        color: #ffffff !important;
+        fill: #ffffff !important;
+        width: 24px !important;
+        height: 24px !important;
+        display: block !important;
+    }
+
+    /* Beri efek sedikit membesar saat diarahkan kursor */
+    button[aria-label="Open sidebar"]:hover,
+    header[data-testid="stHeader"] button:first-child:hover {
         transform: scale(1.08) !important;
         background-color: #003a63 !important;
     }
-    
-    /* Paksa Icon Panah di Dalamnya Berwarna Putih Bersih */
-    div[data-testid="stSidebarCollapsedControl"] button svg {
-        color: #ffffff !important;
-        fill: #ffffff !important;
-        width: 26px !important;
-        height: 26px !important;
-    }
 
-    /* Ketika Sidebar posisi TERBUKA, pastikan tombol tutupnya juga matching */
+    /* Desain tombol close (X) saat sidebar sedang posisi terbuka */
     button[data-testid="stSidebarCollapseButton"] {
         color: #ffffff !important;
         background-color: rgba(255, 255, 255, 0.1) !important;
@@ -87,7 +98,7 @@ st.markdown("""
         color: #ffffff !important;
     }
     
-    /* Beri ruang di atas konten utama agar tidak tertabrak tombol panah fixed */
+    /* Naikkan sedikit jarak atas konten agar pas dan tidak tertabrak tombol fixed */
     .block-container {
         padding-top: 3.5rem !important;
         padding-bottom: 2rem !important;
