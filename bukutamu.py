@@ -27,6 +27,29 @@ st.markdown("""
     [data-testid="stToolbar"] { display: none !important; }
     [data-testid="stHeader"] { background-color: transparent !important; box-shadow: none !important; }
     footer { visibility: hidden !important; }
+    
+    /* --- FIXED SOLUSI TOMBOL HILANG: Memaksa Tombol Pembuka Sidebar Muncul Tegas di Pojok Kiri Atas --- */
+    [data-testid="collapsedControl"] {
+        background-color: #002B49 !important; /* Warna biru gelap sesuai tema sidebar */
+        border-radius: 0 10px 10px 0 !important; /* Membuat sudut membulat di sisi kanan */
+        padding: 6px 12px !important;
+        position: fixed !important;
+        top: 15px !important;
+        left: 0 !important;
+        z-index: 999999 !important;
+        box-shadow: 2px 2px 8px rgba(0,0,0,0.2) !important;
+        display: flex !important;
+        align-items: center !important;
+        justify-content: center !important;
+    }
+    /* Memaksa ikon panah di dalamnya berwarna putih bersih dan berukuran jelas */
+    [data-testid="collapsedControl"] svg {
+        fill: #ffffff !important; 
+        color: #ffffff !important;
+        width: 24px !important;
+        height: 24px !important;
+    }
+
     [data-testid="stAppViewContainer"] { background: linear-gradient(135deg, #e0f2fe 0%, #e8f5e9 100%) !important; }
     [data-testid="stSidebar"] { background-color: #002B49 !important; }
     [data-testid="stSidebar"] h1, [data-testid="stSidebar"] h2, [data-testid="stSidebar"] h3, 
@@ -94,8 +117,8 @@ def upload_ke_google_drive(file_buffer, nama_file, mime_type):
         creds = dapatkan_kredensial()
         service = build('drive', 'v3', credentials=creds)
         
-        # ⚠️ GANTI DENGAN ID FOLDER GOOGLE DRIVE KAMU ⚠️
-        FOLDER_ID = "MASUKKAN_ID_FOLDER_GOOGLE_DRIVE_DISINI" 
+        # ⚠️ MASUKKAN ID FOLDER GOOGLE DRIVE MU DI SINI ⚠️
+        FOLDER_ID = "1234567890abcdefghijklmnopqrstuvwxyz" 
 
         file_metadata = {
             'name': nama_file,
@@ -331,7 +354,7 @@ if menu == "FORMULIR KUNJUNGAN PUBLIK":
     # --- TAB 3: E-KATALOG PNBP ---
     with tab3:
         st.subheader("KATALOG TARIF RESMI JASA DATA DAN INFORMASI (ROMAWI I)")
-        st.info("Dasar Hukum: Peraturan Pemerintah Nomor 47 Tahun 2018 tentang Jenis dan Tarif atas Penerimaan Negara Bukan Pajak yang Evaluasi pada BMKG.")
+        st.info("Dasar Hukum: Peraturan Pemerintah Nomor 47 Tahun 2018 tentang Jenis dan Tarif atas Penerimaan Negara Bukan Pajak yang Berlaku pada BMKG.")
         
         st.markdown("### **A. Informasi Khusus Meteorologi, Klimatologi, dan Geofisika**")
         raw_data_ia = {
@@ -449,7 +472,6 @@ elif menu == "🔒 PORTAL ADMIN & REKAP LAPORAN":
             if not df_tamu.empty:
                 if len(df_tamu.columns) >= 7:
                     kolom_target = df_tamu.columns[6]
-                    # Mendukung sistem lama (Arsip KTP:) dan sistem baru (Link KTP:)
                     df_khusus = df_tamu[df_tamu[kolom_target].astype(str).str.contains("KTP:", na=False)]
                     
                     if not df_khusus.empty:
