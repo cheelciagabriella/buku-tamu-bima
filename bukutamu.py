@@ -198,7 +198,8 @@ def update_status_sheets(nama_pemohon, status_baru):
         sheet = client.open_by_key("1qdrgfAhB_NKPSIxP9p5cY0LF1RmXRzqG-aWUNEx7r94").worksheet("Tamu")
         cell = sheet.find(nama_pemohon)
         if cell:
-            sheet.update_cell(cell.row, 8, status_baru)
+            # Karena kolom Identitas dihapus, status maju ke kolom 7
+            sheet.update_cell(cell.row, 7, status_baru)
             return True
         return False
     except Exception as e:
@@ -292,11 +293,10 @@ if menu == "FORMULIR KUNJUNGAN PUBLIK":
                 st.markdown("#### **I. IDENTITAS PENGUNJUNG**")
                 col1, col2 = st.columns(2)
                 with col1:
-                    nama = st.text_input("NAMA LENGKAP (SESUAI KTP/IDENTITAS RESMI)", placeholder="Contoh: Nama Beserta Gelar")
-                    identitas = st.text_input("NOMOR IDENTITAS (NIK / NIM / NIP)", placeholder="Masukkan Nomor Identitas")
+                    nama = st.text_input("NAMA LENGKAP", placeholder="Contoh: Nama Beserta Gelar")
+                    instansi = st.text_input("ASAL INSTANSI / PERUSAHAAN / UNIVERSITAS", placeholder="Contoh: Pemerintah Kota Bima")
                 with col2:
                     no_hp = st.text_input("NOMOR TELEPON / WHATSAPP AKTIF", placeholder="Contoh: 0812345678xx")
-                    instansi = st.text_input("ASAL INSTANSI / PERUSAHAAN / UNIVERSITAS", placeholder="Contoh: Pemerintah Kota Bima")
             
             st.write("")
             
@@ -317,14 +317,16 @@ if menu == "FORMULIR KUNJUNGAN PUBLIK":
             submit_button = st.button("SIMPAN DATA KUNJUNGAN", type="primary", use_container_width=True)
             
             if submit_button:
-                if not nama or not identitas or not instansi:
-                    st.error("GAGAL: Mohon lengkapi kolom Nama, Nomor Identitas, dan Asal Instansi.")
+                if not nama or not no_hp or not instansi:
+                    st.error("GAGAL: Mohon lengkapi kolom Nama, Nomor HP, dan Asal Instansi.")
                 elif tujuan == "Lain-lain" and not alasan_lainnya:
                     st.warning("PERHATIAN: Mohon uraikan maksud kunjungan secara spesifik pada kolom yang tersedia.")
                 else:
                     tujuan_final = alasan_lainnya if tujuan == "Lain-lain" else tujuan
                     waktu_sekarang = datetime.now(timezone(timedelta(hours=8))).strftime("%Y-%m-%d %H:%M:%S")
-                    row_tamu = [waktu_sekarang, nama, identitas, no_hp, instansi, tujuan_final, "Kunjungan Umum Terdaftar", "-"]
+                    
+                    # Susunan baru 7 kolom: Waktu, Nama, No WA, Instansi, Keperluan, Keterangan, Status
+                    row_tamu = [waktu_sekarang, nama, no_hp, instansi, tujuan_final, "Kunjungan Umum Terdaftar", "-"]
                     
                     if simpan_ke_google_sheets("Tamu", row_tamu):
                         st.session_state.tamu_terdaftar = True
@@ -404,7 +406,8 @@ if menu == "FORMULIR KUNJUNGAN PUBLIK":
                         waktu_khusus = datetime.now(timezone(timedelta(hours=8))).strftime("%Y-%m-%d %H:%M:%S")
                         teks_database = f"Link KTP: {link_ktp} | Link Surat: {link_surat}"
                         
-                        row_khusus = [waktu_khusus, nama_khusus, "Pemohon Khusus (Bebas Tarif)", kontak_khusus, instansi_khusus, jenis_data_khusus, teks_database, "Sedang Diproses"]
+                        # Susunan baru 7 kolom
+                        row_khusus = [waktu_khusus, nama_khusus, kontak_khusus, instansi_khusus, jenis_data_khusus, teks_database, "Sedang Diproses"]
                         
                         if simpan_ke_google_sheets("Tamu", row_khusus):
                             st.success(f"✔️ BERHASIL: Dokumen digital Anda telah sukses disimpan ke Cloud Storage stasiun! Silakan lacak progresnya di Tab 'LACAK STATUS DATA' menggunakan nomor WhatsApp Anda.")
@@ -444,18 +447,19 @@ if menu == "FORMULIR KUNJUNGAN PUBLIK":
                 with st.spinner("Mencari data di database stasiun..."):
                     df_tamu = ambil_data_google_sheets("Tamu")
                     if not df_tamu.empty:
-                        kolom_kontak = df_tamu.columns[3]
+                        # Index kolom disesuaikan karena ada 1 kolom dihapus (Maju 1 index)
+                        kolom_kontak = df_tamu.columns[2]
                         df_user = df_tamu[df_tamu[kolom_kontak].astype(str) == str(no_hp_cari)]
                         
                         if not df_user.empty:
                             data_terakhir = df_user.iloc[-1]
                             nama_user = data_terakhir[df_tamu.columns[1]]
-                            jenis_data = data_terakhir[df_tamu.columns[5]]
+                            jenis_data = data_terakhir[df_tamu.columns[4]]
                             waktu_minta = data_terakhir[df_tamu.columns[0]]
                             
                             status_proses = "Sedang Diproses"
-                            if len(data_terakhir) >= 8:
-                                status_proses = data_terakhir.iloc[7] if data_terakhir.iloc[7] else "Sedang Diproses"
+                            if len(data_terakhir) >= 7:
+                                status_proses = data_terakhir.iloc[6] if data_terakhir.iloc[6] else "Sedang Diproses"
                             
                             st.write("")
                             st.markdown(f"### 📊 Resume Pengajuan: **{nama_user}**")
@@ -525,12 +529,13 @@ elif menu == "🔒 PORTAL ADMIN & REKAP LAPORAN":
             df_tamu = ambil_data_google_sheets("Tamu")
             
             if not df_tamu.empty:
-                kolom_keperluan = df_tamu.columns[6]
+                # Index kolom disesuaikan karena ada 1 kolom dihapus
+                kolom_keperluan = df_tamu.columns[5]
                 kolom_nama = df_tamu.columns[1]
                 kolom_waktu = df_tamu.columns[0]
-                kolom_instansi = df_tamu.columns[4]
-                kolom_kontak = df_tamu.columns[3]
-                kolom_layanan = df_tamu.columns[5]
+                kolom_instansi = df_tamu.columns[3]
+                kolom_kontak = df_tamu.columns[2]
+                kolom_layanan = df_tamu.columns[4]
                 
                 df_khusus = df_tamu[df_tamu[kolom_keperluan].astype(str).str.contains("KTP", na=False)]
                 
@@ -547,7 +552,7 @@ elif menu == "🔒 PORTAL ADMIN & REKAP LAPORAN":
                                 st.write(f"**📱 Kontak WA:** {row[kolom_kontak]}")
                                 st.write(f"**📂 Layanan Diminta:** {row[kolom_layanan]}")
                                 
-                                current_st = row[7] if len(row) >= 8 else "Sedang Diproses"
+                                current_st = row[6] if len(row) >= 7 else "Sedang Diproses"
                                 st.info(f"🚩 **Status Saat Ini:** {current_st}")
                             
                             with col_links:
