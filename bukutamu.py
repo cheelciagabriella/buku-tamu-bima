@@ -280,7 +280,7 @@ if menu == "FORMULIR KUNJUNGAN PUBLIK":
     # PERUBAHAN: Nama Tab 2 diganti menjadi lebih umum
     tab1, tab2, tab3, tab4 = st.tabs([
         "E-BUKU TAMU", 
-        "PERMOHONAN DATA (UMUM)", 
+        "PERMOHONAN DATA", 
         "E-KATALOG PNBP",
         "🔍 LACAK STATUS DATA"
     ])
