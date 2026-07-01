@@ -277,10 +277,9 @@ if menu == "FORMULIR KUNJUNGAN PUBLIK":
     
     st.divider()
     
-    # PERUBAHAN: Nama Tab 2 diganti menjadi lebih umum
     tab1, tab2, tab3, tab4 = st.tabs([
         "E-BUKU TAMU", 
-        "PERMOHONAN DATA", 
+        "PERMOHONAN DATA (UMUM)", 
         "E-KATALOG PNBP",
         "🔍 LACAK STATUS DATA"
     ])
@@ -519,6 +518,16 @@ elif menu == "🔒 PORTAL ADMIN & REKAP LAPORAN":
                 st.rerun()
         
         st.write("")
+        
+        # === TAMBAHAN MENU SHORTCUT ===
+        st.markdown("#### 🔗 Akses Cepat Cloud Storage")
+        col_sheet, col_drive = st.columns(2)
+        with col_sheet:
+            st.link_button("📊 Buka Google Sheets (Database Asli)", "https://docs.google.com/spreadsheets/d/1qdrgfAhB_NKPSIxP9p5cY0LF1RmXRzqG-aWUNEx7r94/edit", use_container_width=True)
+        with col_drive:
+            st.link_button("📁 Buka Google Drive (Folder Arsip)", "https://drive.google.com/drive/folders/1FtwvPLbWcTPpyIOxMRBW88oLHri_rZVH", use_container_width=True)
+        st.divider()
+        # ==============================
         
         tab_db_tamu, tab_arsip = st.tabs(["DATABASE TAMU & LAYANAN", "AUDIT ARSIP DOKUMEN CLOUD"])
         
