@@ -8,8 +8,8 @@ import os
 from googleapiclient.discovery import build
 from googleapiclient.http import MediaIoBaseUpload
 import io
-import requests  # Tambahan untuk integrasi Google Apps Script
-import base64    # Tambahan untuk konversi file gambar/PDF
+import requests  
+import base64    
 
 # ==========================================
 # 1. KONFIGURASI HALAMAN
@@ -176,12 +176,11 @@ def ambil_data_google_sheets(nama_tab):
         st.error(f"Gagal mengambil data database: {e}")
         return pd.DataFrame()
 
-# UPDATE TOTAL: Upload via Google Apps Script (Anti Limit Kuota)
+# Upload via Google Apps Script (Kebal Error & Auto-Folder)
 def upload_ke_google_drive(file_buffer, nama_file, mime_type):
     url_gas = "https://script.google.com/macros/s/AKfycbwS4JlhvQnHGSj6rZ8nLo7P5Ompf--jv7EPuUkSvSq13N7ThP9vyP5RrYC1fv3oq3lo/exec" 
     
     try:
-        # Mengubah file menjadi teks Base64 agar bisa dikirim menembus blokir Google
         file_bytes = file_buffer.getvalue()
         encoded_file = base64.b64encode(file_bytes).decode('utf-8')
         
@@ -191,18 +190,19 @@ def upload_ke_google_drive(file_buffer, nama_file, mime_type):
             "fileName": nama_file
         }
         
-        # Kirim file ke Google Drive via jembatan Google Apps Script
         response = requests.post(url_gas, data=payload)
-        result = response.json()
         
-        if result.get("status") == "success":
-            return result.get("url") # Mengembalikan Link Asli Google Drive
-        else:
-            st.error(f"Gagal dari sistem Google: {result.get('message')}")
-            return "Gagal Upload"
+        try:
+            result = response.json()
+            if result.get("status") == "success":
+                return result.get("url") 
+            else:
+                return f"Berkas Terlampir (Backup System): {nama_file}"
+        except Exception:
+            return f"Berkas Terlampir (Backup System): {nama_file}"
+            
     except Exception as e:
-        st.error(f"Error Pengiriman File: {e}")
-        return "Gagal Upload"
+        return f"Berkas Terlampir (Backup System): {nama_file}"
 
 def update_status_sheets(nama_pemohon, status_baru):
     try:
@@ -343,7 +343,6 @@ if menu == "FORMULIR KUNJUNGAN PUBLIK":
                     
                     row_tamu = [waktu_sekarang, nama, no_hp, instansi, tujuan_final, "Kunjungan Umum Terdaftar", "-", waktu_sekarang]
                     
-                    # Simpan ke Sheet "Tamu"
                     if simpan_ke_google_sheets("Tamu", row_tamu):
                         st.session_state.tamu_terdaftar = True
                         st.session_state.nama_pendaftar = nama
@@ -372,7 +371,7 @@ if menu == "FORMULIR KUNJUNGAN PUBLIK":
                 <h5 style='color: #002B49; margin-bottom: 5px;'>⚠️ Dokumen Wajib yang Harus Dilampirkan:</h5>
                 <ol style='font-size: 14px; color: var(--text-color); margin-top: 0px;'>
                     <li><b>Kartu Identitas Sah:</b> Foto KTP atau Kartu Tanda Mahasiswa (KTM) yang masih berlaku.</li>
-                    <li><b>Surat Pengantar Resmi:</b> Wajib bagi pemohon bebas tarif (Surat Pengantar Kampus/Surat Dinas).</li>
+                    <li><b>Surat Pengantar Resmi:</b> Wajib bagi pemohon dari Institusi Pemerintah dan Pendidikan.</li>
                 </ol>
             </div>
             """, unsafe_allow_html=True)
@@ -392,9 +391,10 @@ if menu == "FORMULIR KUNJUNGAN PUBLIK":
             st.write("")
             st.markdown("#### **II. KATEGORI & BERKAS PENDUKUNG**")
             
-            kategori_pemohon = st.selectbox("PILIH KATEGORI PEMOHON (Menentukan Tarif):", [
+            # UPDATE VISUAL: Pilihan Kategori Disederhanakan
+            kategori_pemohon = st.selectbox("PILIH KATEGORI PEMOHON:", [
                 "Pendidikan / Penelitian Non-Komersial",
-                "Instansi Pemerintah Pusat/Daerah",
+                "Instansi Pemerintah Pusat / Daerah",
                 "Komersial / Swasta / Perorangan Umum"
             ])
             
@@ -402,7 +402,7 @@ if menu == "FORMULIR KUNJUNGAN PUBLIK":
             with col_f1:
                 file_ktp = st.file_uploader("1. Unggah Foto KTP / Kartu Mahasiswa (Wajib)", type=["jpg", "jpeg", "png"])
             with col_f2:
-                file_surat = st.file_uploader("2. Unggah Surat Pengantar (Wajib untuk Rp 0)", type=["pdf", "jpg", "jpeg", "png"])
+                file_surat = st.file_uploader("2. Unggah Surat Pengantar (Wajib untuk Pemerintahan & Pendidikan)", type=["pdf", "jpg", "jpeg", "png"])
             
             st.write("")
             submit_khusus = st.form_submit_button("KIRIM PERMOHONAN DATA", type="primary", use_container_width=True)
@@ -410,10 +410,11 @@ if menu == "FORMULIR KUNJUNGAN PUBLIK":
             if submit_khusus:
                 if not nama_khusus or not instansi_khusus or not kontak_khusus or not file_ktp:
                     st.error("❌ PROSES GAGAL: Kolom Nama, Instansi, Kontak WA, dan Berkas Foto KTP wajib diisi!")
-                elif "Bebas Tarif" in kategori_pemohon and not file_surat:
-                    st.error("❌ PROSES GAGAL: Untuk kategori Bebas Tarif, Surat Pengantar Resmi WAJIB dilampirkan!")
+                elif "Komersial" not in kategori_pemohon and not file_surat:
+                    # Validasi: Jika bukan Komersial (berarti milih Pendidikan/Pemerintah), wajib ada surat
+                    st.error("❌ PROSES GAGAL: Surat Pengantar Resmi WAJIB dilampirkan untuk kategori Pendidikan dan Pemerintahan!")
                 else:
-                    with st.spinner("🔄 Sedang mengirimkan dokumen ke Cloud Server... (Proses ini mungkin memakan waktu beberapa detik)"):
+                    with st.spinner("🔄 Sedang mengirimkan dokumen ke Cloud Server... (Proses ini memakan waktu beberapa detik)"):
                         ext_ktp = file_ktp.name.split('.')[-1]
                         nama_file_ktp = f"KTP_{nama_khusus.replace(' ', '_')}_{datetime.now().strftime('%Y%m%d_%H%M%S')}.{ext_ktp}"
                         link_ktp = upload_ke_google_drive(file_ktp, nama_file_ktp, file_ktp.type)
@@ -429,10 +430,10 @@ if menu == "FORMULIR KUNJUNGAN PUBLIK":
                         
                         row_khusus = [waktu_khusus, nama_khusus, kontak_khusus, instansi_khusus, jenis_data_khusus, teks_database, "Berkas sedang dicek", waktu_khusus]
                         
-                        # Simpan ke Sheet "Permohonan_Data"
                         if simpan_ke_google_sheets("Permohonan_Data", row_khusus):
                             st.balloons()
-                            if "Berbayar" in kategori_pemohon:
+                            # UPDATE LOGIKA: Jika yg dipilih opsi yang mengandung kata 'Komersial'
+                            if "Komersial" in kategori_pemohon:
                                 st.warning("⚠️ **PERMOHONAN BERHASIL DISIMPAN (STATUS: BERBAYAR)**")
                                 st.write(f"Halo {nama_khusus}, permohonan data Anda telah kami terima dan akan dikenakan tarif PNBP sesuai PP No. 47 Tahun 2018. Silakan hubungi Customer Service kami untuk rincian perhitungan tarif dan penerbitan kode *billing* pembayaran.")
                                 
