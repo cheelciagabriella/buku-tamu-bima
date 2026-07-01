@@ -176,7 +176,6 @@ def ambil_data_google_sheets(nama_tab):
         st.error(f"Gagal mengambil data database: {e}")
         return pd.DataFrame()
 
-# Upload via Google Apps Script (Kebal Error & Auto-Folder)
 def upload_ke_google_drive(file_buffer, nama_file, mime_type):
     url_gas = "https://script.google.com/macros/s/AKfycbwS4JlhvQnHGSj6rZ8nLo7P5Ompf--jv7EPuUkSvSq13N7ThP9vyP5RrYC1fv3oq3lo/exec" 
     
@@ -212,9 +211,7 @@ def update_status_sheets(nama_pemohon, status_baru):
         cell = sheet.find(nama_pemohon)
         if cell:
             waktu_sekarang = datetime.now(timezone(timedelta(hours=8))).strftime("%Y-%m-%d %H:%M:%S")
-            # Update status di kolom ke-7
             sheet.update_cell(cell.row, 7, status_baru)
-            # Update timestamp perubahan di kolom ke-8
             sheet.update_cell(cell.row, 8, waktu_sekarang)
             return True
         return False
@@ -391,7 +388,6 @@ if menu == "FORMULIR KUNJUNGAN PUBLIK":
             st.write("")
             st.markdown("#### **II. KATEGORI & BERKAS PENDUKUNG**")
             
-            # UPDATE VISUAL: Pilihan Kategori Disederhanakan
             kategori_pemohon = st.selectbox("PILIH KATEGORI PEMOHON:", [
                 "Pendidikan / Penelitian Non-Komersial",
                 "Instansi Pemerintah Pusat / Daerah",
@@ -411,7 +407,6 @@ if menu == "FORMULIR KUNJUNGAN PUBLIK":
                 if not nama_khusus or not instansi_khusus or not kontak_khusus or not file_ktp:
                     st.error("❌ PROSES GAGAL: Kolom Nama, Instansi, Kontak WA, dan Berkas Foto KTP wajib diisi!")
                 elif "Komersial" not in kategori_pemohon and not file_surat:
-                    # Validasi: Jika bukan Komersial (berarti milih Pendidikan/Pemerintah), wajib ada surat
                     st.error("❌ PROSES GAGAL: Surat Pengantar Resmi WAJIB dilampirkan untuk kategori Pendidikan dan Pemerintahan!")
                 else:
                     with st.spinner("🔄 Sedang mengirimkan dokumen ke Cloud Server... (Proses ini memakan waktu beberapa detik)"):
@@ -432,7 +427,6 @@ if menu == "FORMULIR KUNJUNGAN PUBLIK":
                         
                         if simpan_ke_google_sheets("Permohonan_Data", row_khusus):
                             st.balloons()
-                            # UPDATE LOGIKA: Jika yg dipilih opsi yang mengandung kata 'Komersial'
                             if "Komersial" in kategori_pemohon:
                                 st.warning("⚠️ **PERMOHONAN BERHASIL DISIMPAN (STATUS: BERBAYAR)**")
                                 st.write(f"Halo {nama_khusus}, permohonan data Anda telah kami terima dan akan dikenakan tarif PNBP sesuai PP No. 47 Tahun 2018. Silakan hubungi Customer Service kami untuk rincian perhitungan tarif dan penerbitan kode *billing* pembayaran.")
@@ -603,12 +597,22 @@ elif menu == "🔒 PORTAL ADMIN & REKAP LAPORAN":
                             col_info, col_links = st.columns([2, 1])
                             teks_detail = str(row[kolom_keperluan])
                             
+                            # Ekstrak Kategori Pemohon dengan rapi dan bersihkan data lama otomatis
+                            kategori_text = "Umum"
+                            if "Kategori:" in teks_detail:
+                                try:
+                                    kategori_text = teks_detail.split("Kategori:")[1].split("|")[0].strip()
+                                    kategori_text = kategori_text.replace("(Bebas Tarif Rp 0)", "").replace("(Menentukan Tarif)", "").strip()
+                                except:
+                                    pass
+                            
                             with col_info:
                                 st.markdown(f"### 👤 {row[kolom_nama]}")
                                 st.write(f"**⏰ Waktu Registrasi:** {row[kolom_waktu]}")
                                 st.write(f"**🏢 Asal Instansi:** {row[kolom_instansi]}")
                                 st.write(f"**📱 Kontak WA:** {row[kolom_kontak]}")
                                 st.write(f"**📂 Layanan Diminta:** {row[kolom_layanan]}")
+                                st.write(f"**🏷️ Kategori:** {kategori_text}")
                                 
                                 current_st = row[6] if len(row) >= 7 else "Berkas sedang dicek"
                                 waktu_up = row[7] if len(row) >= 8 else row[kolom_waktu]
@@ -617,28 +621,34 @@ elif menu == "🔒 PORTAL ADMIN & REKAP LAPORAN":
                             
                             with col_links:
                                 st.markdown("**📂 Akses Berkas Google Drive:**")
-                                if "http" in teks_detail:
-                                    link_ktp = ""
-                                    link_surat = ""
+                                link_ktp = ""
+                                link_surat = ""
+                                
+                                if "|" in teks_detail:
                                     try:
-                                        if "|" in teks_detail:
-                                            parts = teks_detail.split("|")
-                                            for part in parts:
-                                                if "KTP:" in part:
-                                                    link_ktp = part.split("KTP:")[1].strip()
-                                                elif "Surat:" in part:
-                                                    link_surat = part.split("Surat:")[1].strip()
+                                        parts = teks_detail.split("|")
+                                        for part in parts:
+                                            if "KTP:" in part:
+                                                link_ktp = part.split("KTP:")[1].strip()
+                                            elif "Surat:" in part:
+                                                link_surat = part.split("Surat:")[1].strip()
                                     except:
                                         pass
-                                    
+                                else:
+                                    link_ktp = teks_detail
+                                
+                                if "http" in link_ktp or "http" in link_surat:
                                     if "http" in link_ktp:
                                         st.link_button("👁️ Lihat Identitas / KTP", link_ktp, use_container_width=True, type="primary")
                                     if "http" in link_surat:
                                         st.write("")
                                         st.link_button("👁️ Lihat Surat Pengantar", link_surat, use_container_width=True)
                                 else:
-                                    st.warning("⚠️ Data Pengujian Lama")
-                                    st.caption(f"Nama berkas terdaftar: {teks_detail}")
+                                    st.warning("⚠️ Berkas Fisik Tidak Ditemukan / Simulasi")
+                                    if link_ktp and "KTP:" not in link_ktp:
+                                        st.caption(f"KTP: {link_ktp}")
+                                    if link_surat and "Surat:" not in link_surat:
+                                        st.caption(f"Surat: {link_surat}")
                     
                     st.divider()
                     st.markdown("### ⚙️ PANEL UPDATE STATUS PROGRESS DATA KONSUMEN")
