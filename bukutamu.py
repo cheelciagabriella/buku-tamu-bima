@@ -200,11 +200,7 @@ def update_status_sheets(nama_pemohon, status_baru):
         sheet = client.open_by_key("1qdrgfAhB_NKPSIxP9p5cY0LF1RmXRzqG-aWUNEx7r94").worksheet("Tamu")
         cell = sheet.find(nama_pemohon)
         if cell:
-            waktu_sekarang = datetime.now(timezone(timedelta(hours=8))).strftime("%Y-%m-%d %H:%M:%S")
-            # Update status di kolom ke-7
             sheet.update_cell(cell.row, 7, status_baru)
-            # Update timestamp perubahan di kolom ke-8
-            sheet.update_cell(cell.row, 8, waktu_sekarang)
             return True
         return False
     except Exception as e:
@@ -283,7 +279,7 @@ if menu == "FORMULIR KUNJUNGAN PUBLIK":
     
     tab1, tab2, tab3, tab4 = st.tabs([
         "E-BUKU TAMU", 
-        "PERMOHONAN DATA (UMUM)", 
+        "PERMOHONAN DATA", 
         "E-KATALOG PNBP",
         "🔍 LACAK STATUS DATA"
     ])
@@ -330,8 +326,7 @@ if menu == "FORMULIR KUNJUNGAN PUBLIK":
                     tujuan_final = alasan_lainnya if tujuan == "Lain-lain" else tujuan
                     waktu_sekarang = datetime.now(timezone(timedelta(hours=8))).strftime("%Y-%m-%d %H:%M:%S")
                     
-                    # Kolom 8 diset waktu_sekarang agar formasi kolom konsisten
-                    row_tamu = [waktu_sekarang, nama, no_hp, instansi, tujuan_final, "Kunjungan Umum Terdaftar", "-", waktu_sekarang]
+                    row_tamu = [waktu_sekarang, nama, no_hp, instansi, tujuan_final, "Kunjungan Umum Terdaftar", "-"]
                     
                     if simpan_ke_google_sheets("Tamu", row_tamu):
                         st.session_state.tamu_terdaftar = True
@@ -416,8 +411,7 @@ if menu == "FORMULIR KUNJUNGAN PUBLIK":
                         waktu_khusus = datetime.now(timezone(timedelta(hours=8))).strftime("%Y-%m-%d %H:%M:%S")
                         teks_database = f"Kategori: {kategori_pemohon} | Link KTP: {link_ktp} | Link Surat: {link_surat}"
                         
-                        # Set default awal ke "Berkas sedang dicek" beserta timestampnya
-                        row_khusus = [waktu_khusus, nama_khusus, kontak_khusus, instansi_khusus, jenis_data_khusus, teks_database, "Berkas sedang dicek", waktu_khusus]
+                        row_khusus = [waktu_khusus, nama_khusus, kontak_khusus, instansi_khusus, jenis_data_khusus, teks_database, "Sedang Diproses"]
                         
                         if simpan_ke_google_sheets("Tamu", row_khusus):
                             st.balloons()
@@ -474,33 +468,22 @@ if menu == "FORMULIR KUNJUNGAN PUBLIK":
                             jenis_data = data_terakhir[df_tamu.columns[4]]
                             waktu_minta = data_terakhir[df_tamu.columns[0]]
                             
-                            # Ekstrak Status (Kolom 7) & Waktu Update (Kolom 8)
-                            status_proses = "Berkas sedang dicek"
-                            waktu_update = waktu_minta
-                            
+                            status_proses = "Sedang Diproses"
                             if len(data_terakhir) >= 7:
-                                status_proses = data_terakhir.iloc[6] if data_terakhir.iloc[6] else "Berkas sedang dicek"
-                            if len(data_terakhir) >= 8:
-                                waktu_update = data_terakhir.iloc[7] if data_terakhir.iloc[7] else waktu_minta
+                                status_proses = data_terakhir.iloc[6] if data_terakhir.iloc[6] else "Sedang Diproses"
                             
                             st.write("")
                             st.markdown(f"### 📊 Resume Pengajuan: **{nama_user}**")
-                            st.markdown(f"**📂 Dokumen Data:** {jenis_data}  \n**⏰ Waktu Registrasi Awal:** {waktu_minta}")
+                            st.markdown(f"**📂 Dokumen Data:** {jenis_data}  \n**⏰ Waktu Registrasi:** {waktu_minta}")
                             st.divider()
                             
                             st.markdown("#### **Progress Alur Kerja Layanan:**")
-                            st.caption(f"🕒 *Status terakhir diperbarui pada: {waktu_update}*")
-                            
-                            if status_proses == "Berkas sedang dicek":
-                                st.info("🔎 **STATUS: BERKAS SEDANG DICEK** \nPermohonan Anda telah kami terima. Saat ini tim sedang memverifikasi kelengkapan dan keabsahan dokumen pendukung (KTP/Surat Pengantar).")
-                            elif status_proses == "Data sedang diproses":
-                                st.warning("🔄 **STATUS: DATA SEDANG DIPROSES** \nBerkas fisik/dokumen pendukung Anda sukses diverifikasi. Saat ini tim teknis data Stamet Bima sedang menyiapkan arsip data meteorologi yang Anda butuhkan.")
-                            elif status_proses == "Data siap dikirim / diambil":
+                            if status_proses == "Sedang Diproses":
+                                st.warning("🔄 **STATUS: SEDANG DIPROSES** \nBerkas fisik/dokumen pendukung Anda sukses diverifikasi. Saat ini tim teknis data Stamet Bima sedang menyiapkan arsip data meteorologi yang Anda butuhkan.")
+                            elif status_proses == "Data Siap Diambil / Dikirim":
                                 st.success("🎉 **STATUS: DATA SELESAI / SIAP DIAMBIL** \nKabar baik! Permintaan data Anda telah selesai dikerjakan. Silakan cek berkas masuk di email/WhatsApp Anda atau datang langsung ke ruang PTSP Stasiun.")
-                            elif status_proses == "Berkas ditolak (jika tidak lengkap)":
+                            elif status_proses == "Ditolak / Berkas Tidak Lengkap":
                                 st.error("❌ **STATUS: PERMOHONAN DITOLAK** \nMohon maaf, permohonan Anda ditolak karena berkas bukti pendukung (KTP/Surat Pengantar) buram, tidak jelas, atau tidak memenuhi syarat. Silakan lakukan registrasi ulang.")
-                            else:
-                                st.info(f"🚩 **STATUS:** {status_proses}")
                         else:
                             st.error("❌ Data Tidak Ditemukan. Pastikan nomor WhatsApp yang Anda masukkan sama persis dengan yang diisi pada formulir.")
                     else:
@@ -585,15 +568,13 @@ elif menu == "🔒 PORTAL ADMIN & REKAP LAPORAN":
                             
                             with col_info:
                                 st.markdown(f"### 👤 {row[kolom_nama]}")
-                                st.write(f"**⏰ Waktu Registrasi:** {row[kolom_waktu]}")
+                                st.write(f"**⏰ Waktu Kunjungan:** {row[kolom_waktu]}")
                                 st.write(f"**🏢 Asal Instansi:** {row[kolom_instansi]}")
                                 st.write(f"**📱 Kontak WA:** {row[kolom_kontak]}")
                                 st.write(f"**📂 Layanan Diminta:** {row[kolom_layanan]}")
                                 
-                                current_st = row[6] if len(row) >= 7 else "Berkas sedang dicek"
-                                waktu_up = row[7] if len(row) >= 8 else row[kolom_waktu]
+                                current_st = row[6] if len(row) >= 7 else "Sedang Diproses"
                                 st.info(f"🚩 **Status Saat Ini:** {current_st}")
-                                st.caption(f"Terakhir diupdate: {waktu_up}")
                             
                             with col_links:
                                 st.markdown("**📂 Akses Berkas Google Drive:**")
@@ -629,10 +610,9 @@ elif menu == "🔒 PORTAL ADMIN & REKAP LAPORAN":
                     if list_nama_khusus:
                         pilih_nama = st.selectbox("Pilih Nama Pemohon Khusus:", list_nama_khusus)
                         pilih_status = st.selectbox("Set Status Progres Terbaru:", [
-                            "Berkas sedang dicek", 
-                            "Data sedang diproses", 
-                            "Data siap dikirim / diambil", 
-                            "Berkas ditolak (jika tidak lengkap)"
+                            "Sedang Diproses", 
+                            "Data Siap Diambil / Dikirim", 
+                            "Ditolak / Berkas Tidak Lengkap"
                         ])
                         
                         if st.button("SIMPAN PEMBARUAN STATUS", type="primary"):
