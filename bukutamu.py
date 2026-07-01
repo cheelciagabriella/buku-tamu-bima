@@ -597,7 +597,6 @@ elif menu == "🔒 PORTAL ADMIN & REKAP LAPORAN":
                             col_info, col_links = st.columns([2, 1])
                             teks_detail = str(row[kolom_keperluan])
                             
-                            # Ekstrak Kategori Pemohon dengan rapi dan bersihkan data lama otomatis
                             kategori_text = "Umum"
                             if "Kategori:" in teks_detail:
                                 try:
@@ -614,8 +613,9 @@ elif menu == "🔒 PORTAL ADMIN & REKAP LAPORAN":
                                 st.write(f"**📂 Layanan Diminta:** {row[kolom_layanan]}")
                                 st.write(f"**🏷️ Kategori:** {kategori_text}")
                                 
-                                current_st = row[6] if len(row) >= 7 else "Berkas sedang dicek"
-                                waktu_up = row[7] if len(row) >= 8 else row[kolom_waktu]
+                                # FIX: Perbaikan bug pembacaan kolom indeks (menggunakan .iloc)
+                                current_st = row.iloc[6] if len(row) >= 7 else "Berkas sedang dicek"
+                                waktu_up = row.iloc[7] if len(row) >= 8 else row[kolom_waktu]
                                 st.info(f"🚩 **Status Saat Ini:** {current_st}")
                                 st.caption(f"Terakhir diupdate: {waktu_up}")
                             
