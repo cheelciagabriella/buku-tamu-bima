@@ -8,6 +8,8 @@ import os
 from googleapiclient.discovery import build
 from googleapiclient.http import MediaIoBaseUpload
 import io
+import requests  # Tambahan untuk integrasi Google Apps Script
+import base64    # Tambahan untuk konversi file gambar/PDF
 
 # ==========================================
 # 1. KONFIGURASI HALAMAN
@@ -174,31 +176,34 @@ def ambil_data_google_sheets(nama_tab):
         st.error(f"Gagal mengambil data database: {e}")
         return pd.DataFrame()
 
+# UPDATE TOTAL: Upload via Google Apps Script (Anti Limit Kuota)
 def upload_ke_google_drive(file_buffer, nama_file, mime_type):
+    url_gas = "https://script.google.com/macros/s/AKfycbwS4JlhvQnHGSj6rZ8nLo7P5Ompf--jv7EPuUkSvSq13N7ThP9vyP5RrYC1fv3oq3lo/exec" 
+    
     try:
-        creds = dapatkan_kredensial()
-        service = build('drive', 'v3', credentials=creds)
-        FOLDER_ID = "1FtwvPLbWcTPpyIOxMRBW88oLHri_rZVH" 
-
-        file_metadata = {
-            'name': nama_file,
-            'parents': [FOLDER_ID]
+        # Mengubah file menjadi teks Base64 agar bisa dikirim menembus blokir Google
+        file_bytes = file_buffer.getvalue()
+        encoded_file = base64.b64encode(file_bytes).decode('utf-8')
+        
+        payload = {
+            "fileData": encoded_file,
+            "mimeType": mime_type,
+            "fileName": nama_file
         }
         
-        media = MediaIoBaseUpload(io.BytesIO(file_buffer.getvalue()), mimetype=mime_type, resumable=True)
-        file = service.files().create(
-            body=file_metadata, 
-            media_body=media, 
-            fields='id, webViewLink',
-            supportsAllDrives=True
-        ).execute()
+        # Kirim file ke Google Drive via jembatan Google Apps Script
+        response = requests.post(url_gas, data=payload)
+        result = response.json()
         
-        return file.get('webViewLink')
+        if result.get("status") == "success":
+            return result.get("url") # Mengembalikan Link Asli Google Drive
+        else:
+            st.error(f"Gagal dari sistem Google: {result.get('message')}")
+            return "Gagal Upload"
     except Exception as e:
-        st.error(f"Gagal mengunggah berkas ke Cloud Storage: {e}")
+        st.error(f"Error Pengiriman File: {e}")
         return "Gagal Upload"
 
-# UPDATE FUNGSI: Arahkan update status ke sheet Permohonan_Data
 def update_status_sheets(nama_pemohon, status_baru):
     try:
         creds = dapatkan_kredensial()
@@ -408,7 +413,7 @@ if menu == "FORMULIR KUNJUNGAN PUBLIK":
                 elif "Bebas Tarif" in kategori_pemohon and not file_surat:
                     st.error("❌ PROSES GAGAL: Untuk kategori Bebas Tarif, Surat Pengantar Resmi WAJIB dilampirkan!")
                 else:
-                    with st.spinner("🔄 Sedang mengamankan dokumen arsip ke Google Drive Cloud..."):
+                    with st.spinner("🔄 Sedang mengirimkan dokumen ke Cloud Server... (Proses ini mungkin memakan waktu beberapa detik)"):
                         ext_ktp = file_ktp.name.split('.')[-1]
                         nama_file_ktp = f"KTP_{nama_khusus.replace(' ', '_')}_{datetime.now().strftime('%Y%m%d_%H%M%S')}.{ext_ktp}"
                         link_ktp = upload_ke_google_drive(file_ktp, nama_file_ktp, file_ktp.type)
@@ -422,10 +427,9 @@ if menu == "FORMULIR KUNJUNGAN PUBLIK":
                         waktu_khusus = datetime.now(timezone(timedelta(hours=8))).strftime("%Y-%m-%d %H:%M:%S")
                         teks_database = f"Kategori: {kategori_pemohon} | Link KTP: {link_ktp} | Link Surat: {link_surat}"
                         
-                        # Set default awal ke "Berkas sedang dicek" beserta timestampnya
                         row_khusus = [waktu_khusus, nama_khusus, kontak_khusus, instansi_khusus, jenis_data_khusus, teks_database, "Berkas sedang dicek", waktu_khusus]
                         
-                        # UPDATE: Simpan ke Sheet "Permohonan_Data"
+                        # Simpan ke Sheet "Permohonan_Data"
                         if simpan_ke_google_sheets("Permohonan_Data", row_khusus):
                             st.balloons()
                             if "Berbayar" in kategori_pemohon:
@@ -470,7 +474,6 @@ if menu == "FORMULIR KUNJUNGAN PUBLIK":
                 st.warning("Silakan isi nomor WhatsApp Anda terlebih dahulu.")
             else:
                 with st.spinner("Mencari data di database stasiun..."):
-                    # UPDATE: Melacak data dari sheet "Permohonan_Data"
                     df_permohonan = ambil_data_google_sheets("Permohonan_Data")
                     if not df_permohonan.empty:
                         kolom_kontak = df_permohonan.columns[2]
@@ -482,7 +485,6 @@ if menu == "FORMULIR KUNJUNGAN PUBLIK":
                             jenis_data = data_terakhir[df_permohonan.columns[4]]
                             waktu_minta = data_terakhir[df_permohonan.columns[0]]
                             
-                            # Ekstrak Status (Kolom 7) & Waktu Update (Kolom 8)
                             status_proses = "Berkas sedang dicek"
                             waktu_update = waktu_minta
                             
@@ -544,7 +546,6 @@ elif menu == "🔒 PORTAL ADMIN & REKAP LAPORAN":
         
         st.write("")
         
-        # === TAMBAHAN MENU SHORTCUT ===
         st.markdown("#### 🔗 Akses Cepat Cloud Storage")
         col_sheet, col_drive = st.columns(2)
         with col_sheet:
@@ -552,12 +553,10 @@ elif menu == "🔒 PORTAL ADMIN & REKAP LAPORAN":
         with col_drive:
             st.link_button("📁 Buka Google Drive (Folder Arsip)", "https://drive.google.com/drive/folders/1FtwvPLbWcTPpyIOxMRBW88oLHri_rZVH", use_container_width=True)
         st.divider()
-        # ==============================
         
         tab_db_tamu, tab_arsip = st.tabs(["DATABASE TAMU & LAYANAN", "AUDIT ARSIP DOKUMEN CLOUD"])
         
         with tab_db_tamu:
-            # UPDATE: Memisahkan tampilan tabel Tamu Biasa dan Permohonan Data
             st.subheader("1. Tabel Rekapitulasi Buku Tamu")
             with st.spinner("Sedang menarik data Tamu dari Cloud..."):
                 df_tamu = ambil_data_google_sheets("Tamu")
@@ -585,7 +584,6 @@ elif menu == "🔒 PORTAL ADMIN & REKAP LAPORAN":
             st.write("Sistem otomatis menyandingkan log data dengan berkas digital fisik di Google Drive.")
             st.write("")
             
-            # UPDATE: Audit mengambil langsung dari sheet Permohonan_Data
             df_permohonan = ambil_data_google_sheets("Permohonan_Data")
             
             if not df_permohonan.empty:
