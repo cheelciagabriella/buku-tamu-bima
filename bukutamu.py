@@ -166,10 +166,21 @@ def ambil_data_google_sheets(nama_tab):
         client = gspread.authorize(creds)
         sheet = client.open_by_key("1qdrgfAhB_NKPSIxP9p5cY0LF1RmXRzqG-aWUNEx7r94").worksheet(nama_tab)
         data = sheet.get_all_values()
-        if len(data) > 1:
-            return pd.DataFrame(data[1:], columns=data[0])
-        elif len(data) == 1:
-            return pd.DataFrame(columns=data[0])
+        
+        if len(data) > 0:
+            # FIX: Pembersih nama kolom ganda/kosong (Menghindari ValueError Duplicate Column)
+            headers = data[0]
+            kolom_unik = []
+            for i, col in enumerate(headers):
+                nama_kolom = col.strip()
+                if nama_kolom == "" or nama_kolom in kolom_unik:
+                    nama_kolom = f"Kolom_Data_{i}" # Diberi nama unik
+                kolom_unik.append(nama_kolom)
+                
+            if len(data) > 1:
+                return pd.DataFrame(data[1:], columns=kolom_unik)
+            else:
+                return pd.DataFrame(columns=kolom_unik)
         else:
             return pd.DataFrame()
     except Exception as e:
@@ -406,7 +417,7 @@ if menu == "FORMULIR KUNJUNGAN PUBLIK":
             if submit_khusus:
                 if not nama_khusus or not instansi_khusus or not kontak_khusus or not file_ktp:
                     st.error("❌ PROSES GAGAL: Kolom Nama, Instansi, Kontak WA, dan Berkas Foto KTP wajib diisi!")
-                elif "Komersial" not in kategori_pemohon and not file_surat:
+                elif kategori_pemohon != "Komersial / Swasta / Perorangan Umum" and not file_surat:
                     st.error("❌ PROSES GAGAL: Surat Pengantar Resmi WAJIB dilampirkan untuk kategori Pendidikan dan Pemerintahan!")
                 else:
                     with st.spinner("🔄 Sedang mengirimkan dokumen ke Cloud Server... (Proses ini memakan waktu beberapa detik)"):
@@ -427,7 +438,7 @@ if menu == "FORMULIR KUNJUNGAN PUBLIK":
                         
                         if simpan_ke_google_sheets("Permohonan_Data", row_khusus):
                             st.balloons()
-                            if "Komersial" in kategori_pemohon:
+                            if kategori_pemohon == "Komersial / Swasta / Perorangan Umum":
                                 st.warning("⚠️ **PERMOHONAN BERHASIL DISIMPAN (STATUS: BERBAYAR)**")
                                 st.write(f"Halo {nama_khusus}, permohonan data Anda telah kami terima dan akan dikenakan tarif PNBP sesuai PP No. 47 Tahun 2018. Silakan hubungi Customer Service kami untuk rincian perhitungan tarif dan penerbitan kode *billing* pembayaran.")
                                 
@@ -613,7 +624,6 @@ elif menu == "🔒 PORTAL ADMIN & REKAP LAPORAN":
                                 st.write(f"**📂 Layanan Diminta:** {row[kolom_layanan]}")
                                 st.write(f"**🏷️ Kategori:** {kategori_text}")
                                 
-                                # FIX: Perbaikan bug pembacaan kolom indeks (menggunakan .iloc)
                                 current_st = row.iloc[6] if len(row) >= 7 else "Berkas sedang dicek"
                                 waktu_up = row.iloc[7] if len(row) >= 8 else row[kolom_waktu]
                                 st.info(f"🚩 **Status Saat Ini:** {current_st}")
