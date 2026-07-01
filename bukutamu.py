@@ -393,9 +393,9 @@ if menu == "FORMULIR KUNJUNGAN PUBLIK":
             st.markdown("#### **II. KATEGORI & BERKAS PENDUKUNG**")
             
             kategori_pemohon = st.selectbox("PILIH KATEGORI PEMOHON (Menentukan Tarif):", [
-                "Pendidikan / Penelitian Non-Komersial (Bebas Tarif Rp 0)",
-                "Instansi Pemerintah Pusat/Daerah (Bebas Tarif Rp 0)",
-                "Komersial / Swasta / Perorangan Umum (Berbayar PNBP)"
+                "Pendidikan / Penelitian Non-Komersial",
+                "Instansi Pemerintah Pusat/Daerah",
+                "Komersial / Swasta / Perorangan Umum"
             ])
             
             col_f1, col_f2 = st.columns(2)
