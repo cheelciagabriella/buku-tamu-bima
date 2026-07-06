@@ -431,10 +431,8 @@ if menu == "FORMULIR KUNJUNGAN PUBLIK":
                 file_surat_permohonan = st.file_uploader("2. Surat Permohonan Permintaan Data (Wajib) *", type=["pdf"])
                 file_proposal = st.file_uploader("5. Proposal & Lembar Pengesahan (Wajib untuk Mahasiswa)", type=["pdf"])
             with col_u2:
-                # Menambahkan Tautan Download langsung di atas uploader
                 st.markdown("📄 **[Download Format Surat Pengantar](https://docs.google.com/document/d/1YNKGAGzif4i36bvLLCZ2jDyz8oYYoQLj/edit)**")
                 file_surat_pengantar = st.file_uploader("3. Surat Pengantar Sekolah/Univ (Wajib untuk Mahasiswa)", type=["pdf"])
-                
                 st.markdown("📄 **[Download Format Surat Pernyataan Bermeterai](https://docs.google.com/document/d/1N6nBHU8PIaGtXIX6u96T9Z0f6cYcnkb6/edit)**")
                 file_surat_pernyataan = st.file_uploader("4. Surat Pernyataan Bermeterai (Wajib) *", type=["pdf"])
             
@@ -458,8 +456,7 @@ if menu == "FORMULIR KUNJUNGAN PUBLIK":
                 elif "Pendidikan" in kategori_pemohon and (not file_surat_pengantar or not file_proposal):
                     st.error("❌ PROSES GAGAL: Surat Pengantar dan Proposal WAJIB dilampirkan untuk permohonan kategori Pendidikan/Mahasiswa!")
                 else:
-                    with st.spinner("🔄 Sedang mengunggah 5 dokumen ke Cloud Server... (Mohon tunggu beberapa detik, jangan tutup halaman ini)"):
-                        
+                    with st.spinner("🔄 Sedang mengunggah dokumen ke Cloud Server... (Mohon tunggu beberapa detik)"):
                         def proses_upload(file_obj, prefix):
                             if file_obj is not None:
                                 ext = file_obj.name.split('.')[-1]
@@ -484,18 +481,27 @@ if menu == "FORMULIR KUNJUNGAN PUBLIK":
                             if "Komersial" in kategori_pemohon:
                                 st.warning("⚠️ **PERMOHONAN BERHASIL DISIMPAN (STATUS: BERBAYAR)**")
                                 st.write(f"Halo {nama_khusus}, permohonan data Anda telah kami terima dan akan dikenakan tarif PNBP sesuai PP No. 47 Tahun 2018. Silakan hubungi Customer Service kami untuk rincian perhitungan tarif dan penerbitan kode *billing* pembayaran.")
-                                
-                                pesan_wa_pnbp = f"Halo%20Admin%20Stamet%20Bima,%20saya%20{nama_khusus}%20baru%20saja%20mengajukan%20permohonan%20data%20Komersial.%20Mohon%20informasi%20rincian%20tarif%20PNBP-nya."
-                                st.link_button("💳 KLIK DI SINI UNTUK CHAT CS VIA WHATSAPP", f"https://wa.me/{NOMOR_WA_CS}?text={pesan_wa_pnbp}", type="primary", use_container_width=True)
                             else:
                                 st.success("✔️ **PERMOHONAN BERHASIL DISIMPAN (STATUS: BEBAS TARIF Rp 0)**")
-                                st.write("Kelima dokumen syarat digital Anda telah sukses diamankan ke Cloud Storage stasiun. Silakan lacak progres validasi berkas Anda di Tab 'LACAK STATUS DATA' menggunakan nomor WhatsApp yang didaftarkan.")
+                                st.write("Dokumen digital Anda telah sukses diamankan ke Cloud Storage stasiun. Silakan lacak progres validasi berkas Anda di Tab 'LACAK STATUS DATA' menggunakan nomor WhatsApp yang didaftarkan.")
 
     # --- TAB 3: E-KATALOG PNBP ---
     with tab3:
-        st.subheader("KATALOG TARIF RESMI JASA DATA DAN INFORMASI")
+        st.markdown("<h3 style='color: #002B49; margin-bottom: 0px;'>Katalog Tarif Resmi Jasa Data dan Informasi</h3>", unsafe_allow_html=True)
         st.caption("Berdasarkan Peraturan Pemerintah Nomor 47 Tahun 2018 tentang Jenis dan Tarif atas Jenis Penerimaan Negara Bukan Pajak (PNBP) yang berlaku pada BMKG.")
+        st.write("")
         
+        # 1. KOTAK INFO TARIF RP 0 VS BERBAYAR
+        col_t1, col_t2 = st.columns(2)
+        with col_t1:
+            st.info("🎓 **Layanan Tarif Rp 0,- (GRATIS)**\nDiperuntukkan secara khusus bagi Mahasiswa/Pelajar (Tugas Akhir/Skripsi), Kegiatan Sosial, Keagamaan, dan Instansi Pemerintah Pusat/Daerah berskala non-komersial.")
+        with col_t2:
+            st.warning("💼 **Layanan PNBP (BERBAYAR)**\nDiperuntukkan bagi Instansi Swasta, BUMN, Kontraktor, dan Perorangan untuk keperluan operasional proyek, klaim asuransi, dan kegiatan berorientasi profit/komersial.")
+        
+        st.write("")
+        st.markdown("#### 💰 Tabel Rincian Layanan Prioritas Stamet Bima")
+        
+        # 2. TABEL KATALOG
         raw_data_ia = {
             "No.": ["1", "2", "3", "4"],
             "Jenis Layanan (Penerimaan Negara Bukan Pajak)": [
@@ -517,8 +523,27 @@ if menu == "FORMULIR KUNJUNGAN PUBLIK":
                 "Rp 3.750.000,00"
             ]
         }
-        
         st.dataframe(pd.DataFrame(raw_data_ia), use_container_width=True, hide_index=True)
+        
+        st.write("")
+        
+        # 3. EXPANDER TATA CARA PEMBAYARAN SIMPONI
+        with st.expander("💳 **KLIK DI SINI: Informasi Tata Cara Pembayaran Resmi ke Kas Negara (e-Billing SIMPONI)**"):
+            st.markdown("""
+            Demi menjaga transparansi dan akuntabilitas pelayanan publik, seluruh biaya PNBP langsung disetorkan ke Kas Negara tanpa melalui rekening pribadi petugas. Berikut alurnya:
+            
+            1. **Penerbitan Kode Billing:** Setelah permohonan data Anda disetujui, Petugas PTSP (Admin) akan membuatkan kode *e-Billing* resmi melalui aplikasi SIMPONI Kementerian Keuangan. Kode ini akan dikirimkan ke WhatsApp Anda.
+            2. **Proses Pembayaran:** Anda dapat melakukan pembayaran menggunakan 15 digit kode *billing* tersebut melalui:
+               * Teller Bank Persepsi (BRI, BNI, Mandiri, BCA, dll) / Kantor Pos.
+               * ATM / Mobile Banking / Internet Banking (Menu: Pembayaran -> Penerimaan Negara / MPN).
+               * *E-Commerce* (Tokopedia, Bukalapak) pada menu Penerimaan Negara.
+            3. **Konfirmasi & Penerimaan Data:** Setelah berhasil membayar, simpan struk Bukti Penerimaan Negara (BPN), lalu unggah/kirimkan foto struk tersebut ke WhatsApp *Customer Service* kami. Data hasil (softcopy/hardcopy) akan segera kami serahkan.
+            """)
+        
+        st.write("")
+        # 4. TOMBOL KONSULTASI KE WA
+        pesan_tanya_tarif = "Halo%20Admin%20Stamet%20Bima,%20saya%20ingin%20konsultasi%20mengenai%20estimasi%20tarif%20PNBP%20untuk%20permintaan%20data%20..."
+        st.link_button("📞 Konsultasi Estimasi Biaya via WhatsApp", f"https://wa.me/{NOMOR_WA_CS}?text={pesan_tanya_tarif}", use_container_width=True)
 
     # --- TAB 4: FITUR TRACKING / LACAK DATA UNTUK KONSUMEN ---
     with tab4:
