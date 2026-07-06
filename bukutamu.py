@@ -449,19 +449,15 @@ if menu == "FORMULIR KUNJUNGAN PUBLIK":
                 selisih_hari = (tgl_selesai - tgl_mulai).days
                 is_valid = True
                 
-                # Pengecekan General: Semua kolom isian teks dan file dasar wajib harus ada
                 if not nama_khusus or not ktp_nim or not instansi_khusus or not kontak_khusus or not email_khusus or not judul_penelitian or not lokasi_data or not deskripsi_tujuan or not file_ktp or not file_surat_permohonan or not file_bukti_skm:
                     is_valid = False
                 
-                # Pengecekan Spesifik: Untuk Kategori Rp 0
                 if "Tarif Rp 0" in kategori_pemohon and (not file_surat_pengantar or not file_surat_pernyataan):
                     is_valid = False
                     
-                # Pengecekan Spesifik: Untuk Kategori Pendidikan/Mahasiswa
                 if "Pendidikan" in kategori_pemohon and not file_proposal:
                     is_valid = False
 
-                # Eksekusi Validasi
                 if not is_valid:
                     st.error("❌ PROSES GAGAL: Pastikan seluruh kolom isian dan berkas yang bertanda Wajib (*) telah diisi dan diunggah sesuai dengan kategori permohonan Anda!")
                 elif not cek_skm:
@@ -528,6 +524,9 @@ if menu == "FORMULIR KUNJUNGAN PUBLIK":
         st.caption("Berdasarkan Peraturan Pemerintah Nomor 47 Tahun 2018 tentang Jenis dan Tarif atas Jenis Penerimaan Negara Bukan Pajak (PNBP) yang berlaku pada BMKG.")
         st.write("")
         
+        st.markdown("📥 **[Unduh File Asli Peraturan Pemerintah (PP) Nomor 47 Tahun 2018 (.PDF)](https://drive.google.com/file/d/1GYgfIqjigGiQF5z_w1y_qg3oGdI9Xe0K/view?usp=drive_web)**")
+        st.write("")
+        
         col_t1, col_t2 = st.columns(2)
         with col_t1:
             st.info("🎓 **Layanan Tarif Rp 0,- (GRATIS)**\nDiperuntukkan secara khusus bagi Mahasiswa/Pelajar (Tugas Akhir/Skripsi), Kegiatan Sosial, Keagamaan, dan Instansi Pemerintah Pusat/Daerah berskala non-komersial.")
@@ -538,22 +537,16 @@ if menu == "FORMULIR KUNJUNGAN PUBLIK":
         st.markdown("#### 💰 Tabel Rincian Layanan Prioritas Stamet Bima")
         
         raw_data_ia = {
-            "No.": ["1", "2", "3", "4"],
+            "No.": ["1", "2"],
             "Jenis Layanan (Penerimaan Negara Bukan Pajak)": [
-                "Informasi Cuaca untuk Penerbangan (Informasi Khusus MKG)", 
-                "Informasi Cuaca Khusus untuk Kegiatan Komersial Outdoor/Indoor",
                 "Informasi Meteorologi untuk Keperluan Klaim Asuransi", 
                 "Informasi Meteorologi Khusus untuk Pendukung Kegiatan Proyek, Survei, dan Penelitian Komersial (Jasa Konsultasi Meteorologi)"
             ],
             "Satuan": [
-                "per route unit", 
-                "per lokasi per hari", 
                 "per lokasi per hari", 
                 "per lokasi"
             ],
             "Tarif Resmi": [
-                "4% dari biaya pelayanan jasa navigasi penerbangan", 
-                "Rp 100.000,00", 
                 "Rp 175.000,00", 
                 "Rp 3.750.000,00"
             ]
@@ -575,7 +568,7 @@ if menu == "FORMULIR KUNJUNGAN PUBLIK":
             """)
         
         st.write("")
-        pesan_tanya_tarif = "Halo%20Admin%20Pantau%20Bima,%20saya%20ingin%20konsultasi%20mengenai%20estimasi%20tarif%20PNBP%20untuk%20permintaan%20data%20..."
+        pesan_tanya_tarif = "Halo%20Admin%20PTSP%20Stamet%20Bima,%20saya%20ingin%20konsultasi%20mengenai%20estimasi%20tarif%20PNBP%20untuk%20permintaan%20data%20..."
         st.link_button("📞 Konsultasi Estimasi Biaya via WhatsApp", f"https://wa.me/{NOMOR_WA_CS}?text={pesan_tanya_tarif}", use_container_width=True)
 
     # --- TAB 4: FITUR TRACKING / LACAK DATA UNTUK KONSUMEN ---
