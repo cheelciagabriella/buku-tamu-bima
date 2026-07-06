@@ -5,9 +5,6 @@ import streamlit.components.v1 as components
 import gspread
 from oauth2client.service_account import ServiceAccountCredentials
 import os
-from googleapiclient.discovery import build
-from googleapiclient.http import MediaIoBaseUpload
-import io
 import requests  
 import base64    
 
@@ -206,12 +203,12 @@ def upload_ke_google_drive(file_buffer, nama_file, mime_type):
             if result.get("status") == "success":
                 return result.get("url") 
             else:
-                return f"Berkas Terlampir (Backup System): {nama_file}"
+                return f"Gagal mendapatkan URL dari sistem. File tersimpan aman di Cloud: {nama_file}"
         except Exception:
-            return f"Berkas Terlampir (Backup System): {nama_file}"
+            return f"Gagal mendapatkan URL dari sistem. File tersimpan aman di Cloud: {nama_file}"
             
     except Exception as e:
-        return f"Berkas Terlampir (Backup System): {nama_file}"
+        return f"Gagal mendapatkan URL dari sistem. File tersimpan aman di Cloud: {nama_file}"
 
 def update_status_sheets(nama_pemohon, status_baru, link_hasil=""):
     try:
@@ -375,14 +372,15 @@ if menu == "FORMULIR KUNJUNGAN PUBLIK":
             <div style='background-color: rgba(0, 43, 73, 0.05); padding: 15px; border-radius: 8px; border-left: 5px solid #002B49;'>
                 <h4 style='color: #002B49; margin-top: 0px;'>📋 PENDAHULUAN & PERSYARATAN LAYANAN</h4>
                 <p style='font-size: 14px; line-height: 1.5; color: var(--text-color);'>
-                    Stasiun Meteorologi Bima melayani permintaan data berbayar (Tarif PNBP) untuk kebutuhan komersial/swasta, serta layanan <b>Bebas Tarif (Gratis)</b> khusus untuk Pendidikan, Penelitian Non-Komersial, dan Instansi Pemerintah.
+                    Stasiun Meteorologi Bima melayani permintaan data berbayar (Tarif PNBP) untuk kebutuhan komersial/swasta, serta layanan <b>Bebas Tarif (Gratis/Nol Rupiah)</b> khusus untuk Pendidikan, Penelitian Non-Komersial, dan Instansi Pemerintah.
                 </p>
-                <h5 style='color: #002B49; margin-bottom: 5px;'>⚠️ Dokumen Wajib yang Harus Dilampirkan:</h5>
+                <h5 style='color: #002B49; margin-bottom: 5px;'>⚠️ Dokumen Wajib yang Harus Dilampirkan (Semua Berformat .PDF):</h5>
                 <ol style='font-size: 14px; color: var(--text-color); margin-top: 0px;'>
-                    <li><b>Kartu Identitas Sah:</b> Foto KTP atau Kartu Tanda Mahasiswa (KTM) yang masih berlaku.</li>
-                    <li><b>Surat Pengantar Resmi:</b> Wajib bagi pemohon dari Institusi Pemerintah dan Pendidikan. 
-                        <a href="https://docs.google.com/document/d/1YNKGAGzif4i36bvLLCZ2jDyz8oYYoQLj/edit" target="_blank" style="color: #002B49; font-weight: bold; text-decoration: underline;">(Download Format di Sini)</a>
-                    </li>
+                    <li><b>Kartu Identitas Sah:</b> Scan KTP dan/atau Kartu Pelajar/Mahasiswa.</li>
+                    <li><b>Surat Permohonan Permintaan Data:</b> Resmi ditandatangani dan distempel instansi/organisasi.</li>
+                    <li><b>Surat Pengantar Sekolah/Universitas:</b> <a href="https://docs.google.com/document/d/1YNKGAGzif4i36bvLLCZ2jDyz8oYYoQLj/edit" target="_blank" style="color: #002B49; font-weight: bold; text-decoration: underline;">(Download Format di Sini)</a></li>
+                    <li><b>Surat Pernyataan Bermeterai:</b> <a href="https://docs.google.com/document/d/1N6nBHU8PIaGtXIX6u96T9Z0f6cYcnkb6/edit" target="_blank" style="color: #002B49; font-weight: bold; text-decoration: underline;">(Download Format di Sini)</a></li>
+                    <li><b>Proposal Penelitian:</b> Beserta lembar pengesahan dari dosen pembimbing/penguji.</li>
                 </ol>
             </div>
             """, unsafe_allow_html=True)
@@ -418,59 +416,70 @@ if menu == "FORMULIR KUNJUNGAN PUBLIK":
             deskripsi_tujuan = st.text_area("DESKRIPSI SINGKAT KEBUTUHAN DATA DAN TUJUAN PENGGUNAAN *", placeholder="Jelaskan secara singkat untuk apa data ini digunakan...")
 
             st.write("")
-            st.markdown("#### **III. KATEGORI & BERKAS PENDUKUNG**")
+            st.markdown("#### **III. KATEGORI & UPLOAD BERKAS PENDUKUNG (MAX 10MB per File)**")
             kategori_pemohon = st.selectbox("PILIH KATEGORI PEMOHON:", [
-                "Pendidikan / Penelitian Non-Komersial",
-                "Instansi Pemerintah Pusat / Daerah",
-                "Komersial / Swasta / Perorangan Umum"
+                "Pendidikan / Penelitian Non-Komersial (Tarif Rp 0)",
+                "Instansi Pemerintah Pusat / Daerah (Tarif Rp 0)",
+                "Komersial / Swasta / Perorangan Umum (Berbayar PNBP)"
             ])
             
-            col_f1, col_f2 = st.columns(2)
-            with col_f1:
-                file_ktp = st.file_uploader("1. Unggah Foto KTP / Kartu Mahasiswa (Wajib) *", type=["jpg", "jpeg", "png", "pdf"])
-            with col_f2:
-                st.markdown("📄 **[Download Format Surat Pengantar](https://docs.google.com/document/d/1YNKGAGzif4i36bvLLCZ2jDyz8oYYoQLj/edit)**")
-                file_surat = st.file_uploader("2. Unggah Surat Pengantar (Wajib untuk Pemerintahan & Pendidikan)", type=["pdf", "jpg", "jpeg", "png", "zip", "rar"])
+            st.caption("Unggah seluruh dokumen yang dipersyaratkan di bawah ini dalam format .PDF")
+            
+            col_u1, col_u2 = st.columns(2)
+            with col_u1:
+                file_ktp = st.file_uploader("1. KTP / Kartu Mahasiswa (Wajib) *", type=["pdf", "jpg", "png"])
+                file_surat_permohonan = st.file_uploader("2. Surat Permohonan Permintaan Data (Wajib) *", type=["pdf"])
+                file_proposal = st.file_uploader("5. Proposal & Lembar Pengesahan (Wajib untuk Mahasiswa)", type=["pdf"])
+            with col_u2:
+                file_surat_pengantar = st.file_uploader("3. Surat Pengantar Sekolah/Univ (Wajib untuk Mahasiswa)", type=["pdf"])
+                file_surat_pernyataan = st.file_uploader("4. Surat Pernyataan Bermeterai (Wajib) *", type=["pdf"])
             
             st.write("")
             st.markdown("#### **IV. KONFIRMASI SURVEI KEPUASAN MASYARAKAT (SKM)**")
             st.info("Berdasarkan standar pelayanan, pemohon diwajibkan untuk mengisi Survei Kepuasan Masyarakat (SKM) sebelum mengirimkan berkas.")
             st.write("👉 **[KLIK DI SINI UNTUK MENGISI FORMULIR SKM BMKG](https://forms.gle/7msXFJk9sKNhGtrQ7)**")
             
-            # Checkbox wajib centang
             cek_skm = st.checkbox("Saya menyatakan dengan sadar bahwa saya TELAH MENGISI Survei Kepuasan Masyarakat (SKM) pada tautan di atas. *")
             
             st.write("")
             submit_khusus = st.form_submit_button("KIRIM PERMOHONAN DATA", type="primary", use_container_width=True)
             
             if submit_khusus:
-                if not nama_khusus or not ktp_nim or not instansi_khusus or not kontak_khusus or not email_khusus or not judul_penelitian or not lokasi_data or not deskripsi_tujuan or not file_ktp:
-                    st.error("❌ PROSES GAGAL: Mohon lengkapi seluruh kolom isian dan unggah berkas KTP!")
+                if not nama_khusus or not ktp_nim or not instansi_khusus or not kontak_khusus or not email_khusus or not judul_penelitian or not lokasi_data or not deskripsi_tujuan:
+                    st.error("❌ PROSES GAGAL: Mohon lengkapi seluruh kolom teks isian!")
+                elif not file_ktp or not file_surat_permohonan or not file_surat_pernyataan:
+                    st.error("❌ PROSES GAGAL: KTP, Surat Permohonan, dan Surat Pernyataan WAJIB diunggah!")
                 elif not cek_skm:
                     st.error("❌ PROSES GAGAL: Anda WAJIB mencentang kotak konfirmasi Survei Kepuasan Masyarakat (SKM) sebelum mengirimkan formulir.")
-                elif kategori_pemohon != "Komersial / Swasta / Perorangan Umum" and not file_surat:
-                    st.error("❌ PROSES GAGAL: Surat Pengantar Resmi WAJIB dilampirkan untuk kategori Pendidikan dan Pemerintahan!")
+                elif "Pendidikan" in kategori_pemohon and (not file_surat_pengantar or not file_proposal):
+                    st.error("❌ PROSES GAGAL: Surat Pengantar dan Proposal WAJIB dilampirkan untuk permohonan kategori Pendidikan/Mahasiswa!")
                 else:
-                    with st.spinner("🔄 Sedang mengirimkan dokumen ke Cloud Server... (Proses ini memakan waktu beberapa detik)"):
-                        ext_ktp = file_ktp.name.split('.')[-1]
-                        nama_file_ktp = f"KTP_{nama_khusus.replace(' ', '_')}_{datetime.now().strftime('%Y%m%d_%H%M%S')}.{ext_ktp}"
-                        link_ktp = upload_ke_google_drive(file_ktp, nama_file_ktp, file_ktp.type)
+                    with st.spinner("🔄 Sedang mengunggah 5 dokumen ke Cloud Server... (Mohon tunggu beberapa detik, jangan tutup halaman ini)"):
                         
-                        link_surat = "Tidak Ada Surat"
-                        if file_surat is not None:
-                            ext_surat = file_surat.name.split('.')[-1]
-                            nama_file_surat = f"Surat_{nama_khusus.replace(' ', '_')}_{datetime.now().strftime('%Y%m%d_%H%M%S')}.{ext_surat}"
-                            link_surat = upload_ke_google_drive(file_surat, nama_file_surat, file_surat.type)
+                        # --- FUNGSI UPLOAD SEMUA FILE ---
+                        def proses_upload(file_obj, prefix):
+                            if file_obj is not None:
+                                ext = file_obj.name.split('.')[-1]
+                                nama_file = f"{prefix}_{nama_khusus.replace(' ', '_')}_{datetime.now().strftime('%Y%m%d%H%M')}.{ext}"
+                                return upload_ke_google_drive(file_obj, nama_file, file_obj.type)
+                            return "-"
+
+                        link_ktp = proses_upload(file_ktp, "KTP")
+                        link_permohonan = proses_upload(file_surat_permohonan, "Permohonan")
+                        link_pengantar = proses_upload(file_surat_pengantar, "Pengantar")
+                        link_pernyataan = proses_upload(file_surat_pernyataan, "Pernyataan")
+                        link_proposal = proses_upload(file_proposal, "Proposal")
                         
                         waktu_khusus = datetime.now(timezone(timedelta(hours=8))).strftime("%Y-%m-%d %H:%M:%S")
                         
-                        teks_database = f"Kategori: {kategori_pemohon} | NIM/KTP: {ktp_nim} | Email: {email_khusus} | Judul: {judul_penelitian} | Periode: {tgl_mulai} sd {tgl_selesai} | Lokasi: {lokasi_data} | Tujuan: {deskripsi_tujuan} | KTP: {link_ktp} | Surat: {link_surat}"
+                        # Gabungkan semua data agar muat di 1 sel Database
+                        teks_database = f"Kategori: {kategori_pemohon} | NIM/KTP: {ktp_nim} | Email: {email_khusus} | Judul: {judul_penelitian} | Periode: {tgl_mulai} sd {tgl_selesai} | Lokasi: {lokasi_data} | Tujuan: {deskripsi_tujuan} | KTP: {link_ktp} | SuratPermohonan: {link_permohonan} | SuratPengantar: {link_pengantar} | SuratPernyataan: {link_pernyataan} | Proposal: {link_proposal}"
                         
                         row_khusus = [waktu_khusus, nama_khusus, kontak_khusus, instansi_khusus, jenis_data_khusus, teks_database, "Menunggu Verifikasi Berkas", waktu_khusus, "-"]
                         
                         if simpan_ke_google_sheets("Permohonan_Data", row_khusus):
                             st.balloons()
-                            if kategori_pemohon == "Komersial / Swasta / Perorangan Umum":
+                            if "Komersial" in kategori_pemohon:
                                 st.warning("⚠️ **PERMOHONAN BERHASIL DISIMPAN (STATUS: BERBAYAR)**")
                                 st.write(f"Halo {nama_khusus}, permohonan data Anda telah kami terima dan akan dikenakan tarif PNBP sesuai PP No. 47 Tahun 2018. Silakan hubungi Customer Service kami untuk rincian perhitungan tarif dan penerbitan kode *billing* pembayaran.")
                                 
@@ -478,7 +487,7 @@ if menu == "FORMULIR KUNJUNGAN PUBLIK":
                                 st.link_button("💳 KLIK DI SINI UNTUK CHAT CS VIA WHATSAPP", f"https://wa.me/{NOMOR_WA_CS}?text={pesan_wa_pnbp}", type="primary", use_container_width=True)
                             else:
                                 st.success("✔️ **PERMOHONAN BERHASIL DISIMPAN (STATUS: BEBAS TARIF Rp 0)**")
-                                st.write("Dokumen digital Anda telah sukses diamankan ke Cloud Storage stasiun. Silakan lacak progres validasi berkas Anda di Tab 'LACAK STATUS DATA' menggunakan nomor WhatsApp yang didaftarkan.")
+                                st.write("Kelima dokumen syarat digital Anda telah sukses diamankan ke Cloud Storage stasiun. Silakan lacak progres validasi berkas Anda di Tab 'LACAK STATUS DATA' menggunakan nomor WhatsApp yang didaftarkan.")
 
     # --- TAB 3: E-KATALOG PNBP ---
     with tab3:
@@ -552,7 +561,7 @@ if menu == "FORMULIR KUNJUNGAN PUBLIK":
                             st.caption(f"🕒 *Status terakhir diperbarui pada: {waktu_update}*")
                             
                             if status_proses == "Menunggu Verifikasi Berkas":
-                                st.info("🔎 **STATUS: MENUNGGU VERIFIKASI BERKAS** \nPermohonan Anda telah kami terima. Saat ini tim sedang memverifikasi kelengkapan dan keabsahan dokumen pendukung (KTP/Surat Pengantar).")
+                                st.info("🔎 **STATUS: MENUNGGU VERIFIKASI BERKAS** \nPermohonan Anda telah kami terima. Saat ini tim sedang memverifikasi kelengkapan dan keabsahan kelima dokumen pendukung (KTP/Surat/Proposal).")
                             elif status_proses == "Proses Penyiapan Data":
                                 st.warning("🔄 **STATUS: PROSES PENYIAPAN DATA** \nBerkas administrasi Anda telah disetujui. Saat ini tim teknis Stamet Bima sedang menyiapkan arsip data meteorologi yang Anda butuhkan.")
                             elif status_proses == "Menunggu Pembayaran PNBP":
@@ -565,7 +574,7 @@ if menu == "FORMULIR KUNJUNGAN PUBLIK":
                                 else:
                                     st.write("Silakan cek dokumen masuk di email/WhatsApp Anda atau datang langsung ke ruang PTSP Stasiun.")
                             elif status_proses == "Ditolak (Berkas Tidak Memenuhi Syarat)":
-                                st.error("❌ **STATUS: DITOLAK** \nMohon maaf, permohonan Anda ditolak karena berkas bukti pendukung (KTP/Surat Pengantar) buram, tidak lengkap, atau tidak memenuhi syarat. Silakan lakukan registrasi ulang.")
+                                st.error("❌ **STATUS: DITOLAK** \nMohon maaf, permohonan Anda ditolak karena dokumen syarat buram, tidak lengkap, atau tidak memenuhi syarat. Silakan lakukan registrasi ulang.")
                             else:
                                 st.info(f"🚩 **STATUS:** {status_proses}")
                         else:
@@ -638,7 +647,7 @@ elif menu == "🔒 PORTAL ADMIN & REKAP LAPORAN":
                     
         with tab_arsip:
             st.subheader("Galeri Audit Berkas Pemohon Data (Cloud Storage)")
-            st.write("Sistem otomatis menyandingkan log data dengan berkas digital fisik di Google Drive.")
+            st.write("Sistem otomatis menyandingkan log data dengan kelima berkas digital fisik di Google Drive.")
             st.write("")
             
             df_permohonan = ambil_data_google_sheets("Permohonan_Data")
@@ -663,7 +672,6 @@ elif menu == "🔒 PORTAL ADMIN & REKAP LAPORAN":
                             if "Kategori:" in teks_detail:
                                 try:
                                     kategori_text = teks_detail.split("Kategori:")[1].split("|")[0].strip()
-                                    kategori_text = kategori_text.replace("(Bebas Tarif Rp 0)", "").replace("(Menentukan Tarif)", "").strip()
                                 except:
                                     pass
                             
@@ -681,35 +689,32 @@ elif menu == "🔒 PORTAL ADMIN & REKAP LAPORAN":
                                 st.caption(f"Terakhir diupdate: {waktu_up}")
                             
                             with col_links:
-                                st.markdown("**📂 Akses Berkas Google Drive:**")
-                                link_ktp = ""
-                                link_surat = ""
+                                st.markdown("**📂 Akses 5 Berkas Pendukung:**")
+                                
+                                # EKSTRAKSI KE 5 LINK DARI TEKS DATABASE
+                                link_ktp, link_permohonan, link_pengantar, link_pernyataan, link_proposal = "", "", "", "", ""
                                 
                                 if "|" in teks_detail:
-                                    try:
-                                        parts = teks_detail.split("|")
-                                        for part in parts:
-                                            if "KTP:" in part:
-                                                link_ktp = part.split("KTP:")[1].strip()
-                                            elif "Surat:" in part:
-                                                link_surat = part.split("Surat:")[1].strip()
-                                    except:
-                                        pass
-                                else:
-                                    link_ktp = teks_detail
+                                    parts = teks_detail.split("|")
+                                    for part in parts:
+                                        part_clean = part.strip()
+                                        if part_clean.startswith("KTP:"): link_ktp = part_clean.split("KTP:")[1].strip()
+                                        elif part_clean.startswith("SuratPermohonan:"): link_permohonan = part_clean.split("SuratPermohonan:")[1].strip()
+                                        elif part_clean.startswith("SuratPengantar:"): link_pengantar = part_clean.split("SuratPengantar:")[1].strip()
+                                        elif part_clean.startswith("SuratPernyataan:"): link_pernyataan = part_clean.split("SuratPernyataan:")[1].strip()
+                                        elif part_clean.startswith("Proposal:"): link_proposal = part_clean.split("Proposal:")[1].strip()
                                 
-                                if "http" in link_ktp or "http" in link_surat:
-                                    if "http" in link_ktp:
-                                        st.link_button("👁️ Lihat Identitas / KTP", link_ktp, use_container_width=True, type="primary")
-                                    if "http" in link_surat:
-                                        st.write("")
-                                        st.link_button("👁️ Lihat Surat Pengantar", link_surat, use_container_width=True)
-                                else:
-                                    st.warning("⚠️ Berkas Fisik Tidak Ditemukan / Simulasi")
-                                    if link_ktp and "KTP:" not in link_ktp:
-                                        st.caption(f"KTP: {link_ktp}")
-                                    if link_surat and "Surat:" not in link_surat:
-                                        st.caption(f"Surat: {link_surat}")
+                                def show_link_button(label, url):
+                                    if "http" in url:
+                                        st.link_button(f"👁️ Lihat {label}", url, use_container_width=True)
+                                    elif url and url != "-":
+                                        st.caption(f"⚠️ {label}: Link Error/Tdk Valid")
+                                        
+                                show_link_button("KTP/Identitas", link_ktp)
+                                show_link_button("Surat Permohonan", link_permohonan)
+                                show_link_button("Surat Pengantar", link_pengantar)
+                                show_link_button("Surat Pernyataan", link_pernyataan)
+                                show_link_button("Proposal", link_proposal)
                     
                     st.divider()
                     st.markdown("### ⚙️ PANEL UPDATE STATUS PROGRESS DATA KONSUMEN")
