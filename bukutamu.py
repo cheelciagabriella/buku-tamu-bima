@@ -206,7 +206,6 @@ def update_status_sheets(nama_pemohon, status_baru, link_hasil=""):
         cell = sheet.find(nama_pemohon)
         if cell:
             waktu_sekarang = datetime.now(timezone(timedelta(hours=8))).strftime("%Y-%m-%d %H:%M:%S")
-            # Kolom ke-19 adalah Status, 20 adalah Waktu Update, 21 adalah Link Hasil
             sheet.update_cell(cell.row, 19, status_baru)
             sheet.update_cell(cell.row, 20, waktu_sekarang)
             if link_hasil:
@@ -447,21 +446,28 @@ if menu == "FORMULIR KUNJUNGAN PUBLIK":
             submit_khusus = st.form_submit_button("KIRIM PERMOHONAN DATA", type="primary", use_container_width=True)
             
             if submit_khusus:
-                # Menghitung selisih hari untuk validasi periode maksimal 5 tahun (5 * 365 = 1825 hari)
                 selisih_hari = (tgl_selesai - tgl_mulai).days
+                is_valid = True
                 
-                if not nama_khusus or not ktp_nim or not instansi_khusus or not kontak_khusus or not email_khusus or not judul_penelitian or not lokasi_data or not deskripsi_tujuan:
-                    st.error("❌ PROSES GAGAL: Mohon lengkapi seluruh kolom teks isian!")
-                elif not file_ktp or not file_surat_permohonan or not file_bukti_skm:
-                    st.error("❌ PROSES GAGAL: Identitas (KTP), Surat Permohonan, dan Bukti Pengisian SKM WAJIB diunggah!")
+                # Pengecekan General: Semua kolom isian teks dan file dasar wajib harus ada
+                if not nama_khusus or not ktp_nim or not instansi_khusus or not kontak_khusus or not email_khusus or not judul_penelitian or not lokasi_data or not deskripsi_tujuan or not file_ktp or not file_surat_permohonan or not file_bukti_skm:
+                    is_valid = False
+                
+                # Pengecekan Spesifik: Untuk Kategori Rp 0
+                if "Tarif Rp 0" in kategori_pemohon and (not file_surat_pengantar or not file_surat_pernyataan):
+                    is_valid = False
+                    
+                # Pengecekan Spesifik: Untuk Kategori Pendidikan/Mahasiswa
+                if "Pendidikan" in kategori_pemohon and not file_proposal:
+                    is_valid = False
+
+                # Eksekusi Validasi
+                if not is_valid:
+                    st.error("❌ PROSES GAGAL: Pastikan seluruh kolom isian dan berkas yang bertanda Wajib (*) telah diisi dan diunggah sesuai dengan kategori permohonan Anda!")
                 elif not cek_skm:
                     st.error("❌ PROSES GAGAL: Anda WAJIB mencentang kotak konfirmasi Survei Kepuasan Masyarakat (SKM)!")
                 elif "Tarif Rp 0" in kategori_pemohon and selisih_hari > 1825:
                     st.error(f"❌ PROSES GAGAL: Rentang data yang Anda minta adalah {selisih_hari} hari. Untuk jalur data Rp. 0,- (Gratis), maksimal periode data adalah 5 tahun (1.825 hari)!")
-                elif "Tarif Rp 0" in kategori_pemohon and (not file_surat_pengantar or not file_surat_pernyataan):
-                    st.error("❌ PROSES GAGAL: Surat Pengantar Instansi dan Surat Pernyataan Bermeterai WAJIB dilampirkan untuk permohonan jalur Bebas Tarif (Rp 0)!")
-                elif "Pendidikan" in kategori_pemohon and not file_proposal:
-                    st.error("❌ PROSES GAGAL: Proposal Penelitian WAJIB dilampirkan untuk permohonan jalur Pendidikan/Mahasiswa!")
                 else:
                     with st.spinner("🔄 Sedang mengunggah seluruh dokumen ke Cloud Server..."):
                         def proses_upload(file_obj, prefix):
@@ -481,7 +487,6 @@ if menu == "FORMULIR KUNJUNGAN PUBLIK":
                         waktu_khusus = datetime.now(timezone(timedelta(hours=8))).strftime("%Y-%m-%d %H:%M:%S")
                         periode_gabung = f"{tgl_mulai} sd {tgl_selesai}"
                         
-                        # ARRAY 21 KOLOM (Link SKM masuk ke nomor 18)
                         row_khusus = [
                             waktu_khusus,          # 1. Waktu Registrasi
                             nama_khusus,           # 2. Nama Lengkap
