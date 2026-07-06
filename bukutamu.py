@@ -431,7 +431,11 @@ if menu == "FORMULIR KUNJUNGAN PUBLIK":
                 file_surat_permohonan = st.file_uploader("2. Surat Permohonan Permintaan Data (Wajib) *", type=["pdf"])
                 file_proposal = st.file_uploader("5. Proposal & Lembar Pengesahan (Wajib untuk Mahasiswa)", type=["pdf"])
             with col_u2:
+                # Menambahkan Tautan Download langsung di atas uploader
+                st.markdown("📄 **[Download Format Surat Pengantar](https://docs.google.com/document/d/1YNKGAGzif4i36bvLLCZ2jDyz8oYYoQLj/edit)**")
                 file_surat_pengantar = st.file_uploader("3. Surat Pengantar Sekolah/Univ (Wajib untuk Mahasiswa)", type=["pdf"])
+                
+                st.markdown("📄 **[Download Format Surat Pernyataan Bermeterai](https://docs.google.com/document/d/1N6nBHU8PIaGtXIX6u96T9Z0f6cYcnkb6/edit)**")
                 file_surat_pernyataan = st.file_uploader("4. Surat Pernyataan Bermeterai (Wajib) *", type=["pdf"])
             
             st.write("")
@@ -456,7 +460,6 @@ if menu == "FORMULIR KUNJUNGAN PUBLIK":
                 else:
                     with st.spinner("🔄 Sedang mengunggah 5 dokumen ke Cloud Server... (Mohon tunggu beberapa detik, jangan tutup halaman ini)"):
                         
-                        # --- FUNGSI UPLOAD SEMUA FILE ---
                         def proses_upload(file_obj, prefix):
                             if file_obj is not None:
                                 ext = file_obj.name.split('.')[-1]
@@ -472,7 +475,6 @@ if menu == "FORMULIR KUNJUNGAN PUBLIK":
                         
                         waktu_khusus = datetime.now(timezone(timedelta(hours=8))).strftime("%Y-%m-%d %H:%M:%S")
                         
-                        # Gabungkan semua data agar muat di 1 sel Database
                         teks_database = f"Kategori: {kategori_pemohon} | NIM/KTP: {ktp_nim} | Email: {email_khusus} | Judul: {judul_penelitian} | Periode: {tgl_mulai} sd {tgl_selesai} | Lokasi: {lokasi_data} | Tujuan: {deskripsi_tujuan} | KTP: {link_ktp} | SuratPermohonan: {link_permohonan} | SuratPengantar: {link_pengantar} | SuratPernyataan: {link_pernyataan} | Proposal: {link_proposal}"
                         
                         row_khusus = [waktu_khusus, nama_khusus, kontak_khusus, instansi_khusus, jenis_data_khusus, teks_database, "Menunggu Verifikasi Berkas", waktu_khusus, "-"]
@@ -691,7 +693,6 @@ elif menu == "🔒 PORTAL ADMIN & REKAP LAPORAN":
                             with col_links:
                                 st.markdown("**📂 Akses 5 Berkas Pendukung:**")
                                 
-                                # EKSTRAKSI KE 5 LINK DARI TEKS DATABASE
                                 link_ktp, link_permohonan, link_pengantar, link_pernyataan, link_proposal = "", "", "", "", ""
                                 
                                 if "|" in teks_detail:
