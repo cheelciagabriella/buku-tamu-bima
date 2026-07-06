@@ -665,7 +665,7 @@ elif menu == "🔒 PORTAL ADMIN & REKAP LAPORAN":
             st.link_button("📁 Buka Google Drive (Folder Arsip)", "https://drive.google.com/drive/folders/1FtwvPLbWcTPpyIOxMRBW88oLHri_rZVH", use_container_width=True)
         st.divider()
         
-        tab_db_tamu, tab_arsip = st.tabs(["DATABASE TAMU & LAYANAN", "AUDIT ARSIP DOKUMEN CLOUD"])
+        tab_db_tamu, tab_arsip = st.tabs(["DATABASE TAMU & LAYANAN", "ARSIP DOKUMEN"])
         
         with tab_db_tamu:
             st.subheader("1. Tabel Rekapitulasi Buku Tamu")
