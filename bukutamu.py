@@ -213,7 +213,6 @@ def upload_ke_google_drive(file_buffer, nama_file, mime_type):
     except Exception as e:
         return f"Berkas Terlampir (Backup System): {nama_file}"
 
-# UPDATE: Fungsi ini sekarang bisa menerima Link Hasil untuk ditulis ke kolom 9
 def update_status_sheets(nama_pemohon, status_baru, link_hasil=""):
     try:
         creds = dapatkan_kredensial()
@@ -224,7 +223,6 @@ def update_status_sheets(nama_pemohon, status_baru, link_hasil=""):
             waktu_sekarang = datetime.now(timezone(timedelta(hours=8))).strftime("%Y-%m-%d %H:%M:%S")
             sheet.update_cell(cell.row, 7, status_baru)
             sheet.update_cell(cell.row, 8, waktu_sekarang)
-            # Tulis ke Kolom I (9) jika ada link hasil yang dimasukkan
             if link_hasil:
                 sheet.update_cell(cell.row, 9, link_hasil)
             return True
@@ -382,26 +380,45 @@ if menu == "FORMULIR KUNJUNGAN PUBLIK":
                 <h5 style='color: #002B49; margin-bottom: 5px;'>⚠️ Dokumen Wajib yang Harus Dilampirkan:</h5>
                 <ol style='font-size: 14px; color: var(--text-color); margin-top: 0px;'>
                     <li><b>Kartu Identitas Sah:</b> Foto KTP atau Kartu Tanda Mahasiswa (KTM) yang masih berlaku.</li>
-                    <li><b>Surat Pengantar Resmi:</b> Wajib bagi pemohon dari Institusi Pemerintah dan Pendidikan.</li>
+                    <li><b>Surat Pengantar Resmi:</b> Wajib bagi pemohon dari Institusi Pemerintah dan Pendidikan. 
+                        <a href="https://docs.google.com/document/d/1YNKGAGzif4i36bvLLCZ2jDyz8oYYoQLj/edit" target="_blank" style="color: #002B49; font-weight: bold; text-decoration: underline;">(Download Format di Sini)</a>
+                    </li>
                 </ol>
             </div>
             """, unsafe_allow_html=True)
         st.write("")
         
         with st.form("form_permohonan_data"):
-            st.markdown("#### **I. DATA UTAMA PEMOHON**")
+            st.markdown("#### **I. IDENTITAS PEMOHON DATA**")
             col_k1, col_k2 = st.columns(2)
             
             with col_k1:
-                nama_khusus = st.text_input("NAMA LENGKAP PEMOHON:", placeholder="Masukkan nama lengkap")
-                instansi_khusus = st.text_input("ASAL KAMPUS / SEKOLAH / INSTANSI:", placeholder="Contoh: PT. ABC / Univ. Mataram")
+                nama_khusus = st.text_input("NAMA LENGKAP *", placeholder="Nama depan dan nama belakang")
+                ktp_nim = st.text_input("NOMOR KTP / NIM *", placeholder="Masukkan Nomor Induk Kependudukan / Mahasiswa")
+                instansi_khusus = st.text_input("SEKOLAH / UNIVERSITAS / INSTANSI *", placeholder="Contoh: Universitas Mataram")
             with col_k2:
-                kontak_khusus = st.text_input("NOMOR WHATSAPP AKTIF (Untuk Pelacakan Status):", placeholder="Contoh: 081234567xxx")
-                jenis_data_khusus = st.text_input("JENIS DATA YANG DIMINTA:", placeholder="Contoh: Data Cuaca Harian 2023")
+                kontak_khusus = st.text_input("NOMOR HP WHATSAPP (AKTIF) *", placeholder="Contoh: 081234567xxx")
+                email_khusus = st.text_input("EMAIL *", placeholder="Contoh: email_anda@gmail.com")
             
             st.write("")
-            st.markdown("#### **II. KATEGORI & BERKAS PENDUKUNG**")
+            st.markdown("#### **II. DATA YANG DIBUTUHKAN**")
+            judul_penelitian = st.text_input("JUDUL SKRIPSI / PENELITIAN *", placeholder="Masukkan judul penelitian atau proyek")
+            jenis_data_khusus = st.selectbox("JENIS DATA YANG DIBUTUHKAN *", [
+                "Curah Hujan", "Suhu Udara", "Arah dan Kecepatan Angin", 
+                "Tekanan Udara", "Lama Penyinaran Matahari", "Penguapan", "Lainnya"
+            ])
             
+            col_d1, col_d2 = st.columns(2)
+            with col_d1:
+                tgl_mulai = st.date_input("PERIODE DATA (TANGGAL MULAI) *")
+            with col_d2:
+                tgl_selesai = st.date_input("PERIODE DATA (TANGGAL SELESAI) *")
+                
+            lokasi_data = st.text_input("LOKASI DATA YANG DIMINTA *", placeholder="Contoh: Kota Bima")
+            deskripsi_tujuan = st.text_area("DESKRIPSI SINGKAT KEBUTUHAN DATA DAN TUJUAN PENGGUNAAN *", placeholder="Jelaskan secara singkat untuk apa data ini digunakan...")
+
+            st.write("")
+            st.markdown("#### **III. KATEGORI & BERKAS PENDUKUNG**")
             kategori_pemohon = st.selectbox("PILIH KATEGORI PEMOHON:", [
                 "Pendidikan / Penelitian Non-Komersial",
                 "Instansi Pemerintah Pusat / Daerah",
@@ -410,16 +427,27 @@ if menu == "FORMULIR KUNJUNGAN PUBLIK":
             
             col_f1, col_f2 = st.columns(2)
             with col_f1:
-                file_ktp = st.file_uploader("1. Unggah Foto KTP / Kartu Mahasiswa (Wajib)", type=["jpg", "jpeg", "png"])
+                file_ktp = st.file_uploader("1. Unggah Foto KTP / Kartu Mahasiswa (Wajib) *", type=["jpg", "jpeg", "png", "pdf"])
             with col_f2:
-                file_surat = st.file_uploader("2. Unggah Surat Pengantar (Wajib untuk Pemerintahan & Pendidikan)", type=["pdf", "jpg", "jpeg", "png"])
+                st.markdown("📄 **[Download Format Surat Pengantar](https://docs.google.com/document/d/1YNKGAGzif4i36bvLLCZ2jDyz8oYYoQLj/edit)**")
+                file_surat = st.file_uploader("2. Unggah Surat Pengantar (Wajib untuk Pemerintahan & Pendidikan)", type=["pdf", "jpg", "jpeg", "png", "zip", "rar"])
+            
+            st.write("")
+            st.markdown("#### **IV. KONFIRMASI SURVEI KEPUASAN MASYARAKAT (SKM)**")
+            st.info("Berdasarkan standar pelayanan, pemohon diwajibkan untuk mengisi Survei Kepuasan Masyarakat (SKM) sebelum mengirimkan berkas.")
+            st.write("👉 **[KLIK DI SINI UNTUK MENGISI FORMULIR SKM BMKG](https://forms.gle/7msXFJk9sKNhGtrQ7)**")
+            
+            # Checkbox wajib centang
+            cek_skm = st.checkbox("Saya menyatakan dengan sadar bahwa saya TELAH MENGISI Survei Kepuasan Masyarakat (SKM) pada tautan di atas. *")
             
             st.write("")
             submit_khusus = st.form_submit_button("KIRIM PERMOHONAN DATA", type="primary", use_container_width=True)
             
             if submit_khusus:
-                if not nama_khusus or not instansi_khusus or not kontak_khusus or not file_ktp:
-                    st.error("❌ PROSES GAGAL: Kolom Nama, Instansi, Kontak WA, dan Berkas Foto KTP wajib diisi!")
+                if not nama_khusus or not ktp_nim or not instansi_khusus or not kontak_khusus or not email_khusus or not judul_penelitian or not lokasi_data or not deskripsi_tujuan or not file_ktp:
+                    st.error("❌ PROSES GAGAL: Mohon lengkapi seluruh kolom isian dan unggah berkas KTP!")
+                elif not cek_skm:
+                    st.error("❌ PROSES GAGAL: Anda WAJIB mencentang kotak konfirmasi Survei Kepuasan Masyarakat (SKM) sebelum mengirimkan formulir.")
                 elif kategori_pemohon != "Komersial / Swasta / Perorangan Umum" and not file_surat:
                     st.error("❌ PROSES GAGAL: Surat Pengantar Resmi WAJIB dilampirkan untuk kategori Pendidikan dan Pemerintahan!")
                 else:
@@ -435,9 +463,9 @@ if menu == "FORMULIR KUNJUNGAN PUBLIK":
                             link_surat = upload_ke_google_drive(file_surat, nama_file_surat, file_surat.type)
                         
                         waktu_khusus = datetime.now(timezone(timedelta(hours=8))).strftime("%Y-%m-%d %H:%M:%S")
-                        teks_database = f"Kategori: {kategori_pemohon} | Link KTP: {link_ktp} | Link Surat: {link_surat}"
                         
-                        # Inisialisasi row_khusus dengan 9 elemen (Kolom ke-9 = Link Hasil, default kosong "-")
+                        teks_database = f"Kategori: {kategori_pemohon} | NIM/KTP: {ktp_nim} | Email: {email_khusus} | Judul: {judul_penelitian} | Periode: {tgl_mulai} sd {tgl_selesai} | Lokasi: {lokasi_data} | Tujuan: {deskripsi_tujuan} | KTP: {link_ktp} | Surat: {link_surat}"
+                        
                         row_khusus = [waktu_khusus, nama_khusus, kontak_khusus, instansi_khusus, jenis_data_khusus, teks_database, "Menunggu Verifikasi Berkas", waktu_khusus, "-"]
                         
                         if simpan_ke_google_sheets("Permohonan_Data", row_khusus):
@@ -455,21 +483,30 @@ if menu == "FORMULIR KUNJUNGAN PUBLIK":
     # --- TAB 3: E-KATALOG PNBP ---
     with tab3:
         st.subheader("KATALOG TARIF RESMI JASA DATA DAN INFORMASI")
+        st.caption("Berdasarkan Peraturan Pemerintah Nomor 47 Tahun 2018 tentang Jenis dan Tarif atas Jenis Penerimaan Negara Bukan Pajak (PNBP) yang berlaku pada BMKG.")
+        
         raw_data_ia = {
-            "Jenis Penerimaan Negara Bukan Pajak": [
-                "1. Informasi Cuaca untuk Penerbangan", "2. Informasi Cuaca untuk Pelayaran",
-                "3. Informasi Cuaca untuk Pelabuhan", "4. Informasi Cuaca untuk Pengeboran Lepas Pantai",
-                "5.a. Analisis dan Prakiraan Hujan Bulanan", "5.b. Prakiraan Musim Kemarau"
+            "No.": ["1", "2", "3", "4"],
+            "Jenis Layanan (Penerimaan Negara Bukan Pajak)": [
+                "Informasi Cuaca untuk Penerbangan (Informasi Khusus MKG)", 
+                "Informasi Cuaca Khusus untuk Kegiatan Komersial Outdoor/Indoor",
+                "Informasi Meteorologi untuk Keperluan Klaim Asuransi", 
+                "Informasi Meteorologi Khusus untuk Pendukung Kegiatan Proyek, Survei, dan Penelitian Komersial (Jasa Konsultasi Meteorologi)"
             ],
             "Satuan": [
-                "per route unit", "per route per hari", "per lokasi per hari", "per dokumen per lokasi per hari",
-                "per buku", "per buku"
+                "per route unit", 
+                "per lokasi per hari", 
+                "per lokasi per hari", 
+                "per lokasi"
             ],
-            "Tarif": [
-                "4% dari biaya navigasi", "Rp 250.000,00", "Rp 225.000,00", "Rp 330.000,00",
-                "Rp 65.000,00", "Rp 230.000,00"
+            "Tarif Resmi": [
+                "4% dari biaya pelayanan jasa navigasi penerbangan", 
+                "Rp 100.000,00", 
+                "Rp 175.000,00", 
+                "Rp 3.750.000,00"
             ]
         }
+        
         st.dataframe(pd.DataFrame(raw_data_ia), use_container_width=True, hide_index=True)
 
     # --- TAB 4: FITUR TRACKING / LACAK DATA UNTUK KONSUMEN ---
@@ -522,7 +559,6 @@ if menu == "FORMULIR KUNJUNGAN PUBLIK":
                                 st.warning("💳 **STATUS: MENUNGGU PEMBAYARAN PNBP** \nData Anda sedang disiapkan, namun Anda diwajibkan menyelesaikan pembayaran PNBP sesuai peraturan yang berlaku. Mohon hubungi Customer Service kami untuk penerbitan e-Billing.")
                             elif status_proses == "Selesai (Data Telah Dikirim / Siap Diambil)":
                                 st.success("🎉 **STATUS: SELESAI** \nKabar baik! Permintaan data Anda telah selesai dikerjakan.")
-                                # UPDATE: Menampilkan Tombol Download jika ada Link
                                 if "http" in str(link_hasil_unduh):
                                     st.write("Silakan unduh dokumen data meteorologi Anda melalui tautan di bawah ini:")
                                     st.link_button("📥 UNDUH DATA HASIL PERMOHONAN", link_hasil_unduh, type="primary", use_container_width=True)
@@ -690,7 +726,6 @@ elif menu == "🔒 PORTAL ADMIN & REKAP LAPORAN":
                             "Ditolak (Berkas Tidak Memenuhi Syarat)"
                         ])
                         
-                        # UPDATE: Jika Admin memilih Selesai, munculkan kolom input untuk Link Data
                         link_input = ""
                         if pilih_status == "Selesai (Data Telah Dikirim / Siap Diambil)":
                             link_input = st.text_input("Tautkan Link Google Drive Data Hasil (Opsional):", placeholder="Paste URL file data di sini (https://...)")
