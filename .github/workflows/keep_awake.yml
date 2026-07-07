@@ -1,0 +1,20 @@
+name: Keep Streamlit App Awake
+
+on:
+  schedule:
+    - cron: "0 */10 * * *" # Robot akan berjalan otomatis setiap 10 jam
+  workflow_dispatch: # Menyediakan tombol untuk jalan manual
+
+jobs:
+  auto-commit:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Mengambil kode dari repositori
+        uses: actions/checkout@v4
+
+      - name: Membuat commit kosong agar Streamlit tetap melek
+        run: |
+          git config --global user.email "bot@bmkg.go.id"
+          git config --global user.name "AntiSleep Bot"
+          git commit --allow-empty -m "🤖 Auto-commit untuk mencegah Streamlit tertidur"
+          git push
