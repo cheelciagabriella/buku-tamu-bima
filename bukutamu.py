@@ -218,15 +218,33 @@ def update_status_sheets(nama_pemohon, status_baru, link_hasil=""):
         cell = sheet.find(nama_pemohon)
         if cell:
             waktu_sekarang = datetime.now(timezone(timedelta(hours=8))).strftime("%Y-%m-%d %H:%M:%S")
+            row_vals = sheet.row_values(cell.row)
+            
+            # MEMBACA HISTORY LAMA DAN MENAMBAH HISTORY BARU (Format: Waktu | Status || Waktu | Status)
+            histori_lama = row_vals[21] if len(row_vals) >= 22 else f"{row_vals[19] if len(row_vals) > 19 else ''} | {row_vals[18] if len(row_vals) > 18 else 'Menunggu Verifikasi Berkas'}"
+            histori_baru = f"{histori_lama} || {waktu_sekarang} | {status_baru}"
+            
             sheet.update_cell(cell.row, 19, status_baru)
             sheet.update_cell(cell.row, 20, waktu_sekarang)
             if link_hasil:
                 sheet.update_cell(cell.row, 21, link_hasil)
+            sheet.update_cell(cell.row, 22, histori_baru)
             return True
         return False
     except Exception as e:
         st.error(f"Gagal memperbarui status di sistem Cloud: {e}")
         return False
+
+# FUNGSI PEMISAH TANGGAL DAN JAM
+def format_tgl_jam(waktu_str):
+    try:
+        dt = datetime.strptime(str(waktu_str).strip(), "%Y-%m-%d %H:%M:%S")
+        return dt.strftime("%d-%m-%Y"), dt.strftime("%H:%M:%S")
+    except:
+        parts = str(waktu_str).strip().split()
+        tgl = parts[0] if len(parts) > 0 else "-"
+        jam = parts[1] if len(parts) > 1 else "-"
+        return tgl, jam
 
 # ==========================================
 # 4. INISIALISASI KONTROL ALUR
@@ -303,7 +321,7 @@ if menu == "FORMULIR KUNJUNGAN PUBLIK":
     st.divider()
     
     # ---------------------------------------------------------
-    # TOMBOL KOTAK NAVIGASI 
+    # TOMBOL KOTAK NAVIGASI (ANTI BOCOR)
     # ---------------------------------------------------------
     c1, c2, c3, c4 = st.columns(4)
     with c1:
@@ -452,7 +470,7 @@ if menu == "FORMULIR KUNJUNGAN PUBLIK":
             col_u1, col_u2 = st.columns(2)
             with col_u1:
                 file_ktp = st.file_uploader("**1. KTP / Kartu Identitas (Wajib)** *", type=["pdf", "jpg", "png"])
-                file_surat_permohonan = st.file_uploader("**2. Surat Permohonan (Wajib)** *", type=["pdf"])
+                file_surat_permohonan = st.file_uploader("**2. Surat Permohonan Instansi (Wajib)** *", type=["pdf"])
                 if "Pendidikan" in kategori_pemohon:
                     st.write("")
                     file_proposal = st.file_uploader("**5. Proposal & Lembar Pengesahan (Wajib Mahasiswa)** *", type=["pdf"])
@@ -519,11 +537,14 @@ if menu == "FORMULIR KUNJUNGAN PUBLIK":
                     waktu_khusus = datetime.now(timezone(timedelta(hours=8))).strftime("%Y-%m-%d %H:%M:%S")
                     periode_gabung = f"{tgl_mulai} sd {tgl_selesai}"
                     
+                    # Tambahkan format history baru di kolom ke-22 (index 21)
+                    histori_awal = f"{waktu_khusus} | Menunggu Verifikasi Berkas"
+                    
                     row_khusus = [
                         waktu_khusus, nama_khusus, kontak_khusus, instansi_khusus, kategori_pemohon, ktp_nim, email_khusus, 
                         judul_penelitian, jenis_data_khusus, periode_gabung, lokasi_data, deskripsi_tujuan, link_ktp, 
                         link_permohonan, link_pengantar, link_pernyataan, link_proposal, link_skm, 
-                        "Menunggu Verifikasi Berkas", waktu_khusus, "-"
+                        "Menunggu Verifikasi Berkas", waktu_khusus, "-", histori_awal
                     ]
                     
                     if simpan_ke_google_sheets("Permohonan_Data", row_khusus):
@@ -539,7 +560,7 @@ if menu == "FORMULIR KUNJUNGAN PUBLIK":
                         """, unsafe_allow_html=True)
                         
                         if "Berbayar PNBP" in kategori_pemohon:
-                            st.write(f"Halo **{nama_khusus}**, permohonan data Anda akan dikenakan tarif PNBP sesuai PP No. 47 Tahun 2018[cite: 1].")
+                            st.write(f"Halo **{nama_khusus}**, permohonan data Anda akan dikenakan tarif PNBP sesuai PP No. 47 Tahun 2018.")
                             pesan_wa = f"Halo%20Admin%20PTSP%20Stamet%20Bima.%20Saya%20*{nama_khusus}*%20baru%20saja%20mengajukan%20permohonan%20data%20jalur%20*Komersial%20(PNBP)*.%20Saya%20ingin%20konfirmasi%20bahwa%20seluruh%20berkas%20telah%20saya%20unggah.%20Mohon%20informasi%20rincian%20tarif%20dan%20kode%20billing-nya.%20Terima%20kasih."
                         else:
                             st.write("Seluruh dokumen syarat digital serta bukti pengisian SKM Anda telah sukses diamankan ke Cloud Server.")
@@ -632,31 +653,47 @@ if menu == "FORMULIR KUNJUNGAN PUBLIK":
                             waktu_update = data_terakhir.iloc[19] if len(data_terakhir) >= 20 else waktu_minta
                             link_hasil_unduh = data_terakhir.iloc[20] if len(data_terakhir) >= 21 else ""
                             
+                            tgl_minta, jam_minta = format_tgl_jam(waktu_minta)
+                            
                             st.write("")
                             st.markdown(f"### 📊 Resume Pengajuan: **{nama_user}**")
-                            st.markdown(f"**📂 Dokumen Data:** {jenis_data}  \n**⏰ Waktu Registrasi Awal:** {waktu_minta}")
+                            st.markdown(f"**📂 Dokumen Data:** {jenis_data}")
+                            st.write(f"📅 **Tanggal Registrasi:** {tgl_minta}")
+                            st.write(f"⏰ **Jam Registrasi:** {jam_minta} WITA")
                             st.divider()
                             
-                            st.markdown("#### **Progress Alur Kerja Layanan:**")
-                            st.caption(f"🕒 Status terakhir diperbarui pada: {waktu_update}")
+                            st.markdown("#### **Riwayat Progress Layanan:**")
+                            st.caption("Semua riwayat pembaruan status Anda oleh tim Admin tercatat di bawah ini:")
                             
-                            if status_proses == "Menunggu Verifikasi Berkas":
-                                st.info("🔎 **STATUS: MENUNGGU VERIFIKASI BERKAS** \nPermohonan Anda telah kami terima. Saat ini tim sedang memverifikasi kelengkapan dan keabsahan seluruh berkas digital dan bukti SKM Anda.")
-                            elif status_proses == "Proses Penyiapan Data":
-                                st.warning("🔄 **STATUS: PROSES PENYIAPAN DATA** \nBerkas administrasi Anda telah disetujui. Saat ini tim teknis Stamet Bima sedang menyiapkan arsip data meteorologi yang Anda butuhkan.")
-                            elif status_proses == "Menunggu Pembayaran PNBP":
-                                st.warning("💳 **STATUS: MENUNGGU PEMBAYARAN PNBP** \nData Anda sedang disiapkan, namun Anda diwajibkan menyelesaikan pembayaran PNBP sesuai peraturan yang berlaku. Mohon hubungi Customer Service kami untuk penerbitan e-Billing.")
-                            elif status_proses == "Selesai (Data Telah Dikirim / Siap Diambil)":
-                                st.success("🎉 **STATUS: SELESAI** \nKabar baik! Permintaan data Anda telah selesai dikerjakan.")
-                                if "http" in str(link_hasil_unduh):
-                                    st.write("Silakan unduh dokumen data meteorologi Anda melalui tautan di bawah ini:")
-                                    st.link_button("📥 UNDUH DATA HASIL PERMOHONAN", link_hasil_unduh, type="primary", use_container_width=True)
-                                else:
-                                    st.write("Silakan cek dokumen masuk di email/WhatsApp Anda atau datang langsung ke ruang PTSP Stasiun.")
-                            elif status_proses == "Ditolak (Berkas Tidak Memenuhi Syarat)":
-                                st.error("❌ **STATUS: DITOLAK** \nMohon maaf, permohonan Anda ditolak karena dokumen syarat buram, tidak lengkap, rentang waktu tidak sesuai, atau tidak memenuhi syarat. Silakan lakukan registrasi ulang.")
-                            else:
-                                st.info(f"🚩 **STATUS:** {status_proses}")
+                            # Mengambil history (Kolom 22) atau Fallback jika data lama
+                            histori_str = data_terakhir.iloc[21] if len(data_terakhir) >= 22 else f"{waktu_update} | {status_proses}"
+                            histori_list = histori_str.split(" || ")
+                            
+                            # Tampilkan History Timeline secara terbalik (Terbaru di atas)
+                            for index, item in enumerate(reversed(histori_list)):
+                                if " | " in item:
+                                    waktu_hist, stat_hist = item.split(" | ", 1)
+                                    tgl_h, jam_h = format_tgl_jam(waktu_hist)
+                                    
+                                    # Atur Warna dan Ikon Box berdasarkan Status
+                                    icon = "✅" if "Selesai" in stat_hist else "⏳" if "Menunggu" in stat_hist else "🔄" if "Proses" in stat_hist else "❌" if "Ditolak" in stat_hist else "📌"
+                                    bg_color = "#d4edda" if "Selesai" in stat_hist else "#f8d7da" if "Ditolak" in stat_hist else "#fff3cd" if "Menunggu Pembayaran" in stat_hist else "#cce5ff" if "Proses" in stat_hist else "#f8f9fa"
+                                    border_color = "#28a745" if "Selesai" in stat_hist else "#dc3545" if "Ditolak" in stat_hist else "#ffc107" if "Menunggu Pembayaran" in stat_hist else "#007bff" if "Proses" in stat_hist else "#6c757d"
+                                    
+                                    st.markdown(f"""
+                                    <div style='background-color: {bg_color}; padding: 15px; border-radius: 8px; margin-bottom: 12px; border-left: 6px solid {border_color};'>
+                                        <h5 style='margin-top: 0px; margin-bottom: 8px; color: #333;'>{icon} <b>{stat_hist.strip()}</b></h5>
+                                        <p style='margin-bottom: 0px; font-size: 14px; color: #555;'>📅 <b>Tanggal:</b> {tgl_h}<br>⏰ <b>Jam:</b> {jam_h} WITA</p>
+                                    </div>
+                                    """, unsafe_allow_html=True)
+                                    
+                                    # Munculkan Tombol Download jika status Selesai & ini adalah kotak paling atas
+                                    if index == 0 and "Selesai" in stat_hist and link_hasil_unduh and link_hasil_unduh != "-":
+                                        if "http" in link_hasil_unduh:
+                                            st.link_button("📥 UNDUH DATA HASIL PERMOHONAN DI SINI", link_hasil_unduh, type="primary", use_container_width=True)
+                                        else:
+                                            st.info("Silakan cek dokumen masuk di email/WhatsApp Anda atau datang langsung ke ruang PTSP Stasiun.")
+                                            
                         else:
                             st.error("❌ Data Tidak Ditemukan. Pastikan nomor WhatsApp yang Anda masukkan sama persis dengan yang diisi pada formulir.")
                     else:
@@ -706,8 +743,8 @@ elif menu == "PORTAL ADMIN & REKAP LAPORAN":
                 st.session_state.admin_tab = "DATABASE TAMU & LAYANAN"
                 st.rerun()
         with ca2:
-            if st.button("ARSIP DOKUMEN CLOUD", use_container_width=True, type="primary" if st.session_state.admin_tab == "ARSIP DOKUMEN CLOUD" else "secondary"):
-                st.session_state.admin_tab = "ARSIP DOKUMEN CLOUD"
+            if st.button("AUDIT ARSIP DOKUMEN CLOUD", use_container_width=True, type="primary" if st.session_state.admin_tab == "AUDIT ARSIP DOKUMEN CLOUD" else "secondary"):
+                st.session_state.admin_tab = "AUDIT ARSIP DOKUMEN CLOUD"
                 st.rerun()
                 
         st.markdown("---")
@@ -735,9 +772,9 @@ elif menu == "PORTAL ADMIN & REKAP LAPORAN":
                 else:
                     st.info("Database Permohonan Data masih kosong.")
                     
-        elif st.session_state.admin_tab == "ARSIP DOKUMEN CLOUD":
-            st.subheader("Galeri Berkas Pemohon Data (Cloud Storage)")
-            st.write("Sistem otomatis menarik data dari 21 kolom pangkalan data Google Sheets.")
+        elif st.session_state.admin_tab == "AUDIT ARSIP DOKUMEN CLOUD":
+            st.subheader("Galeri Audit Berkas Pemohon Data (Cloud Storage)")
+            st.write("Sistem otomatis menarik data dari 22 kolom pangkalan data Google Sheets.")
             st.write("")
             
             df_permohonan = ambil_data_google_sheets("Permohonan_Data")
@@ -761,9 +798,12 @@ elif menu == "PORTAL ADMIN & REKAP LAPORAN":
                             current_st = row.iloc[18] if len(row) > 18 else "Menunggu Verifikasi Berkas"
                             waktu_up = row.iloc[19] if len(row) > 19 else waktu_reg
                             
+                            tgl_reg, jam_reg = format_tgl_jam(waktu_reg)
+                            
                             with col_info:
                                 st.markdown(f"### 👤 {nama_pemohon}")
-                                st.write(f"**⏰ Waktu Registrasi:** {waktu_reg}")
+                                st.write(f"📅 **Tanggal Registrasi:** {tgl_reg}")
+                                st.write(f"⏰ **Jam:** {jam_reg} WITA")
                                 st.write(f"**🏢 Asal Instansi:** {instansi_asal}")
                                 st.write(f"**📱 Kontak WA:** {wa_kontak}")
                                 st.write(f"**📂 Layanan Diminta:** {layanan_data}")
@@ -797,7 +837,7 @@ elif menu == "PORTAL ADMIN & REKAP LAPORAN":
                     
                     st.divider()
                     st.markdown("### ⚙️ PANEL UPDATE STATUS PROGRESS DATA KONSUMEN")
-                    st.caption("Ubah status di bawah ini agar pemohon dapat melihat progress pencarian datanya secara langsung.")
+                    st.caption("Setiap pembaruan status akan otomatis terekam dalam histori.")
                     
                     list_nama_khusus = df_khusus[kolom_nama].tolist()
                     if list_nama_khusus:
