@@ -706,8 +706,8 @@ elif menu == "PORTAL ADMIN & REKAP LAPORAN":
                 st.session_state.admin_tab = "DATABASE TAMU & LAYANAN"
                 st.rerun()
         with ca2:
-            if st.button("AUDIT ARSIP DOKUMEN CLOUD", use_container_width=True, type="primary" if st.session_state.admin_tab == "AUDIT ARSIP DOKUMEN CLOUD" else "secondary"):
-                st.session_state.admin_tab = "AUDIT ARSIP DOKUMEN CLOUD"
+            if st.button("ARSIP DOKUMEN CLOUD", use_container_width=True, type="primary" if st.session_state.admin_tab == "ARSIP DOKUMEN CLOUD" else "secondary"):
+                st.session_state.admin_tab = "ARSIP DOKUMEN CLOUD"
                 st.rerun()
                 
         st.markdown("---")
@@ -735,8 +735,8 @@ elif menu == "PORTAL ADMIN & REKAP LAPORAN":
                 else:
                     st.info("Database Permohonan Data masih kosong.")
                     
-        elif st.session_state.admin_tab == "AUDIT ARSIP DOKUMEN CLOUD":
-            st.subheader("Galeri Audit Berkas Pemohon Data (Cloud Storage)")
+        elif st.session_state.admin_tab == "ARSIP DOKUMEN CLOUD":
+            st.subheader("Galeri Berkas Pemohon Data (Cloud Storage)")
             st.write("Sistem otomatis menarik data dari 21 kolom pangkalan data Google Sheets.")
             st.write("")
             
