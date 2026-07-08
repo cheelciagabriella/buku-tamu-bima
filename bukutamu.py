@@ -18,7 +18,7 @@ st.set_page_config(
 )
 
 # ==========================================
-# 2. KUSTOMISASI CSS
+# 2. KUSTOMISASI CSS & TABS SAKTI
 # ==========================================
 st.markdown("""
     <style>
@@ -84,6 +84,45 @@ st.markdown("""
     .block-container {
         padding-top: 4rem !important;
         padding-bottom: 2rem !important;
+    }
+
+    /* =======================================================
+       CSS SAKTI: MENYULAP RADIO BUTTON MENJADI TABS ANTI BOCOR
+       ======================================================= */
+    .fake-tabs-container { display: none; }
+    .fake-tabs-container + div label[data-testid="stWidgetLabel"] { display: none !important; }
+    .fake-tabs-container + div [role="radiogroup"] {
+        flex-direction: row;
+        gap: 25px;
+        border-bottom: 1px solid rgba(49, 51, 63, 0.2);
+        padding-bottom: 0px;
+        margin-bottom: 20px;
+    }
+    .fake-tabs-container + div [role="radiogroup"] > label {
+        background: transparent !important;
+        border-bottom: 2px solid transparent !important;
+        padding: 10px 5px !important;
+        margin-bottom: -1px;
+        cursor: pointer;
+    }
+    .fake-tabs-container + div [role="radiogroup"] > label div:first-child {
+        display: none !important; /* Hilangkan lingkaran radio */
+    }
+    .fake-tabs-container + div [role="radiogroup"] > label p {
+        font-size: 16px !important;
+        font-weight: 400 !important;
+        color: rgba(49, 51, 63, 0.6) !important;
+        margin: 0;
+    }
+    .fake-tabs-container + div [role="radiogroup"] > label[data-checked="true"] {
+        border-bottom-color: #FF4B4B !important;
+    }
+    .fake-tabs-container + div [role="radiogroup"] > label[data-checked="true"] p {
+        color: #FF4B4B !important;
+        font-weight: 600 !important;
+    }
+    .fake-tabs-container + div [role="radiogroup"] > label:hover p {
+        color: #FF4B4B !important;
     }
     </style>
 """, unsafe_allow_html=True)
@@ -238,13 +277,13 @@ st.sidebar.title("NAVIGASI SISTEM")
 menu = st.sidebar.radio("PILIH MENU LAYANAN:", [
     "FORMULIR KUNJUNGAN PUBLIK", 
     "🔒 PORTAL ADMIN & REKAP LAPORAN"
-], key="menu_navigasi")
+])
 st.sidebar.divider()
 st.sidebar.caption("SISTEM ADMINISTRASI TERPADU")
 st.sidebar.caption("STASIUN METEOROLOGI KELAS II SULTAN MUHAMMAD SALAHUDDIN BIMA")
 
 # ==========================================
-# 6. HALAMAN 1: FORMULIR KUNJUNGAN PUBLIK
+# 6. HALAMAN UTAMA LAYANAN PUBLIK
 # ==========================================
 if menu == "FORMULIR KUNJUNGAN PUBLIK":
     col_logo, col_text, col_clock = st.columns([1.2, 5.5, 2.3])
@@ -286,23 +325,19 @@ if menu == "FORMULIR KUNJUNGAN PUBLIK":
     
     st.divider()
     
-    tab1, tab2, tab3, tab4 = st.tabs([
-        "E-BUKU TAMU", 
-        "PERMOHONAN DATA", 
-        "E-KATALOG PNBP",
-        "🔍 LACAK STATUS DATA"
-    ])
+    # MENGGUNAKAN TABS SAKTI ANTI-BOCOR (CSS INJECTION)
+    st.markdown('<div class="fake-tabs-container"></div>', unsafe_allow_html=True)
+    pilihan_tab = st.radio("Navigasi", ["E-BUKU TAMU", "PERMOHONAN DATA", "E-KATALOG PNBP", "🔍 LACAK STATUS DATA"])
     
     # ------------------------------------------
-    # TAB 1: E-BUKU TAMU (SUPER AMAN DALAM FORM)
+    # TAB 1: E-BUKU TAMU
     # ------------------------------------------
-    with tab1:
+    if pilihan_tab == "E-BUKU TAMU":
         if not st.session_state.tamu_terdaftar:
             st.subheader("FORMULIR REGISTRASI PENGUNJUNG")
             st.caption("Mohon lengkapi data registrasi di bawah ini untuk kepentingan administrasi pelayanan publik.")
             
-            # KUNCI 1: SEMUA INPUT DIBUNGKUS st.form. Mengklik apapun tidak akan merefresh layar!
-            with st.form("form_buku_tamu"):
+            with st.container(border=True):
                 st.markdown("#### **I. IDENTITAS PENGUNJUNG**")
                 col1, col2 = st.columns(2)
                 with col1:
@@ -310,24 +345,31 @@ if menu == "FORMULIR KUNJUNGAN PUBLIK":
                     instansi = st.text_input("ASAL INSTANSI / PERUSAHAAN / UNIVERSITAS", placeholder="Contoh: Pemerintah Kota Bima")
                 with col2:
                     no_hp = st.text_input("NOMOR TELEPON / WHATSAPP AKTIF", placeholder="Contoh: 0812345678xx")
-                
-                st.write("")
-                
+            
+            st.write("")
+            
+            with st.container(border=True):
                 st.markdown("#### **II. MAKSUD KUNJUNGAN**")
                 col3, col4 = st.columns(2)
                 with col3:
-                    tujuan = st.selectbox("LAYANAN YANG DITUJU", ["Kunjungan Kerja / Koordinasi", "Studi Banding / Edukasi Publik", "Lain-lain"])
+                    tujuan = st.selectbox(
+                        "LAYANAN YANG DITUJU", 
+                        ["Kunjungan Kerja / Koordinasi", "Studi Banding / Edukasi Publik", "Lain-lain"]
+                    )
                 with col4:
-                    alasan_lainnya = st.text_input("URAIKAN SECARA SPESIFIK (Wajib jika pilih 'Lain-lain'):", placeholder="Tuliskan alasan spesifik di sini...")
+                    alasan_lainnya = ""
+                    # Fitur aslinya kembali 100% normal dan stabil!
+                    if tujuan == "Lain-lain":
+                        alasan_lainnya = st.text_input("URAIKAN MAKSUD KUNJUNGAN SECARA SPESIFIK:", placeholder="Tuliskan Keperluan Anda")
 
-                st.write("") 
-                submit_button = st.form_submit_button("SIMPAN DATA KUNJUNGAN", type="primary", use_container_width=True)
-                
+            st.write("") 
+            submit_button = st.button("SIMPAN DATA KUNJUNGAN", type="primary", use_container_width=True)
+            
             if submit_button:
                 if not nama or not no_hp or not instansi:
                     st.error("GAGAL: Mohon lengkapi kolom Nama, Nomor HP, dan Asal Instansi.")
                 elif tujuan == "Lain-lain" and not alasan_lainnya:
-                    st.warning("PERHATIAN: Anda memilih 'Lain-lain'. Mohon uraikan maksud kunjungan spesifik Anda pada kolom di sebelahnya.")
+                    st.warning("PERHATIAN: Mohon uraikan maksud kunjungan secara spesifik pada kolom yang tersedia.")
                 else:
                     tujuan_final = alasan_lainnya if tujuan == "Lain-lain" else tujuan
                     waktu_sekarang = datetime.now(timezone(timedelta(hours=8))).strftime("%Y-%m-%d %H:%M:%S")
@@ -343,118 +385,124 @@ if menu == "FORMULIR KUNJUNGAN PUBLIK":
             st.success(f"DATA BERHASIL TERSIMPAN: Terima kasih Bapak/Ibu {st.session_state.nama_pendaftar}, data kunjungan Anda telah sah tercatat.")
             st.balloons()
             st.write("")
-            if st.button("KEMBALI KE REGISTRASI TAMU BARU", type="primary", use_container_width=True, key="btn_kembali_tamu"):
+            if st.button("KEMBALI KE REGISTRASI TAMU BARU", type="primary", use_container_width=True):
                 st.session_state.tamu_terdaftar = False
                 st.session_state.nama_pendaftar = ""
                 st.rerun()
 
     # ------------------------------------------
-    # TAB 2: PERMOHONAN DATA (SUPER AMAN DALAM FORM)
+    # TAB 2: PERMOHONAN DATA
     # ------------------------------------------
-    with tab2:
+    elif pilihan_tab == "PERMOHONAN DATA":
         st.subheader("FORMULIR PERMOHONAN DATA METEOROLOGI")
         
-        st.markdown("""
-        <div style='background-color: rgba(0, 43, 73, 0.05); padding: 15px; border-radius: 8px; border-left: 5px solid #002B49; margin-bottom: 20px;'>
-            <h4 style='color: #002B49; margin-top: 0px;'>📋 PANDUAN UNGGAH BERKAS</h4>
-            <p style='font-size: 14px; line-height: 1.5; color: var(--text-color); margin-bottom: 5px;'>
-                Harap perhatikan syarat yang diwajibkan sesuai jalur Anda:
-            </p>
-            <ul style='font-size: 14px; color: var(--text-color); margin-top: 0px;'>
-                <li><b>Komersial/Swasta (Berbayar PNBP):</b> Hanya perlu unggah KTP, Surat Permohonan Instansi, dan Bukti SKM.</li>
-                <li><b>Pendidikan/Pemerintah (Gratis Rp 0,-):</b> Wajib unggah KTP, Surat Permohonan, Surat Pengantar, Surat Pernyataan Bermeterai, dan Bukti SKM. Proposal <b>hanya</b> wajib untuk Mahasiswa. <span style='color:red; font-weight:bold;'>Maksimal rentang data 5 tahun.</span></li>
-            </ul>
-        </div>
-        """, unsafe_allow_html=True)
+        with st.container(border=True):
+            st.markdown("""
+            <div style='background-color: rgba(0, 43, 73, 0.05); padding: 15px; border-radius: 8px; border-left: 5px solid #002B49;'>
+                <h4 style='color: #002B49; margin-top: 0px;'>📋 PERSYARATAN ADMINISTRASI BERDASARKAN KATEGORI</h4>
+                <p style='font-size: 14px; line-height: 1.5; color: var(--text-color); margin-bottom: 5px;'>
+                    Sistem akan secara otomatis menyesuaikan formulir unggahan berdasarkan pilihan kategori Anda:
+                </p>
+                <ul style='font-size: 14px; color: var(--text-color); margin-top: 0px;'>
+                    <li><b>Komersial/Swasta (PNBP):</b> Wajib unggah KTP, Surat Permohonan Instansi, dan Bukti Isi SKM.</li>
+                    <li><b>Pendidikan/Pemerintah (Rp 0,-):</b> Wajib unggah KTP, Surat Permohonan, Surat Pengantar, Surat Pernyataan Bermeterai, Proposal (khusus Mahasiswa), dan Bukti Isi SKM. <span style='color:red; font-weight:bold;'>Maksimal rentang periode data adalah 5 tahun.</span></li>
+                </ul>
+            </div>
+            """, unsafe_allow_html=True)
+        st.write("")
         
-        # KUNCI 2: SEMUA INPUT DIBUNGKUS st.form. Mengklik kategori tidak akan merefresh layar!
-        with st.form("form_permohonan_data"):
-            st.markdown("#### **I. TENTUKAN KATEGORI PERMOHONAN**")
-            kategori_pemohon = st.radio("Silakan pilih kategori instansi / tujuan Anda:", [
-                "Pendidikan / Penelitian Non-Komersial (Tarif Rp 0)",
-                "Instansi Pemerintah Pusat / Daerah (Tarif Rp 0)",
-                "Komersial / Swasta / Perorangan Umum (Berbayar PNBP)"
-            ])
+        st.markdown("#### **I. TENTUKAN KATEGORI PERMOHONAN**")
+        kategori_pemohon = st.radio("Silakan pilih kategori instansi / tujuan Anda:", [
+            "Pendidikan / Penelitian Non-Komersial (Tarif Rp 0)",
+            "Instansi Pemerintah Pusat / Daerah (Tarif Rp 0)",
+            "Komersial / Swasta / Perorangan Umum (Berbayar PNBP)"
+        ])
+        st.write("")
+        
+        st.markdown("#### **II. IDENTITAS PEMOHON DATA**")
+        col_k1, col_k2 = st.columns(2)
+        
+        with col_k1:
+            nama_khusus = st.text_input("NAMA LENGKAP *", placeholder="Nama depan dan nama belakang")
+            ktp_nim = st.text_input("NOMOR KTP / NIM *", placeholder="Masukkan Nomor Induk Kependudukan / Mahasiswa")
+            instansi_khusus = st.text_input("SEKOLAH / UNIVERSITAS / INSTANSI *", placeholder="Contoh: Universitas Mataram / PT. XYZ")
+        with col_k2:
+            kontak_khusus = st.text_input("NOMOR HP WHATSAPP (AKTIF) *", placeholder="Contoh: 081234567xxx")
+            email_khusus = st.text_input("EMAIL *", placeholder="Contoh: email_anda@gmail.com")
+        
+        st.write("")
+        st.markdown("#### **III. DATA YANG DIBUTUHKAN**")
+        judul_penelitian = st.text_input("JUDUL KEGIATAN / PROYEK / PENELITIAN *", placeholder="Masukkan judul penelitian atau proyek")
+        jenis_data_khusus = st.selectbox("JENIS DATA YANG DIBUTUHKAN *", [
+            "Curah Hujan", "Suhu Udara", "Arah dan Kecepatan Angin", 
+            "Tekanan Udara", "Lama Penyinaran Matahari", "Penguapan", "Lainnya"
+        ])
+        
+        col_d1, col_d2 = st.columns(2)
+        with col_d1:
+            tgl_mulai = st.date_input("PERIODE DATA (TANGGAL MULAI) *")
+        with col_d2:
+            tgl_selesai = st.date_input("PERIODE DATA (TANGGAL SELESAI) *")
+            if "Tarif Rp 0" in kategori_pemohon:
+                st.markdown("<small style='color: red; font-weight: bold;'>⚠️ (Untuk data Rp. 0,- maksimal periode data adalah 5 tahun)</small>", unsafe_allow_html=True)
             
-            st.write("---")
-            st.markdown("#### **II. IDENTITAS PEMOHON DATA**")
-            col_k1, col_k2 = st.columns(2)
-            
-            with col_k1:
-                nama_khusus = st.text_input("NAMA LENGKAP *", placeholder="Nama depan dan nama belakang")
-                ktp_nim = st.text_input("NOMOR KTP / NIM *", placeholder="Masukkan Nomor Induk Kependudukan / Mahasiswa")
-                instansi_khusus = st.text_input("SEKOLAH / UNIVERSITAS / INSTANSI *", placeholder="Contoh: Universitas Mataram / PT. XYZ")
-            with col_k2:
-                kontak_khusus = st.text_input("NOMOR HP WHATSAPP (AKTIF) *", placeholder="Contoh: 081234567xxx")
-                email_khusus = st.text_input("EMAIL *", placeholder="Contoh: email_anda@gmail.com")
-            
-            st.write("---")
-            st.markdown("#### **III. DATA YANG DIBUTUHKAN**")
-            judul_penelitian = st.text_input("JUDUL KEGIATAN / PROYEK / PENELITIAN *", placeholder="Masukkan judul penelitian atau proyek")
-            jenis_data_khusus = st.selectbox("JENIS DATA YANG DIBUTUHKAN *", [
-                "Curah Hujan", "Suhu Udara", "Arah dan Kecepatan Angin", 
-                "Tekanan Udara", "Lama Penyinaran Matahari", "Penguapan", "Lainnya"
-            ])
-            
-            col_d1, col_d2 = st.columns(2)
-            with col_d1:
-                tgl_mulai = st.date_input("PERIODE DATA (TANGGAL MULAI) *")
-            with col_d2:
-                tgl_selesai = st.date_input("PERIODE DATA (TANGGAL SELESAI) *")
-                st.caption("⚠️ (Khusus data Jalur Gratis Rp 0,- maksimal periode data adalah 5 tahun / 1825 Hari)")
-                
-            lokasi_data = st.text_input("LOKASI DATA YANG DIMINTA *", placeholder="Contoh: Kota Bima")
-            deskripsi_tujuan = st.text_area("DESKRIPSI SINGKAT KEBUTUHAN DATA DAN TUJUAN PENGGUNAAN *", placeholder="Jelaskan secara singkat untuk apa data ini digunakan...")
+        lokasi_data = st.text_input("LOKASI DATA YANG DIMINTA *", placeholder="Contoh: Kota Bima")
+        deskripsi_tujuan = st.text_area("DESKRIPSI SINGKAT KEBUTUHAN DATA DAN TUJUAN PENGGUNAAN *", placeholder="Jelaskan secara singkat untuk apa data ini digunakan...")
 
-            st.write("---")
-            st.markdown("#### **IV. UPLOAD BERKAS PENDUKUNG (Maks. 10MB/File)**")
-            
-            col_u1, col_u2 = st.columns(2)
-            with col_u1:
-                file_ktp = st.file_uploader("1. KTP / Kartu Identitas (Wajib Semua Jalur) *", type=["pdf", "jpg", "png"])
-                file_surat_permohonan = st.file_uploader("2. Surat Permohonan Instansi (Wajib Semua Jalur) *", type=["pdf"])
-                file_proposal = st.file_uploader("5. Proposal Penelitian (Wajib khusus Jalur Mahasiswa)", type=["pdf"])
-                    
-            with col_u2:
-                st.markdown("📄 **[Download Format Surat Pengantar](https://docs.google.com/document/d/1YNKGAGzif4i36bvLLCZ2jDyz8oYYoQLj/edit)**")
-                file_surat_pengantar = st.file_uploader("3. Surat Pengantar Sekolah/Instansi (Wajib khusus Jalur Rp 0)", type=["pdf"])
+        st.write("")
+        st.markdown(f"#### **IV. UPLOAD BERKAS PENDUKUNG (Maks. 10MB/File)**")
+        st.caption(f"Kategori Terpilih: **{kategori_pemohon}**")
+        
+        col_u1, col_u2 = st.columns(2)
+        with col_u1:
+            file_ktp = st.file_uploader("1. KTP / Kartu Identitas (Wajib Semua Jalur) *", type=["pdf", "jpg", "png"])
+            file_surat_permohonan = st.file_uploader("2. Surat Permohonan Instansi (Wajib Semua Jalur) *", type=["pdf"])
+            if "Pendidikan" in kategori_pemohon:
+                st.write("")
+                file_proposal = st.file_uploader("5. Proposal & Lembar Pengesahan (Wajib khusus Mahasiswa) *", type=["pdf"])
+            else:
+                file_proposal = None
                 
+        with col_u2:
+            if "Berbayar PNBP" in kategori_pemohon:
+                st.info("💡 **Informasi Layanan Komersial:** \nAnda berada pada jalur permohonan berbayar (PNBP). Anda cukup melampirkan identitas diri (KTP), Surat Permohonan resmi dari instansi, dan tangkapan layar bukti pengisian SKM di bawah.")
+                file_surat_pengantar = None
+                file_surat_pernyataan = None
+            else:
+                st.markdown("📄 **[Download Format Surat Pengantar](https://docs.google.com/document/d/1YNKGAGzif4i36bvLLCZ2jDyz8oYYoQLj/edit)**")
+                file_surat_pengantar = st.file_uploader("3. Surat Pengantar Sekolah/Univ/Instansi (Wajib Jalur Rp 0) *", type=["pdf"])
                 st.markdown("📄 **[Download Format Surat Pernyataan Bermeterai](https://docs.google.com/document/d/1N6nBHU8PIaGtXIX6u96T9Z0f6cYcnkb6/edit)**")
-                file_surat_pernyataan = st.file_uploader("4. Surat Pernyataan Bermeterai (Wajib khusus Jalur Rp 0)", type=["pdf"])
-            
-            st.write("---")
-            st.markdown("#### **V. KONFIRMASI SURVEI KEPUASAN MASYARAKAT (SKM) [WAJIB]**")
-            st.write("👉 **[KLIK DI SINI UNTUK MENGISI FORMULIR SKM BMKG](https://forms.gle/7msXFJk9sKNhGtrQ7)**")
-            
-            file_bukti_skm = st.file_uploader("6. Unggah Bukti / Tangkapan Layar (Screenshot) Hasil Pengisian SKM (Wajib Semua Jalur) *", type=["pdf", "jpg", "jpeg", "png"])
-            cek_skm = st.checkbox("Saya menyatakan dengan sadar bahwa saya BENAR-BENAR TELAH MENGISI Survei Kepuasan Masyarakat (SKM) pada tautan di atas dan mengunggah buktinya. *")
-            
-            st.write("")
-            submit_khusus = st.form_submit_button("KIRIM PERMOHONAN DATA", type="primary", use_container_width=True)
-            
+                file_surat_pernyataan = st.file_uploader("4. Surat Pernyataan Bermeterai (Wajib Jalur Rp 0) *", type=["pdf"])
+        
+        st.write("")
+        st.markdown("#### **V. KONFIRMASI SURVEI KEPUASAN MASYARAKAT (SKM) [WAJIB]**")
+        st.info("Berdasarkan standar pelayanan, pemohon diwajibkan untuk mengisi Survei Kepuasan Masyarakat (SKM) sebelum mengirimkan berkas permohonan.")
+        st.write("👉 **[KLIK DI SINI UNTUK MENGISI FORMULIR SKM BMKG](https://forms.gle/7msXFJk9sKNhGtrQ7)**")
+        
+        file_bukti_skm = st.file_uploader("6. Unggah Bukti / Tangkapan Layar (Screenshot) Hasil Pengisian SKM (Wajib) *", type=["pdf", "jpg", "jpeg", "png"])
+        cek_skm = st.checkbox("Saya menyatakan dengan sadar bahwa saya BENAR-BENAR TELAH MENGISI Survei Kepuasan Masyarakat (SKM) pada tautan di atas dan mengunggah buktinya. *")
+        
+        st.write("")
+        submit_khusus = st.button("KIRIM PERMOHONAN DATA", type="primary", use_container_width=True)
+        
         if submit_khusus:
             selisih_hari = (tgl_selesai - tgl_mulai).days
             is_valid = True
             
-            # Cek field wajib standar
             if not nama_khusus or not ktp_nim or not instansi_khusus or not kontak_khusus or not email_khusus or not judul_penelitian or not lokasi_data or not deskripsi_tujuan or not file_ktp or not file_surat_permohonan or not file_bukti_skm:
                 is_valid = False
             
-            # Logika Pengecekan Khusus saat tombol ditekan
-            is_rp_nol = ("Tarif Rp 0" in kategori_pemohon)
-            is_pendidikan = ("Pendidikan" in kategori_pemohon)
-            
-            if is_rp_nol and (not file_surat_pengantar or not file_surat_pernyataan):
-                st.error("❌ PROSES GAGAL: Untuk Jalur Gratis (Rp 0), Anda WAJIB mengunggah Surat Pengantar Instansi dan Surat Pernyataan Bermeterai!")
+            if "Tarif Rp 0" in kategori_pemohon and (not file_surat_pengantar or not file_surat_pernyataan):
                 is_valid = False
-            elif is_pendidikan and not file_proposal:
-                st.error("❌ PROSES GAGAL: Untuk kategori Pendidikan/Mahasiswa, Anda WAJIB mengunggah Proposal Penelitian!")
+                
+            if "Pendidikan" in kategori_pemohon and not file_proposal:
                 is_valid = False
-            elif not is_valid:
-                st.error("❌ PROSES GAGAL: Pastikan seluruh kolom isian dan berkas yang bertanda (Wajib) sesuai kategori Anda telah diisi dan diunggah!")
+
+            if not is_valid:
+                st.error("❌ PROSES GAGAL: Pastikan seluruh kolom isian dan berkas yang bertanda Wajib (*) telah diisi dan diunggah sesuai dengan kategori permohonan Anda!")
             elif not cek_skm:
-                st.error("❌ PROSES GAGAL: Anda WAJIB mencentang kotak konfirmasi Survei Kepuasan Masyarakat (SKM) di bagian paling bawah!")
-            elif is_rp_nol and selisih_hari > 1825:
+                st.error("❌ PROSES GAGAL: Anda WAJIB mencentang kotak konfirmasi Survei Kepuasan Masyarakat (SKM)!")
+            elif "Tarif Rp 0" in kategori_pemohon and selisih_hari > 1825:
                 st.error(f"❌ PROSES GAGAL: Rentang data yang Anda minta adalah {selisih_hari} hari. Untuk jalur data Rp. 0,- (Gratis), maksimal periode data adalah 5 tahun (1.825 hari)!")
             else:
                 with st.spinner("🔄 Sedang mengunggah seluruh dokumen ke Cloud Server..."):
@@ -502,7 +550,7 @@ if menu == "FORMULIR KUNJUNGAN PUBLIK":
     # ------------------------------------------
     # TAB 3: E-KATALOG PNBP
     # ------------------------------------------
-    with tab3:
+    elif pilihan_tab == "E-KATALOG PNBP":
         st.markdown("<h3 style='color: #002B49; margin-bottom: 0px;'>Katalog Tarif Resmi Jasa Data dan Informasi</h3>", unsafe_allow_html=True)
         st.caption("Berdasarkan Peraturan Pemerintah Nomor 47 Tahun 2018 tentang Jenis dan Tarif atas Jenis Penerimaan Negara Bukan Pajak (PNBP) yang berlaku pada BMKG.")
         st.write("")
@@ -557,15 +605,13 @@ if menu == "FORMULIR KUNJUNGAN PUBLIK":
     # ------------------------------------------
     # TAB 4: FITUR TRACKING / LACAK DATA UNTUK KONSUMEN
     # ------------------------------------------
-    with tab4:
+    elif pilihan_tab == "🔍 LACAK STATUS DATA":
         st.subheader("🔍 PORTAL PELACAKAN STATUS PERMOHONAN DATA")
         st.caption("Transparansi Pelayanan Publik: Lacak status pemrosesan dokumen data khusus Anda secara real-time.")
         
-        with st.form("form_lacak"):
-            no_hp_cari = st.text_input("Masukkan Nomor WhatsApp yang Anda Daftarkan:", placeholder="Contoh: 081234567xxx")
-            btn_lacak = st.form_submit_button("CEK PROGRESS SEKARANG", type="primary", use_container_width=True)
-            
-        if btn_lacak:
+        no_hp_cari = st.text_input("Masukkan Nomor WhatsApp yang Anda Daftarkan:", placeholder="Contoh: 081234567xxx")
+        
+        if st.button("CEK PROGRESS SEKARANG", type="primary", use_container_width=True):
             if not no_hp_cari:
                 st.warning("Silakan isi nomor WhatsApp Anda terlebih dahulu.")
             else:
@@ -652,9 +698,11 @@ elif menu == "🔒 PORTAL ADMIN & REKAP LAPORAN":
             st.link_button("📁 Buka Google Drive (Folder Arsip)", "https://drive.google.com/drive/folders/1FtwvPLbWcTPpyIOxMRBW88oLHri_rZVH", use_container_width=True)
         st.divider()
         
-        tab_db_tamu, tab_arsip = st.tabs(["DATABASE TAMU & LAYANAN", "AUDIT ARSIP DOKUMEN CLOUD"])
+        # MENGGUNAKAN TABS SAKTI UNTUK ADMIN JUGA
+        st.markdown('<div class="fake-tabs-container"></div>', unsafe_allow_html=True)
+        pilihan_admin = st.radio("Admin Nav", ["DATABASE TAMU & LAYANAN", "AUDIT ARSIP DOKUMEN CLOUD"])
         
-        with tab_db_tamu:
+        if pilihan_admin == "DATABASE TAMU & LAYANAN":
             st.subheader("1. Tabel Rekapitulasi Buku Tamu")
             with st.spinner("Sedang menarik data Tamu dari Cloud..."):
                 df_tamu = ambil_data_google_sheets("Tamu")
@@ -677,89 +725,92 @@ elif menu == "🔒 PORTAL ADMIN & REKAP LAPORAN":
                 else:
                     st.info("Database Permohonan Data masih kosong.")
                     
-        with tab_arsip:
+        elif pilihan_admin == "AUDIT ARSIP DOKUMEN CLOUD":
             st.subheader("Galeri Audit Berkas Pemohon Data (Cloud Storage)")
             st.write("Sistem otomatis menarik data dari 21 kolom pangkalan data Google Sheets.")
             st.write("")
             
             df_permohonan = ambil_data_google_sheets("Permohonan_Data")
             
-            if df_permohonan.empty:
-                st.info("Database Permohonan Data masih kosong.")
-            else:
-                kolom_nama = df_permohonan.columns[1]
-                for index, row in df_permohonan.iterrows():
-                    with st.container(border=True):
-                        col_info, col_links = st.columns([2, 1])
-                        
-                        kategori_text = row.iloc[4] if len(row) > 4 else "-"
-                        nama_pemohon = row.iloc[1] if len(row) > 1 else "-"
-                        waktu_reg = row.iloc[0] if len(row) > 0 else "-"
-                        instansi_asal = row.iloc[3] if len(row) > 3 else "-"
-                        wa_kontak = row.iloc[2] if len(row) > 2 else "-"
-                        layanan_data = row.iloc[8] if len(row) > 8 else "-"
-                        
-                        current_st = row.iloc[18] if len(row) > 18 else "Menunggu Verifikasi Berkas"
-                        waktu_up = row.iloc[19] if len(row) > 19 else waktu_reg
-                        
-                        with col_info:
-                            st.markdown(f"### 👤 {nama_pemohon}")
-                            st.write(f"**⏰ Waktu Registrasi:** {waktu_reg}")
-                            st.write(f"**🏢 Asal Instansi:** {instansi_asal}")
-                            st.write(f"**📱 Kontak WA:** {wa_kontak}")
-                            st.write(f"**📂 Layanan Diminta:** {layanan_data}")
-                            st.write(f"**🏷️ Kategori:** {kategori_text}")
-                            
-                            st.info(f"🚩 **Status Saat Ini:** {current_st}")
-                            st.caption(f"Terakhir diupdate: {waktu_up}")
-                        
-                        with col_links:
-                            st.markdown("**📂 Akses Berkas Pendukung:**")
-                            
-                            link_ktp = str(row.iloc[12]) if len(row) > 12 else "-"
-                            link_permohonan = str(row.iloc[13]) if len(row) > 13 else "-"
-                            link_pengantar = str(row.iloc[14]) if len(row) > 14 else "-"
-                            link_pernyataan = str(row.iloc[15]) if len(row) > 15 else "-"
-                            link_proposal = str(row.iloc[16]) if len(row) > 16 else "-"
-                            link_skm_file = str(row.iloc[17]) if len(row) > 17 else "-"
-                            
-                            def show_link_button(label, url):
-                                if "http" in url:
-                                    st.link_button(f"👁️ Lihat {label}", url, use_container_width=True)
-                                elif url and url != "-":
-                                    st.caption(f"⚠️ {label}: Tdk Ada/Valid")
-                                    
-                            show_link_button("KTP/Identitas", link_ktp)
-                            show_link_button("Surat Permohonan", link_permohonan)
-                            show_link_button("Surat Pengantar", link_pengantar)
-                            show_link_button("Surat Pernyataan", link_pernyataan)
-                            show_link_button("Proposal", link_proposal)
-                            show_link_button("Bukti SKM", link_skm_file)
+            if not df_permohonan.empty:
+                df_khusus = df_permohonan 
                 
-                st.divider()
-                st.markdown("### ⚙️ PANEL UPDATE STATUS PROGRESS DATA KONSUMEN")
-                st.caption("Ubah status di bawah ini agar pemohon dapat melihat progress pencarian datanya secara langsung.")
-                
-                list_nama_khusus = df_permohonan[kolom_nama].tolist()
-                if list_nama_khusus:
-                    with st.form("form_update_status"):
-                        pilih_nama = st.selectbox("Pilih Nama Pemohon Khusus:", list_nama_khusus)
-                        pilih_status = st.selectbox("Set Status Progres Terbaru:", [
-                            "Menunggu Verifikasi Berkas", 
-                            "Proses Penyiapan Data", 
-                            "Menunggu Pembayaran PNBP",
-                            "Selesai (Data Telah Dikirim / Siap Diambil)",
-                            "Ditolak (Berkas Tidak Memenuhi Syarat)"
-                        ])
-                        
-                        link_input = st.text_input("Tautkan Link Google Drive Data Hasil (Hanya jika Selesai):", placeholder="Paste URL file data di sini (https://...)")
-                        
-                        btn_simpan_status = st.form_submit_button("SIMPAN PEMBARUAN STATUS", type="primary")
-                        
-                    if btn_simpan_status:
-                        with st.spinner("Mengupdate status di database cloud..."):
-                            if update_status_sheets(pilih_nama, pilih_status, link_input):
-                                st.success(f"Berhasil mengubah status {pilih_nama} menjadi: {pilih_status}!")
-                                st.rerun()
+                if not df_khusus.empty:
+                    kolom_nama = df_khusus.columns[1]
+                    for index, row in df_khusus.iterrows():
+                        with st.container(border=True):
+                            col_info, col_links = st.columns([2, 1])
+                            
+                            kategori_text = row.iloc[4] if len(row) > 4 else "-"
+                            nama_pemohon = row.iloc[1] if len(row) > 1 else "-"
+                            waktu_reg = row.iloc[0] if len(row) > 0 else "-"
+                            instansi_asal = row.iloc[3] if len(row) > 3 else "-"
+                            wa_kontak = row.iloc[2] if len(row) > 2 else "-"
+                            layanan_data = row.iloc[8] if len(row) > 8 else "-"
+                            
+                            current_st = row.iloc[18] if len(row) > 18 else "Menunggu Verifikasi Berkas"
+                            waktu_up = row.iloc[19] if len(row) > 19 else waktu_reg
+                            
+                            with col_info:
+                                st.markdown(f"### 👤 {nama_pemohon}")
+                                st.write(f"**⏰ Waktu Registrasi:** {waktu_reg}")
+                                st.write(f"**🏢 Asal Instansi:** {instansi_asal}")
+                                st.write(f"**📱 Kontak WA:** {wa_kontak}")
+                                st.write(f"**📂 Layanan Diminta:** {layanan_data}")
+                                st.write(f"**🏷️ Kategori:** {kategori_text}")
+                                
+                                st.info(f"🚩 **Status Saat Ini:** {current_st}")
+                                st.caption(f"Terakhir diupdate: {waktu_up}")
+                            
+                            with col_links:
+                                st.markdown("**📂 Akses Berkas Pendukung:**")
+                                
+                                link_ktp = str(row.iloc[12]) if len(row) > 12 else "-"
+                                link_permohonan = str(row.iloc[13]) if len(row) > 13 else "-"
+                                link_pengantar = str(row.iloc[14]) if len(row) > 14 else "-"
+                                link_pernyataan = str(row.iloc[15]) if len(row) > 15 else "-"
+                                link_proposal = str(row.iloc[16]) if len(row) > 16 else "-"
+                                link_skm_file = str(row.iloc[17]) if len(row) > 17 else "-"
+                                
+                                def show_link_button(label, url):
+                                    if "http" in url:
+                                        st.link_button(f"👁️ Lihat {label}", url, use_container_width=True)
+                                    elif url and url != "-":
+                                        st.caption(f"⚠️ {label}: Tdk Ada/Valid")
+                                        
+                                show_link_button("KTP/Identitas", link_ktp)
+                                show_link_button("Surat Permohonan", link_permohonan)
+                                show_link_button("Surat Pengantar", link_pengantar)
+                                show_link_button("Surat Pernyataan", link_pernyataan)
+                                show_link_button("Proposal", link_proposal)
+                                show_link_button("Bukti SKM", link_skm_file)
+                    
+                    st.divider()
+                    st.markdown("### ⚙️ PANEL UPDATE STATUS PROGRESS DATA KONSUMEN")
+                    st.caption("Ubah status di bawah ini agar pemohon dapat melihat progress pencarian datanya secara langsung.")
+                    
+                    list_nama_khusus = df_khusus[kolom_nama].tolist()
+                    if list_nama_khusus:
+                        with st.form("form_update_status"):
+                            pilih_nama = st.selectbox("Pilih Nama Pemohon Khusus:", list_nama_khusus)
+                            pilih_status = st.selectbox("Set Status Progres Terbaru:", [
+                                "Menunggu Verifikasi Berkas", 
+                                "Proses Penyiapan Data", 
+                                "Menunggu Pembayaran PNBP",
+                                "Selesai (Data Telah Dikirim / Siap Diambil)",
+                                "Ditolak (Berkas Tidak Memenuhi Syarat)"
+                            ])
+                            
+                            link_input = st.text_input("Tautkan Link Google Drive Data Hasil (Hanya jika Selesai):", placeholder="Paste URL file data di sini (https://...)")
+                            
+                            btn_simpan_status = st.form_submit_button("SIMPAN PEMBARUAN STATUS", type="primary")
+                            
+                        if btn_simpan_status:
+                            with st.spinner("Mengupdate status di database cloud..."):
+                                if update_status_sheets(pilih_nama, pilih_status, link_input):
+                                    st.success(f"Berhasil mengubah status {pilih_nama} menjadi: {pilih_status}!")
+                                    st.rerun()
                 else:
                     st.info("Belum ada data pemohon khusus baru yang terekam.")
+            else:
+                st.info("Database Permohonan Data masih kosong.")
