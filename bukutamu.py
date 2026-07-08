@@ -18,7 +18,7 @@ st.set_page_config(
 )
 
 # ==========================================
-# 2. KUSTOMISASI CSS (KUNCI SIDEBAR, HAPUS FORK GITHUB & UKURAN)
+# 2. KUSTOMISASI CSS
 # ==========================================
 st.markdown("""
     <style>
@@ -293,7 +293,9 @@ if menu == "FORMULIR KUNJUNGAN PUBLIK":
         "🔍 LACAK STATUS DATA"
     ])
     
-    # --- TAB 1: E-BUKU TAMU ---
+    # ------------------------------------------
+    # TAB 1: E-BUKU TAMU
+    # ------------------------------------------
     with tab1:
         if not st.session_state.tamu_terdaftar:
             st.subheader("FORMULIR REGISTRASI PENGUNJUNG")
@@ -351,7 +353,9 @@ if menu == "FORMULIR KUNJUNGAN PUBLIK":
                 st.session_state.nama_pendaftar = ""
                 st.rerun()
 
-    # --- TAB 2: PERMOHONAN DATA ---
+    # ------------------------------------------
+    # TAB 2: PERMOHONAN DATA
+    # ------------------------------------------
     with tab2:
         st.subheader("FORMULIR PERMOHONAN DATA METEOROLOGI")
         
@@ -445,86 +449,88 @@ if menu == "FORMULIR KUNJUNGAN PUBLIK":
             st.write("")
             submit_khusus = st.form_submit_button("KIRIM PERMOHONAN DATA", type="primary", use_container_width=True)
             
-            if submit_khusus:
-                selisih_hari = (tgl_selesai - tgl_mulai).days
-                is_valid = True
+        if submit_khusus:
+            selisih_hari = (tgl_selesai - tgl_mulai).days
+            is_valid = True
+            
+            if not nama_khusus or not ktp_nim or not instansi_khusus or not kontak_khusus or not email_khusus or not judul_penelitian or not lokasi_data or not deskripsi_tujuan or not file_ktp or not file_surat_permohonan or not file_bukti_skm:
+                is_valid = False
+            
+            if "Tarif Rp 0" in kategori_pemohon and (not file_surat_pengantar or not file_surat_pernyataan):
+                is_valid = False
                 
-                if not nama_khusus or not ktp_nim or not instansi_khusus or not kontak_khusus or not email_khusus or not judul_penelitian or not lokasi_data or not deskripsi_tujuan or not file_ktp or not file_surat_permohonan or not file_bukti_skm:
-                    is_valid = False
-                
-                if "Tarif Rp 0" in kategori_pemohon and (not file_surat_pengantar or not file_surat_pernyataan):
-                    is_valid = False
+            if "Pendidikan" in kategori_pemohon and not file_proposal:
+                is_valid = False
+
+            if not is_valid:
+                st.error("❌ PROSES GAGAL: Pastikan seluruh kolom isian dan berkas yang bertanda Wajib (*) telah diisi dan diunggah sesuai dengan kategori permohonan Anda!")
+            elif not cek_skm:
+                st.error("❌ PROSES GAGAL: Anda WAJIB mencentang kotak konfirmasi Survei Kepuasan Masyarakat (SKM)!")
+            elif "Tarif Rp 0" in kategori_pemohon and selisih_hari > 1825:
+                st.error(f"❌ PROSES GAGAL: Rentang data yang Anda minta adalah {selisih_hari} hari. Untuk jalur data Rp. 0,- (Gratis), maksimal periode data adalah 5 tahun (1.825 hari)!")
+            else:
+                with st.spinner("🔄 Sedang mengunggah seluruh dokumen ke Cloud Server..."):
+                    def proses_upload(file_obj, prefix):
+                        if file_obj is not None:
+                            ext = file_obj.name.split('.')[-1]
+                            nama_file = f"{prefix}_{nama_khusus.replace(' ', '_')}_{datetime.now().strftime('%Y%m%d%H%M')}.{ext}"
+                            return upload_ke_google_drive(file_obj, nama_file, file_obj.type)
+                        return "-"
+
+                    link_ktp = proses_upload(file_ktp, "KTP")
+                    link_permohonan = proses_upload(file_surat_permohonan, "Permohonan")
+                    link_pengantar = proses_upload(file_surat_pengantar, "Pengantar")
+                    link_pernyataan = proses_upload(file_surat_pernyataan, "Pernyataan")
+                    link_proposal = proses_upload(file_proposal, "Proposal")
+                    link_skm = proses_upload(file_bukti_skm, "Bukti_SKM")
                     
-                if "Pendidikan" in kategori_pemohon and not file_proposal:
-                    is_valid = False
+                    waktu_khusus = datetime.now(timezone(timedelta(hours=8))).strftime("%Y-%m-%d %H:%M:%S")
+                    periode_gabung = f"{tgl_mulai} sd {tgl_selesai}"
+                    
+                    row_khusus = [
+                        waktu_khusus,          # 1. Waktu Registrasi
+                        nama_khusus,           # 2. Nama Lengkap
+                        kontak_khusus,         # 3. Nomor WhatsApp
+                        instansi_khusus,       # 4. Asal Instansi / Lembaga
+                        kategori_pemohon,      # 5. Kategori Pemohon
+                        ktp_nim,               # 6. Nomor KTP / NIM
+                        email_khusus,          # 7. Email
+                        judul_penelitian,      # 8. Judul Penelitian
+                        jenis_data_khusus,     # 9. Jenis Data Diminta
+                        periode_gabung,        # 10. Periode Data
+                        lokasi_data,           # 11. Lokasi Data
+                        deskripsi_tujuan,      # 12. Tujuan Penggunaan
+                        link_ktp,              # 13. Link KTP
+                        link_permohonan,       # 14. Link Surat Permohonan
+                        link_pengantar,        # 15. Link Surat Pengantar
+                        link_pernyataan,       # 16. Link Surat Pernyataan
+                        link_proposal,         # 17. Link Proposal
+                        link_skm,              # 18. Link Bukti SKM
+                        "Menunggu Verifikasi Berkas", # 19. Status
+                        waktu_khusus,          # 20. Waktu Update Status
+                        "-"                    # 21. Link Hasil Data
+                    ]
+                    
+                    if simpan_ke_google_sheets("Permohonan_Data", row_khusus):
+                        st.balloons()
+                        if "Berbayar PNBP" in kategori_pemohon:
+                            st.warning("⚠️ **PERMOHONAN BERHASIL DISIMPAN (STATUS: BERBAYAR)**")
+                            st.write(f"Halo {nama_khusus}, permohonan data Anda telah kami terima dan akan dikenakan tarif PNBP sesuai PP No. 47 Tahun 2018.")
+                            st.write("**Langkah terakhir:** Silakan klik tombol di bawah ini untuk memberitahu Admin agar berkas Anda segera diverifikasi dan diterbitkan *kode billing* pembayarannya.")
+                            
+                            pesan_wa_pnbp = f"Halo%20Admin%20PTSP%20Stamet%20Bima,%20saya%20*{nama_khusus}*%20baru%20saja%20mengajukan%20permohonan%20data%20jalur%20*Komersial%20(PNBP)*.%20Mohon%20informasi%20rincian%20tarifnya."
+                            st.link_button("📲 KLIK DI SINI UNTUK KONFIRMASI KE ADMIN VIA WHATSAPP", f"https://wa.me/{NOMOR_WA_CS}?text={pesan_wa_pnbp}", type="primary", use_container_width=True)
+                        else:
+                            st.success("✔️ **PERMOHONAN BERHASIL DISIMPAN (STATUS: BEBAS TARIF Rp 0)**")
+                            st.write("Seluruh dokumen syarat digital serta bukti pengisian SKM Anda telah sukses diamankan ke Cloud Server.")
+                            st.write("**Langkah terakhir:** Silakan klik tombol di bawah ini untuk memberitahu Admin agar berkas Anda segera diproses.")
+                            
+                            pesan_wa_rp0 = f"Halo%20Admin%20PTSP%20Stamet%20Bima,%20saya%20*{nama_khusus}*%20baru%20saja%20mengajukan%20permohonan%20data%20jalur%20*Bebas%20Tarif%20(Rp%200)*.%20Mohon%20bantuannya%20untuk%20memverifikasi%20berkas%20saya.%20Terima%20kasih."
+                            st.link_button("📲 KLIK DI SINI UNTUK NOTIFIKASI ADMIN VIA WHATSAPP", f"https://wa.me/{NOMOR_WA_CS}?text={pesan_wa_rp0}", type="primary", use_container_width=True)
 
-                if not is_valid:
-                    st.error("❌ PROSES GAGAL: Pastikan seluruh kolom isian dan berkas yang bertanda Wajib (*) telah diisi dan diunggah sesuai dengan kategori permohonan Anda!")
-                elif not cek_skm:
-                    st.error("❌ PROSES GAGAL: Anda WAJIB mencentang kotak konfirmasi Survei Kepuasan Masyarakat (SKM)!")
-                elif "Tarif Rp 0" in kategori_pemohon and selisih_hari > 1825:
-                    st.error(f"❌ PROSES GAGAL: Rentang data yang Anda minta adalah {selisih_hari} hari. Untuk jalur data Rp. 0,- (Gratis), maksimal periode data adalah 5 tahun (1.825 hari)!")
-                else:
-                    with st.spinner("🔄 Sedang mengunggah seluruh dokumen ke Cloud Server..."):
-                        def proses_upload(file_obj, prefix):
-                            if file_obj is not None:
-                                ext = file_obj.name.split('.')[-1]
-                                nama_file = f"{prefix}_{nama_khusus.replace(' ', '_')}_{datetime.now().strftime('%Y%m%d%H%M')}.{ext}"
-                                return upload_ke_google_drive(file_obj, nama_file, file_obj.type)
-                            return "-"
-
-                        link_ktp = proses_upload(file_ktp, "KTP")
-                        link_permohonan = proses_upload(file_surat_permohonan, "Permohonan")
-                        link_pengantar = proses_upload(file_surat_pengantar, "Pengantar")
-                        link_pernyataan = proses_upload(file_surat_pernyataan, "Pernyataan")
-                        link_proposal = proses_upload(file_proposal, "Proposal")
-                        link_skm = proses_upload(file_bukti_skm, "Bukti_SKM")
-                        
-                        waktu_khusus = datetime.now(timezone(timedelta(hours=8))).strftime("%Y-%m-%d %H:%M:%S")
-                        periode_gabung = f"{tgl_mulai} sd {tgl_selesai}"
-                        
-                        row_khusus = [
-                            waktu_khusus,          # 1. Waktu Registrasi
-                            nama_khusus,           # 2. Nama Lengkap
-                            kontak_khusus,         # 3. Nomor WhatsApp
-                            instansi_khusus,       # 4. Asal Instansi / Lembaga
-                            kategori_pemohon,      # 5. Kategori Pemohon
-                            ktp_nim,               # 6. Nomor KTP / NIM
-                            email_khusus,          # 7. Email
-                            judul_penelitian,      # 8. Judul Penelitian
-                            jenis_data_khusus,     # 9. Jenis Data Diminta
-                            periode_gabung,        # 10. Periode Data
-                            lokasi_data,           # 11. Lokasi Data
-                            deskripsi_tujuan,      # 12. Tujuan Penggunaan
-                            link_ktp,              # 13. Link KTP
-                            link_permohonan,       # 14. Link Surat Permohonan
-                            link_pengantar,        # 15. Link Surat Pengantar
-                            link_pernyataan,       # 16. Link Surat Pernyataan
-                            link_proposal,         # 17. Link Proposal
-                            link_skm,              # 18. Link Bukti SKM
-                            "Menunggu Verifikasi Berkas", # 19. Status
-                            waktu_khusus,          # 20. Waktu Update Status
-                            "-"                    # 21. Link Hasil Data
-                        ]
-                        
-                        if simpan_ke_google_sheets("Permohonan_Data", row_khusus):
-                            st.balloons()
-                            if "Berbayar PNBP" in kategori_pemohon:
-                                st.warning("⚠️ **PERMOHONAN BERHASIL DISIMPAN (STATUS: BERBAYAR)**")
-                                st.write(f"Halo {nama_khusus}, permohonan data Anda telah kami terima dan akan dikenakan tarif PNBP sesuai PP No. 47 Tahun 2018.")
-                                st.write("**Langkah terakhir:** Silakan klik tombol di bawah ini untuk memberitahu Admin agar berkas Anda segera diverifikasi dan diterbitkan *kode billing* pembayarannya.")
-                                
-                                pesan_wa_pnbp = f"Halo%20Admin%20PTSP%20Stamet%20Bima,%20saya%20*{nama_khusus}*%20baru%20saja%20mengajukan%20permohonan%20data%20jalur%20*Komersial%20(PNBP)*.%20Mohon%20informasi%20rincian%20tarifnya."
-                                st.link_button("📲 KLIK DI SINI UNTUK KONFIRMASI KE ADMIN VIA WHATSAPP", f"https://wa.me/{NOMOR_WA_CS}?text={pesan_wa_pnbp}", type="primary", use_container_width=True)
-                            else:
-                                st.success("✔️ **PERMOHONAN BERHASIL DISIMPAN (STATUS: BEBAS TARIF Rp 0)**")
-                                st.write("Seluruh dokumen syarat digital serta bukti pengisian SKM Anda telah sukses diamankan ke Cloud Server.")
-                                st.write("**Langkah terakhir:** Silakan klik tombol di bawah ini untuk memberitahu Admin agar berkas Anda segera diproses.")
-                                
-                                pesan_wa_rp0 = f"Halo%20Admin%20PTSP%20Stamet%20Bima,%20saya%20*{nama_khusus}*%20baru%20saja%20mengajukan%20permohonan%20data%20jalur%20*Bebas%20Tarif%20(Rp%200)*.%20Mohon%20bantuannya%20untuk%20memverifikasi%20berkas%20saya.%20Terima%20kasih."
-                                st.link_button("📲 KLIK DI SINI UNTUK NOTIFIKASI ADMIN VIA WHATSAPP", f"https://wa.me/{NOMOR_WA_CS}?text={pesan_wa_rp0}", type="primary", use_container_width=True)
-
-    # --- TAB 3: E-KATALOG PNBP ---
+    # ------------------------------------------
+    # TAB 3: E-KATALOG PNBP
+    # ------------------------------------------
     with tab3:
         st.markdown("<h3 style='color: #002B49; margin-bottom: 0px;'>Katalog Tarif Resmi Jasa Data dan Informasi</h3>", unsafe_allow_html=True)
         st.caption("Berdasarkan Peraturan Pemerintah Nomor 47 Tahun 2018 tentang Jenis dan Tarif atas Jenis Penerimaan Negara Bukan Pajak (PNBP) yang berlaku pada BMKG.")
@@ -577,7 +583,9 @@ if menu == "FORMULIR KUNJUNGAN PUBLIK":
         pesan_tanya_tarif = "Halo%20Admin%20PTSP%20Stamet%20Bima,%20saya%20ingin%20konsultasi%20mengenai%20estimasi%20tarif%20PNBP%20untuk%20permintaan%20data%20..."
         st.link_button("📞 Konsultasi Estimasi Biaya via WhatsApp", f"https://wa.me/{NOMOR_WA_CS}?text={pesan_tanya_tarif}", use_container_width=True)
 
-    # --- TAB 4: FITUR TRACKING / LACAK DATA UNTUK KONSUMEN ---
+    # ------------------------------------------
+    # TAB 4: FITUR TRACKING / LACAK DATA UNTUK KONSUMEN
+    # ------------------------------------------
     with tab4:
         st.subheader("🔍 PORTAL PELACAKAN STATUS PERMOHONAN DATA")
         st.caption("Transparansi Pelayanan Publik: Lacak status pemrosesan dokumen data khusus Anda secara real-time.")
