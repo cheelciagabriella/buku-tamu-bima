@@ -303,7 +303,7 @@ if menu == "FORMULIR KUNJUNGAN PUBLIK":
     st.divider()
     
     # ---------------------------------------------------------
-    # TOMBOL NAVIGASI FORMAL (ANTI BOCOR)
+    # TOMBOL KOTAK NAVIGASI 
     # ---------------------------------------------------------
     c1, c2, c3, c4 = st.columns(4)
     with c1:
@@ -399,8 +399,8 @@ if menu == "FORMULIR KUNJUNGAN PUBLIK":
                     Sistem akan secara otomatis menyesuaikan formulir unggahan berdasarkan pilihan kategori Anda:
                 </p>
                 <ul style='font-size: 14px; color: var(--text-color); margin-top: 0px;'>
-                    <li><b>Komersial/Swasta (PNBP):</b> Wajib unggah KTP, Surat Permohonan Instansi, dan Bukti Isi SKM.</li>
-                    <li><b>Pendidikan/Pemerintah (Rp 0,-):</b> Wajib unggah KTP, Surat Permohonan, Surat Pengantar, Surat Pernyataan Bermeterai, Proposal (khusus Mahasiswa), dan Bukti Isi SKM. <span style='color:red; font-weight:bold;'>Maksimal rentang periode data adalah 5 tahun.</span></li>
+                    <li><b>Komersial/Swasta (PNBP):</b> <b>Wajib</b> unggah KTP, Surat Permohonan Instansi, dan Bukti Isi SKM.</li>
+                    <li><b>Pendidikan/Pemerintah (Rp 0,-):</b> <b>Wajib</b> unggah KTP, Surat Permohonan, Surat Pengantar, Surat Pernyataan Bermeterai, Proposal (khusus Mahasiswa), dan Bukti Isi SKM. <span style='color:red; font-weight:bold;'>Maksimal rentang periode data adalah 5 tahun.</span></li>
                 </ul>
             </div>
             """, unsafe_allow_html=True)
@@ -466,7 +466,7 @@ if menu == "FORMULIR KUNJUNGAN PUBLIK":
                     file_surat_pernyataan = None
                 else:
                     st.markdown("📄 **[Download Format Surat Pengantar](https://docs.google.com/document/d/1YNKGAGzif4i36bvLLCZ2jDyz8oYYoQLj/edit)**")
-                    file_surat_pengantar = st.file_uploader("**3. Surat Pengantar Sekolah/Instansi (Wajib)** *", type=["pdf"])
+                    file_surat_pengantar = st.file_uploader("**3. Surat Pengantar Instansi (Wajib)** *", type=["pdf"])
                     st.markdown("📄 **[Download Format Surat Pernyataan Bermeterai](https://docs.google.com/document/d/1N6nBHU8PIaGtXIX6u96T9Z0f6cYcnkb6/edit)**")
                     file_surat_pernyataan = st.file_uploader("**4. Surat Pernyataan Bermeterai (Wajib)** *", type=["pdf"])
             
@@ -527,20 +527,25 @@ if menu == "FORMULIR KUNJUNGAN PUBLIK":
                     ]
                     
                     if simpan_ke_google_sheets("Permohonan_Data", row_khusus):
+                        st.balloons()
+                        st.success("✔️ **DATA BERHASIL TERSIMPAN DI DATABASE!**")
+                        
+                        # UI WAJIB KONFIRMASI AGAR ADMIN TAHU
+                        st.markdown("""
+                            <div style='background-color: #ff4b4b; padding: 20px; border-radius: 8px; color: white; text-align: center; margin-top: 15px; margin-bottom: 15px;'>
+                                <h3 style='color: white; margin-top: 0;'>⚠️ TAHAP AKHIR: WAJIB KONFIRMASI!</h3>
+                                <p style='font-size: 16px;'>Permohonan Anda <b>TIDAK AKAN DIPROSES</b> oleh Admin jika Anda tidak melakukan konfirmasi via WhatsApp.</p>
+                            </div>
+                        """, unsafe_allow_html=True)
+                        
                         if "Berbayar PNBP" in kategori_pemohon:
-                            st.warning("⚠️ **PERMOHONAN BERHASIL DISIMPAN (STATUS: BERBAYAR)**")
-                            st.write(f"Halo **{nama_khusus}**, permohonan data Anda telah kami terima dan akan dikenakan tarif PNBP sesuai PP No. 47 Tahun 2018[cite: 1].")
-                            st.write("**Langkah terakhir:** Silakan klik tombol di bawah ini untuk memberitahu Admin agar berkas Anda segera diverifikasi dan diterbitkan *kode billing* pembayarannya.")
-                            
-                            pesan_wa_pnbp = f"Halo%20Admin%20PTSP%20Stamet%20Bima,%20saya%20*{nama_khusus}*%20baru%20saja%20mengajukan%20permohonan%20data%20jalur%20*Komersial%20(PNBP)*.%20Mohon%20informasi%20rincian%20tarifnya."
-                            st.link_button("📲 KLIK DI SINI UNTUK KONFIRMASI KE ADMIN VIA WHATSAPP", f"https://wa.me/{NOMOR_WA_CS}?text={pesan_wa_pnbp}", type="primary", use_container_width=True)
+                            st.write(f"Halo **{nama_khusus}**, permohonan data Anda akan dikenakan tarif PNBP sesuai PP No. 47 Tahun 2018[cite: 1].")
+                            pesan_wa = f"Halo%20Admin%20PTSP%20Stamet%20Bima.%20Saya%20*{nama_khusus}*%20baru%20saja%20mengajukan%20permohonan%20data%20jalur%20*Komersial%20(PNBP)*.%20Saya%20ingin%20konfirmasi%20bahwa%20seluruh%20berkas%20telah%20saya%20unggah.%20Mohon%20informasi%20rincian%20tarif%20dan%20kode%20billing-nya.%20Terima%20kasih."
                         else:
-                            st.success("✔️ **PERMOHONAN BERHASIL DISIMPAN (STATUS: BEBAS TARIF Rp 0)**")
                             st.write("Seluruh dokumen syarat digital serta bukti pengisian SKM Anda telah sukses diamankan ke Cloud Server.")
-                            st.write("**Langkah terakhir:** Silakan klik tombol di bawah ini untuk memberitahu Admin agar berkas Anda segera diproses.")
+                            pesan_wa = f"Halo%20Admin%20PTSP%20Stamet%20Bima.%20Saya%20*{nama_khusus}*%20baru%20saja%20mengajukan%20permohonan%20data%20jalur%20*Bebas%20Tarif%20(Rp%200)*.%20Saya%20ingin%20konfirmasi%20bahwa%20seluruh%20berkas%20telah%20saya%20unggah.%20Mohon%20segera%20diverifikasi.%20Terima%20kasih."
                             
-                            pesan_wa_rp0 = f"Halo%20Admin%20PTSP%20Stamet%20Bima,%20saya%20*{nama_khusus}*%20baru%20saja%20mengajukan%20permohonan%20data%20jalur%20*Bebas%20Tarif%20(Rp%200)*.%20Mohon%20bantuannya%20untuk%20memverifikasi%20berkas%20saya.%20Terima%20kasih."
-                            st.link_button("📲 KLIK DI SINI UNTUK NOTIFIKASI ADMIN VIA WHATSAPP", f"https://wa.me/{NOMOR_WA_CS}?text={pesan_wa_rp0}", type="primary", use_container_width=True)
+                        st.link_button("🚨 KLIK DI SINI UNTUK KONFIRMASI KE WA ADMIN (WAJIB) 🚨", f"https://wa.me/{NOMOR_WA_CS}?text={pesan_wa}", type="primary", use_container_width=True)
 
     # ------------------------------------------
     # ISI HALAMAN 3: E-KATALOG PNBP
