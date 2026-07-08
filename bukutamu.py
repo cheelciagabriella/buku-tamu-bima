@@ -18,7 +18,7 @@ st.set_page_config(
 )
 
 # ==========================================
-# 2. KUSTOMISASI CSS
+# 2. KUSTOMISASI CSS & SULAP TAB FORMAL
 # ==========================================
 st.markdown("""
     <style>
@@ -84,6 +84,48 @@ st.markdown("""
     .block-container {
         padding-top: 4rem !important;
         padding-bottom: 2rem !important;
+    }
+
+    /* =========================================================
+       CSS SAKTI: MENYULAP RADIO HORIZONTAL JADI TAB FORMAL ASLI
+       ========================================================= */
+    .block-container div[data-testid="stRadio"] div[role="radiogroup"][aria-orientation="horizontal"] {
+        flex-direction: row;
+        gap: 2rem;
+        border-bottom: 1px solid rgba(49, 51, 63, 0.2);
+        padding-bottom: 0px;
+    }
+    .block-container div[data-testid="stRadio"] div[role="radiogroup"][aria-orientation="horizontal"] > label {
+        padding: 0.5rem 0.25rem;
+        margin-bottom: -1px;
+        border-bottom: 2px solid transparent;
+        cursor: pointer;
+        background-color: transparent !important;
+        box-shadow: none !important;
+        border-radius: 0 !important;
+    }
+    /* Sembunyikan lingkaran radio */
+    .block-container div[data-testid="stRadio"] div[role="radiogroup"][aria-orientation="horizontal"] > label > div:first-child {
+        display: none !important;
+    }
+    /* Teks tab normal */
+    .block-container div[data-testid="stRadio"] div[role="radiogroup"][aria-orientation="horizontal"] > label p {
+        font-size: 1rem;
+        color: rgba(49, 51, 63, 0.6);
+        font-weight: 400;
+        margin: 0;
+    }
+    /* Hover state (Saat disorot mouse) */
+    .block-container div[data-testid="stRadio"] div[role="radiogroup"][aria-orientation="horizontal"] > label:hover p {
+        color: #FF4B4B;
+    }
+    /* Active state (Saat tab diklik, muncul garis bawah merah) */
+    .block-container div[data-testid="stRadio"] div[role="radiogroup"][aria-orientation="horizontal"] > label[data-checked="true"] {
+        border-bottom: 2px solid #FF4B4B !important;
+    }
+    .block-container div[data-testid="stRadio"] div[role="radiogroup"][aria-orientation="horizontal"] > label[data-checked="true"] p {
+        color: #FF4B4B !important;
+        font-weight: 600;
     }
     </style>
 """, unsafe_allow_html=True)
@@ -225,10 +267,6 @@ if "nama_pendaftar" not in st.session_state:
     st.session_state.nama_pendaftar = ""
 if "admin_logged_in" not in st.session_state:
     st.session_state.admin_logged_in = False
-if "active_tab" not in st.session_state:
-    st.session_state.active_tab = "E-BUKU TAMU"
-if "admin_tab" not in st.session_state:
-    st.session_state.admin_tab = "DATABASE TAMU & LAYANAN"
 
 # ==========================================
 # 5. NAVIGASI SAMPING
@@ -290,33 +328,18 @@ if menu == "FORMULIR KUNJUNGAN PUBLIK":
     
     st.divider()
     
-    # ---------------------------------------------------------
-    # TOMBOL PINTAR PENGGANTI TABS (ANTI BOCOR 1000%)
-    # ---------------------------------------------------------
-    c1, c2, c3, c4 = st.columns(4)
-    with c1:
-        if st.button("📖 E-BUKU TAMU", use_container_width=True, type="primary" if st.session_state.active_tab == "E-BUKU TAMU" else "secondary"):
-            st.session_state.active_tab = "E-BUKU TAMU"
-            st.rerun()
-    with c2:
-        if st.button("📝 PERMOHONAN DATA", use_container_width=True, type="primary" if st.session_state.active_tab == "PERMOHONAN DATA" else "secondary"):
-            st.session_state.active_tab = "PERMOHONAN DATA"
-            st.rerun()
-    with c3:
-        if st.button("💰 E-KATALOG PNBP", use_container_width=True, type="primary" if st.session_state.active_tab == "E-KATALOG PNBP" else "secondary"):
-            st.session_state.active_tab = "E-KATALOG PNBP"
-            st.rerun()
-    with c4:
-        if st.button("🔍 LACAK STATUS DATA", use_container_width=True, type="primary" if st.session_state.active_tab == "LACAK STATUS DATA" else "secondary"):
-            st.session_state.active_tab = "LACAK STATUS DATA"
-            st.rerun()
-            
-    st.markdown("---")
+    # KUNCI UTAMA: TABS SULAPAN YANG FORMAL DAN KOKOH!
+    pilihan_tab = st.radio(
+        "Navigasi Utama", 
+        ["📖 E-BUKU TAMU", "📝 PERMOHONAN DATA", "💰 E-KATALOG PNBP", "🔍 LACAK STATUS DATA"],
+        horizontal=True,
+        label_visibility="collapsed"
+    )
     
     # ------------------------------------------
-    # ISI TAB 1: E-BUKU TAMU
+    # TAB 1: E-BUKU TAMU
     # ------------------------------------------
-    if st.session_state.active_tab == "E-BUKU TAMU":
+    if pilihan_tab == "📖 E-BUKU TAMU":
         if not st.session_state.tamu_terdaftar:
             st.subheader("FORMULIR REGISTRASI PENGUNJUNG")
             st.caption("Mohon lengkapi data registrasi di bawah ini untuk kepentingan administrasi pelayanan publik.")
@@ -342,8 +365,9 @@ if menu == "FORMULIR KUNJUNGAN PUBLIK":
                     )
                 with col4:
                     alasan_lainnya = ""
+                    # Ini kotak isian yang suka bikin tab error dulu. Sekarang AMAN SENTOSA karena berada di halaman tunggal!
                     if tujuan == "Lain-lain":
-                        alasan_lainnya = st.text_input("URAIKAN MAKSUD KUNJUNGAN SECARA SPESIFIK:", placeholder="Tuliskan Keperluan Anda")
+                        alasan_lainnya = st.text_input("URAIKAN MAKSUD KUNJUNGAN SECARA SPESIFIK:", placeholder="Tuliskan Keperluan Anda di sini...")
 
             st.write("") 
             submit_button = st.button("SIMPAN DATA KUNJUNGAN", type="primary", use_container_width=True)
@@ -374,9 +398,9 @@ if menu == "FORMULIR KUNJUNGAN PUBLIK":
                 st.rerun()
 
     # ------------------------------------------
-    # ISI TAB 2: PERMOHONAN DATA
+    # TAB 2: PERMOHONAN DATA
     # ------------------------------------------
-    elif st.session_state.active_tab == "PERMOHONAN DATA":
+    elif pilihan_tab == "📝 PERMOHONAN DATA":
         st.subheader("FORMULIR PERMOHONAN DATA METEOROLOGI")
         
         with st.container(border=True):
@@ -384,7 +408,7 @@ if menu == "FORMULIR KUNJUNGAN PUBLIK":
             <div style='background-color: rgba(0, 43, 73, 0.05); padding: 15px; border-radius: 8px; border-left: 5px solid #002B49;'>
                 <h4 style='color: #002B49; margin-top: 0px;'>📋 PERSYARATAN ADMINISTRASI BERDASARKAN KATEGORI</h4>
                 <p style='font-size: 14px; line-height: 1.5; color: var(--text-color); margin-bottom: 5px;'>
-                    Sistem akan secara otomatis menyesuaikan formulir unggahan berdasarkan pilihan kategori Anda:
+                    Sistem akan menyesuaikan formulir unggahan berdasarkan pilihan kategori Anda:
                 </p>
                 <ul style='font-size: 14px; color: var(--text-color); margin-top: 0px;'>
                     <li><b>Komersial/Swasta (PNBP):</b> Wajib unggah KTP, Surat Permohonan Instansi, dan Bukti Isi SKM.</li>
@@ -395,7 +419,8 @@ if menu == "FORMULIR KUNJUNGAN PUBLIK":
         st.write("")
         
         st.markdown("#### **I. TENTUKAN KATEGORI PERMOHONAN**")
-        kategori_pemohon = st.radio("Silakan pilih kategori instansi / tujuan Anda:", [
+        # Diubah menjadi selectbox yang sangat rapi dan tidak akan bentrok dengan CSS Tabs
+        kategori_pemohon = st.selectbox("Silakan pilih kategori instansi / tujuan Anda:", [
             "Pendidikan / Penelitian Non-Komersial (Tarif Rp 0)",
             "Instansi Pemerintah Pusat / Daerah (Tarif Rp 0)",
             "Komersial / Swasta / Perorangan Umum (Berbayar PNBP)"
@@ -439,11 +464,13 @@ if menu == "FORMULIR KUNJUNGAN PUBLIK":
             
             col_u1, col_u2 = st.columns(2)
             with col_u1:
-                file_ktp = st.file_uploader("1. KTP / Kartu Identitas (Wajib) *", type=["pdf", "jpg", "png"])
-                file_surat_permohonan = st.file_uploader("2. Surat Permohonan Permintaan Data (Wajib) *", type=["pdf"])
+                file_ktp = st.file_uploader("1. KTP / Kartu Identitas (Wajib Semua Jalur) *", type=["pdf", "jpg", "png"])
+                file_surat_permohonan = st.file_uploader("2. Surat Permohonan (Wajib Semua Jalur) *", type=["pdf"])
+                
+                # Sembunyi/muncul sesuai pilihan tanpa takut halaman tumpah!
                 if "Pendidikan" in kategori_pemohon:
                     st.write("")
-                    file_proposal = st.file_uploader("5. Proposal & Lembar Pengesahan (Wajib Mahasiswa) *", type=["pdf"])
+                    file_proposal = st.file_uploader("5. Proposal (Wajib Khusus Mahasiswa) *", type=["pdf"])
                 else:
                     file_proposal = None
                     
@@ -454,16 +481,16 @@ if menu == "FORMULIR KUNJUNGAN PUBLIK":
                     file_surat_pernyataan = None
                 else:
                     st.markdown("📄 **[Download Format Surat Pengantar](https://docs.google.com/document/d/1YNKGAGzif4i36bvLLCZ2jDyz8oYYoQLj/edit)**")
-                    file_surat_pengantar = st.file_uploader("3. Surat Pengantar Sekolah/Univ/Instansi (Wajib) *", type=["pdf"])
+                    file_surat_pengantar = st.file_uploader("3. Surat Pengantar Instansi (Wajib) *", type=["pdf"])
                     st.markdown("📄 **[Download Format Surat Pernyataan Bermeterai](https://docs.google.com/document/d/1N6nBHU8PIaGtXIX6u96T9Z0f6cYcnkb6/edit)**")
-                    file_surat_pernyataan = st.file_uploader("4. Surat Pernyataan Bermeterai (Wajib) *", type=["pdf"])
+                    file_surat_pernyataan = st.file_uploader("4. Surat Pernyataan (Wajib) *", type=["pdf"])
             
             st.write("")
             st.markdown("#### **V. KONFIRMASI SURVEI KEPUASAN MASYARAKAT (SKM) [WAJIB]**")
             st.info("Berdasarkan standar pelayanan, pemohon diwajibkan untuk mengisi Survei Kepuasan Masyarakat (SKM) sebelum mengirimkan berkas permohonan.")
             st.write("👉 **[KLIK DI SINI UNTUK MENGISI FORMULIR SKM BMKG](https://forms.gle/7msXFJk9sKNhGtrQ7)**")
             
-            file_bukti_skm = st.file_uploader("6. Unggah Bukti / Tangkapan Layar (Screenshot) Hasil Pengisian SKM (Wajib) *", type=["pdf", "jpg", "jpeg", "png"])
+            file_bukti_skm = st.file_uploader("6. Unggah Bukti Hasil SKM (Wajib) *", type=["pdf", "jpg", "jpeg", "png"])
             cek_skm = st.checkbox("Saya menyatakan dengan sadar bahwa saya BENAR-BENAR TELAH MENGISI Survei Kepuasan Masyarakat (SKM) pada tautan di atas dan mengunggah buktinya. *")
             
             st.write("")
@@ -508,27 +535,10 @@ if menu == "FORMULIR KUNJUNGAN PUBLIK":
                     periode_gabung = f"{tgl_mulai} sd {tgl_selesai}"
                     
                     row_khusus = [
-                        waktu_khusus,          # 1. Waktu Registrasi
-                        nama_khusus,           # 2. Nama Lengkap
-                        kontak_khusus,         # 3. Nomor WhatsApp
-                        instansi_khusus,       # 4. Asal Instansi / Lembaga
-                        kategori_pemohon,      # 5. Kategori Pemohon
-                        ktp_nim,               # 6. Nomor KTP / NIM
-                        email_khusus,          # 7. Email
-                        judul_penelitian,      # 8. Judul Penelitian
-                        jenis_data_khusus,     # 9. Jenis Data Diminta
-                        periode_gabung,        # 10. Periode Data
-                        lokasi_data,           # 11. Lokasi Data
-                        deskripsi_tujuan,      # 12. Tujuan Penggunaan
-                        link_ktp,              # 13. Link KTP
-                        link_permohonan,       # 14. Link Surat Permohonan
-                        link_pengantar,        # 15. Link Surat Pengantar
-                        link_pernyataan,       # 16. Link Surat Pernyataan
-                        link_proposal,         # 17. Link Proposal
-                        link_skm,              # 18. Link Bukti SKM
-                        "Menunggu Verifikasi Berkas", # 19. Status
-                        waktu_khusus,          # 20. Waktu Update Status
-                        "-"                    # 21. Link Hasil Data
+                        waktu_khusus, nama_khusus, kontak_khusus, instansi_khusus, kategori_pemohon, ktp_nim, email_khusus, 
+                        judul_penelitian, jenis_data_khusus, periode_gabung, lokasi_data, deskripsi_tujuan, link_ktp, 
+                        link_permohonan, link_pengantar, link_pernyataan, link_proposal, link_skm, 
+                        "Menunggu Verifikasi Berkas", waktu_khusus, "-"
                     ]
                     
                     if simpan_ke_google_sheets("Permohonan_Data", row_khusus):
@@ -549,9 +559,9 @@ if menu == "FORMULIR KUNJUNGAN PUBLIK":
                             st.link_button("📲 KLIK DI SINI UNTUK NOTIFIKASI ADMIN VIA WHATSAPP", f"https://wa.me/{NOMOR_WA_CS}?text={pesan_wa_rp0}", type="primary", use_container_width=True)
 
     # ------------------------------------------
-    # ISI TAB 3: E-KATALOG PNBP
+    # TAB 3: E-KATALOG PNBP
     # ------------------------------------------
-    elif st.session_state.active_tab == "E-KATALOG PNBP":
+    elif pilihan_tab == "💰 E-KATALOG PNBP":
         st.markdown("<h3 style='color: #002B49; margin-bottom: 0px;'>Katalog Tarif Resmi Jasa Data dan Informasi</h3>", unsafe_allow_html=True)
         st.caption("Berdasarkan Peraturan Pemerintah Nomor 47 Tahun 2018 tentang Jenis dan Tarif atas Jenis Penerimaan Negara Bukan Pajak (PNBP) yang berlaku pada BMKG.")
         st.write("")
@@ -604,9 +614,9 @@ if menu == "FORMULIR KUNJUNGAN PUBLIK":
         st.link_button("📞 Konsultasi Estimasi Biaya via WhatsApp", f"https://wa.me/{NOMOR_WA_CS}?text={pesan_tanya_tarif}", use_container_width=True)
 
     # ------------------------------------------
-    # ISI TAB 4: FITUR TRACKING / LACAK DATA UNTUK KONSUMEN
+    # TAB 4: FITUR TRACKING / LACAK DATA UNTUK KONSUMEN
     # ------------------------------------------
-    elif st.session_state.active_tab == "LACAK STATUS DATA":
+    elif pilihan_tab == "🔍 LACAK STATUS DATA":
         st.subheader("🔍 PORTAL PELACAKAN STATUS PERMOHONAN DATA")
         st.caption("Transparansi Pelayanan Publik: Lacak status pemrosesan dokumen data khusus Anda secara real-time.")
         
@@ -701,20 +711,9 @@ elif menu == "🔒 PORTAL ADMIN & REKAP LAPORAN":
             st.link_button("📁 Buka Google Drive (Folder Arsip)", "https://drive.google.com/drive/folders/1FtwvPLbWcTPpyIOxMRBW88oLHri_rZVH", use_container_width=True)
         st.divider()
         
-        # TOMBOL PINTAR ADMIN
-        ca1, ca2 = st.columns(2)
-        with ca1:
-            if st.button("DATABASE TAMU & LAYANAN", use_container_width=True, type="primary" if st.session_state.admin_tab == "DATABASE TAMU & LAYANAN" else "secondary"):
-                st.session_state.admin_tab = "DATABASE TAMU & LAYANAN"
-                st.rerun()
-        with ca2:
-            if st.button("AUDIT ARSIP DOKUMEN CLOUD", use_container_width=True, type="primary" if st.session_state.admin_tab == "AUDIT ARSIP DOKUMEN CLOUD" else "secondary"):
-                st.session_state.admin_tab = "AUDIT ARSIP DOKUMEN CLOUD"
-                st.rerun()
-                
-        st.markdown("---")
+        pilihan_admin = st.radio("Navigasi Admin", ["DATABASE TAMU & LAYANAN", "AUDIT ARSIP DOKUMEN CLOUD"], horizontal=True, label_visibility="collapsed")
         
-        if st.session_state.admin_tab == "DATABASE TAMU & LAYANAN":
+        if pilihan_admin == "DATABASE TAMU & LAYANAN":
             st.subheader("1. Tabel Rekapitulasi Buku Tamu")
             with st.spinner("Sedang menarik data Tamu dari Cloud..."):
                 df_tamu = ambil_data_google_sheets("Tamu")
@@ -737,7 +736,7 @@ elif menu == "🔒 PORTAL ADMIN & REKAP LAPORAN":
                 else:
                     st.info("Database Permohonan Data masih kosong.")
                     
-        elif st.session_state.admin_tab == "AUDIT ARSIP DOKUMEN CLOUD":
+        elif pilihan_admin == "AUDIT ARSIP DOKUMEN CLOUD":
             st.subheader("Galeri Audit Berkas Pemohon Data (Cloud Storage)")
             st.write("Sistem otomatis menarik data dari 21 kolom pangkalan data Google Sheets.")
             st.write("")
