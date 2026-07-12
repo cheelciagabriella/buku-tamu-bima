@@ -220,6 +220,7 @@ def update_status_sheets(nama_pemohon, status_baru, link_hasil=""):
             waktu_sekarang = datetime.now(timezone(timedelta(hours=8))).strftime("%Y-%m-%d %H:%M:%S")
             row_vals = sheet.row_values(cell.row)
             
+            # MEMBACA HISTORY LAMA DAN MENAMBAH HISTORY BARU (Format: Waktu | Status || Waktu | Status)
             histori_lama = row_vals[21] if len(row_vals) >= 22 else f"{row_vals[19] if len(row_vals) > 19 else ''} | {row_vals[18] if len(row_vals) > 18 else 'Menunggu Verifikasi Berkas'}"
             histori_baru = f"{histori_lama} || {waktu_sekarang} | {status_baru}"
             
@@ -234,6 +235,7 @@ def update_status_sheets(nama_pemohon, status_baru, link_hasil=""):
         st.error(f"Gagal memperbarui status di sistem Cloud: {e}")
         return False
 
+# FUNGSI PEMISAH TANGGAL DAN JAM
 def format_tgl_jam(waktu_str):
     try:
         dt = datetime.strptime(str(waktu_str).strip(), "%Y-%m-%d %H:%M:%S")
@@ -341,7 +343,7 @@ if menu == "FORMULIR KUNJUNGAN PUBLIK":
     st.divider()
     
     # ---------------------------------------------------------
-    # TOMBOL KOTAK NAVIGASI LENGKAP (5 TAB)
+    # TOMBOL NAVIGASI FORMAL (ANTI BOCOR)
     # ---------------------------------------------------------
     c1, c2, c3, c4, c5 = st.columns(5)
     with c1:
@@ -434,7 +436,6 @@ if menu == "FORMULIR KUNJUNGAN PUBLIK":
 
         elif st.session_state.tamu_terdaftar:
             st.success(f"🎉 **DATA BERHASIL TERSIMPAN:** Terima kasih Bapak/Ibu **{st.session_state.nama_pendaftar}**, data kunjungan Anda telah sah tercatat.")
-            st.balloons()
             st.write("")
             if st.button("KEMBALI KE REGISTRASI TAMU BARU", type="primary", use_container_width=True):
                 st.session_state.tamu_terdaftar = False
@@ -522,7 +523,7 @@ if menu == "FORMULIR KUNJUNGAN PUBLIK":
                     file_surat_pernyataan = None
                 else:
                     st.markdown("📄 **[Download Format Surat Pengantar](https://docs.google.com/document/d/1YNKGAGzif4i36bvLLCZ2jDyz8oYYoQLj/edit)**")
-                    file_surat_pengantar = st.file_uploader("**3. Surat Pengantar Instansi (Wajib)** *", type=["pdf"])
+                    file_surat_pengantar = st.file_uploader("**3. Surat Pengantar Sekolah/Instansi (Wajib)** *", type=["pdf"])
                     st.markdown("📄 **[Download Format Surat Pernyataan Bermeterai](https://docs.google.com/document/d/1N6nBHU8PIaGtXIX6u96T9Z0f6cYcnkb6/edit)**")
                     file_surat_pernyataan = st.file_uploader("**4. Surat Pernyataan Bermeterai (Wajib)** *", type=["pdf"])
             
@@ -637,21 +638,18 @@ if menu == "FORMULIR KUNJUNGAN PUBLIK":
         st.markdown("#### **Tabel Rincian Layanan Prioritas Stamet Bima**")
         
         raw_data_ia = {
-            "No.": ["1", "2", "3", "4"],
+            "No.": ["1", "2"],
             "Jenis Layanan (Penerimaan Negara Bukan Pajak)": [
                 "Informasi Meteorologi untuk Keperluan Klaim Asuransi", 
-                "Informasi Meteorologi Khusus untuk Pendukung Kegiatan Proyek, Survei, dan Penelitian Komersial (Jasa Konsultasi Meteorologi)",
-                "Informasi Radar Cuaca (per 10 menit)"
+                "Informasi Meteorologi Khusus untuk Pendukung Kegiatan Proyek, Survei, dan Penelitian Komersial (Jasa Konsultasi Meteorologi)"
             ],
             "Satuan": [
                 "per lokasi per hari", 
-                "per lokasi",
-                "per data per lokasi"
+                "per lokasi"
             ],
             "Tarif Resmi": [
                 "Rp 175.000,00", 
-                "Rp 3.750.000,00",
-                "Rp 70.000,00",
+                "Rp 3.750.000,00"
             ]
         }
         st.dataframe(pd.DataFrame(raw_data_ia), use_container_width=True, hide_index=True)
