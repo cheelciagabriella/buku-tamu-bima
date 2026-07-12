@@ -95,7 +95,7 @@ st.markdown("""
     div[data-testid="stButton"] button p {
         font-weight: 700 !important;
         letter-spacing: 0.5px !important;
-        font-size: 15px !important;
+        font-size: 14px !important; /* Diperkecil sedikit agar 5 tab muat rapi */
     }
     </style>
 """, unsafe_allow_html=True)
@@ -220,7 +220,7 @@ def update_status_sheets(nama_pemohon, status_baru, link_hasil=""):
             waktu_sekarang = datetime.now(timezone(timedelta(hours=8))).strftime("%Y-%m-%d %H:%M:%S")
             row_vals = sheet.row_values(cell.row)
             
-            # MEMBACA HISTORY LAMA DAN MENAMBAH HISTORY BARU (Format: Waktu | Status || Waktu | Status)
+            # HISTORY LAMA + BARU
             histori_lama = row_vals[21] if len(row_vals) >= 22 else f"{row_vals[19] if len(row_vals) > 19 else ''} | {row_vals[18] if len(row_vals) > 18 else 'Menunggu Verifikasi Berkas'}"
             histori_baru = f"{histori_lama} || {waktu_sekarang} | {status_baru}"
             
@@ -235,7 +235,6 @@ def update_status_sheets(nama_pemohon, status_baru, link_hasil=""):
         st.error(f"Gagal memperbarui status di sistem Cloud: {e}")
         return False
 
-# FUNGSI PEMISAH TANGGAL DAN JAM
 def format_tgl_jam(waktu_str):
     try:
         dt = datetime.strptime(str(waktu_str).strip(), "%Y-%m-%d %H:%M:%S")
@@ -247,7 +246,7 @@ def format_tgl_jam(waktu_str):
         return tgl, jam
 
 # ==========================================
-# 4. INISIALISASI KONTROL ALUR
+# 4. INISIALISASI KONTROL ALUR & AUTO-DRAG
 # ==========================================
 if "tamu_terdaftar" not in st.session_state:
     st.session_state.tamu_terdaftar = False
@@ -259,6 +258,13 @@ if "active_tab" not in st.session_state:
     st.session_state.active_tab = "E-BUKU TAMU"
 if "admin_tab" not in st.session_state:
     st.session_state.admin_tab = "DATABASE TAMU & LAYANAN"
+# Sesi memori untuk auto-drag dari E-Buku Tamu ke Permohonan Data
+if "draft_nama" not in st.session_state:
+    st.session_state.draft_nama = ""
+if "draft_instansi" not in st.session_state:
+    st.session_state.draft_instansi = ""
+if "draft_hp" not in st.session_state:
+    st.session_state.draft_hp = ""
 
 # ==========================================
 # 5. NAVIGASI SAMPING
@@ -321,9 +327,9 @@ if menu == "FORMULIR KUNJUNGAN PUBLIK":
     st.divider()
     
     # ---------------------------------------------------------
-    # TOMBOL KOTAK NAVIGASI (ANTI BOCOR)
+    # TOMBOL KOTAK NAVIGASI LENGKAP (5 TAB)
     # ---------------------------------------------------------
-    c1, c2, c3, c4 = st.columns(4)
+    c1, c2, c3, c4, c5 = st.columns(5)
     with c1:
         if st.button("E-BUKU TAMU", use_container_width=True, type="primary" if st.session_state.active_tab == "E-BUKU TAMU" else "secondary"):
             st.session_state.active_tab = "E-BUKU TAMU"
@@ -337,8 +343,12 @@ if menu == "FORMULIR KUNJUNGAN PUBLIK":
             st.session_state.active_tab = "E-KATALOG PNBP"
             st.rerun()
     with c4:
-        if st.button("LACAK STATUS DATA", use_container_width=True, type="primary" if st.session_state.active_tab == "LACAK STATUS DATA" else "secondary"):
+        if st.button("LACAK STATUS", use_container_width=True, type="primary" if st.session_state.active_tab == "LACAK STATUS DATA" else "secondary"):
             st.session_state.active_tab = "LACAK STATUS DATA"
+            st.rerun()
+    with c5:
+        if st.button("PENGADUAN & SARAN", use_container_width=True, type="primary" if st.session_state.active_tab == "PENGADUAN & SARAN" else "secondary"):
+            st.session_state.active_tab = "PENGADUAN & SARAN"
             st.rerun()
             
     st.markdown("---")
@@ -355,10 +365,10 @@ if menu == "FORMULIR KUNJUNGAN PUBLIK":
                 st.markdown("#### **I. IDENTITAS PENGUNJUNG**")
                 col1, col2 = st.columns(2)
                 with col1:
-                    nama = st.text_input("**NAMA LENGKAP** *", placeholder="Contoh: Nama Beserta Gelar")
-                    instansi = st.text_input("**ASAL INSTANSI / PERUSAHAAN / UNIVERSITAS** *", placeholder="Contoh: Pemerintah Kota Bima")
+                    nama = st.text_input("**NAMA LENGKAP** *", value=st.session_state.draft_nama, placeholder="Contoh: Nama Beserta Gelar")
+                    instansi = st.text_input("**ASAL INSTANSI / PERUSAHAAN / UNIVERSITAS** *", value=st.session_state.draft_instansi, placeholder="Contoh: Pemerintah Kota Bima")
                 with col2:
-                    no_hp = st.text_input("**NOMOR TELEPON / WHATSAPP AKTIF** *", placeholder="Contoh: 0812345678xx")
+                    no_hp = st.text_input("**NOMOR TELEPON / WHATSAPP AKTIF** *", value=st.session_state.draft_hp, placeholder="Contoh: 0812345678xx")
             
             st.write("")
             
@@ -368,31 +378,46 @@ if menu == "FORMULIR KUNJUNGAN PUBLIK":
                 with col3:
                     tujuan = st.selectbox(
                         "**LAYANAN YANG DITUJU** *", 
-                        ["Kunjungan Kerja / Koordinasi", "Studi Banding / Edukasi Publik", "Lain-lain"]
+                        ["Kunjungan Kerja / Koordinasi", "Permohonan Data Meteorologi", "Studi Banding / Edukasi Publik", "Lain-lain"]
                     )
                 with col4:
                     alasan_lainnya = ""
                     if tujuan == "Lain-lain":
                         alasan_lainnya = st.text_input("**URAIKAN MAKSUD KUNJUNGAN SECARA SPESIFIK:** *", placeholder="Tuliskan Keperluan Anda")
+                    elif tujuan == "Permohonan Data Meteorologi":
+                        st.info("💡 **INFO:** Anda akan diarahkan ke form Permohonan Data. Data Anda akan disalin otomatis agar tidak mengisi dua kali.")
 
             st.write("") 
-            submit_button = st.button("SIMPAN DATA KUNJUNGAN", type="primary", use_container_width=True)
             
-            if submit_button:
-                if not nama or not no_hp or not instansi:
-                    st.error("❌ **GAGAL:** Mohon lengkapi kolom Nama, Nomor HP, dan Asal Instansi.")
-                elif tujuan == "Lain-lain" and not alasan_lainnya:
-                    st.warning("⚠️ **PERHATIAN:** Mohon uraikan maksud kunjungan secara spesifik pada kolom yang tersedia.")
-                else:
-                    tujuan_final = alasan_lainnya if tujuan == "Lain-lain" else tujuan
-                    waktu_sekarang = datetime.now(timezone(timedelta(hours=8))).strftime("%Y-%m-%d %H:%M:%S")
-                    
-                    row_tamu = [waktu_sekarang, nama, no_hp, instansi, tujuan_final, "Kunjungan Umum Terdaftar", "-", waktu_sekarang]
-                    
-                    if simpan_ke_google_sheets("Tamu", row_tamu):
-                        st.session_state.tamu_terdaftar = True
-                        st.session_state.nama_pendaftar = nama
-                        st.rerun()
+            # Logika Cerdas: Jika tujuannya Permohonan Data, tombolnya melempar ke tab sebelah!
+            if tujuan == "Permohonan Data Meteorologi":
+                if st.button("LENGKAPI FORMULIR PERMOHONAN DATA ➡️", type="primary", use_container_width=True):
+                    st.session_state.draft_nama = nama
+                    st.session_state.draft_instansi = instansi
+                    st.session_state.draft_hp = no_hp
+                    st.session_state.active_tab = "PERMOHONAN DATA"
+                    st.rerun()
+            else:
+                submit_button = st.button("SIMPAN DATA KUNJUNGAN", type="primary", use_container_width=True)
+                
+                if submit_button:
+                    if not nama or not no_hp or not instansi:
+                        st.error("❌ **GAGAL:** Mohon lengkapi kolom Nama, Nomor HP, dan Asal Instansi.")
+                    elif tujuan == "Lain-lain" and not alasan_lainnya:
+                        st.warning("⚠️ **PERHATIAN:** Mohon uraikan maksud kunjungan secara spesifik pada kolom yang tersedia.")
+                    else:
+                        tujuan_final = alasan_lainnya if tujuan == "Lain-lain" else tujuan
+                        waktu_sekarang = datetime.now(timezone(timedelta(hours=8))).strftime("%Y-%m-%d %H:%M:%S")
+                        
+                        row_tamu = [waktu_sekarang, nama, no_hp, instansi, tujuan_final, "Kunjungan Umum Terdaftar", "-", waktu_sekarang]
+                        
+                        if simpan_ke_google_sheets("Tamu", row_tamu):
+                            st.session_state.tamu_terdaftar = True
+                            st.session_state.nama_pendaftar = nama
+                            st.session_state.draft_nama = "" # Reset memori
+                            st.session_state.draft_instansi = ""
+                            st.session_state.draft_hp = ""
+                            st.rerun()
 
         elif st.session_state.tamu_terdaftar:
             st.success(f"🎉 **DATA BERHASIL TERSIMPAN:** Terima kasih Bapak/Ibu **{st.session_state.nama_pendaftar}**, data kunjungan Anda telah sah tercatat.")
@@ -437,11 +462,12 @@ if menu == "FORMULIR KUNJUNGAN PUBLIK":
             col_k1, col_k2 = st.columns(2)
             
             with col_k1:
-                nama_khusus = st.text_input("**NAMA LENGKAP** *", placeholder="Nama depan dan nama belakang")
+                # Mengambil data draft otomatis dari Buku Tamu jika ada
+                nama_khusus = st.text_input("**NAMA LENGKAP** *", value=st.session_state.draft_nama, placeholder="Nama depan dan nama belakang")
                 ktp_nim = st.text_input("**NOMOR KTP / NIM** *", placeholder="Masukkan Nomor Induk Kependudukan / Mahasiswa")
-                instansi_khusus = st.text_input("**SEKOLAH / UNIVERSITAS / INSTANSI** *", placeholder="Contoh: Universitas Mataram / PT. XYZ")
+                instansi_khusus = st.text_input("**SEKOLAH / UNIVERSITAS / INSTANSI** *", value=st.session_state.draft_instansi, placeholder="Contoh: Universitas Mataram / PT. XYZ")
             with col_k2:
-                kontak_khusus = st.text_input("**NOMOR HP WHATSAPP (AKTIF)** *", placeholder="Contoh: 081234567xxx")
+                kontak_khusus = st.text_input("**NOMOR HP WHATSAPP (AKTIF)** *", value=st.session_state.draft_hp, placeholder="Contoh: 081234567xxx")
                 email_khusus = st.text_input("**EMAIL** *", placeholder="Contoh: email_anda@gmail.com")
             
             st.write("")
@@ -537,7 +563,6 @@ if menu == "FORMULIR KUNJUNGAN PUBLIK":
                     waktu_khusus = datetime.now(timezone(timedelta(hours=8))).strftime("%Y-%m-%d %H:%M:%S")
                     periode_gabung = f"{tgl_mulai} sd {tgl_selesai}"
                     
-                    # Tambahkan format history baru di kolom ke-22 (index 21)
                     histori_awal = f"{waktu_khusus} | Menunggu Verifikasi Berkas"
                     
                     row_khusus = [
@@ -548,10 +573,19 @@ if menu == "FORMULIR KUNJUNGAN PUBLIK":
                     ]
                     
                     if simpan_ke_google_sheets("Permohonan_Data", row_khusus):
+                        
+                        # FITUR AUTO-SINKRONISASI BUKU TAMU: Otomatis masuk ke Buku Tamu juga tanpa harus ketik 2x!
+                        row_tamu_otomatis = [waktu_khusus, nama_khusus, kontak_khusus, instansi_khusus, "Permohonan Data (Sinkronisasi Otomatis)", "Kunjungan Pelayanan Publik", "-", waktu_khusus]
+                        simpan_ke_google_sheets("Tamu", row_tamu_otomatis)
+                        
+                        # Hapus memori auto-drag
+                        st.session_state.draft_nama = ""
+                        st.session_state.draft_instansi = ""
+                        st.session_state.draft_hp = ""
+                        
                         st.balloons()
                         st.success("✔️ **DATA BERHASIL TERSIMPAN DI DATABASE!**")
                         
-                        # UI WAJIB KONFIRMASI AGAR ADMIN TAHU
                         st.markdown("""
                             <div style='background-color: #ff4b4b; padding: 20px; border-radius: 8px; color: white; text-align: center; margin-top: 15px; margin-bottom: 15px;'>
                                 <h3 style='color: white; margin-top: 0;'>⚠️ TAHAP AKHIR: WAJIB KONFIRMASI!</h3>
@@ -624,7 +658,7 @@ if menu == "FORMULIR KUNJUNGAN PUBLIK":
         st.link_button("📞 Konsultasi Estimasi Biaya via WhatsApp", f"https://wa.me/{NOMOR_WA_CS}?text={pesan_tanya_tarif}", use_container_width=True)
 
     # ------------------------------------------
-    # ISI HALAMAN 4: FITUR TRACKING / LACAK DATA UNTUK KONSUMEN
+    # ISI HALAMAN 4: FITUR TRACKING / LACAK DATA
     # ------------------------------------------
     elif st.session_state.active_tab == "LACAK STATUS DATA":
         st.subheader("🔍 PORTAL PELACAKAN STATUS PERMOHONAN DATA")
@@ -665,17 +699,14 @@ if menu == "FORMULIR KUNJUNGAN PUBLIK":
                             st.markdown("#### **Riwayat Progress Layanan:**")
                             st.caption("Semua riwayat pembaruan status Anda oleh tim Admin tercatat di bawah ini:")
                             
-                            # Mengambil history (Kolom 22) atau Fallback jika data lama
                             histori_str = data_terakhir.iloc[21] if len(data_terakhir) >= 22 else f"{waktu_update} | {status_proses}"
                             histori_list = histori_str.split(" || ")
                             
-                            # Tampilkan History Timeline secara terbalik (Terbaru di atas)
                             for index, item in enumerate(reversed(histori_list)):
                                 if " | " in item:
                                     waktu_hist, stat_hist = item.split(" | ", 1)
                                     tgl_h, jam_h = format_tgl_jam(waktu_hist)
                                     
-                                    # Atur Warna dan Ikon Box berdasarkan Status
                                     icon = "✅" if "Selesai" in stat_hist else "⏳" if "Menunggu" in stat_hist else "🔄" if "Proses" in stat_hist else "❌" if "Ditolak" in stat_hist else "📌"
                                     bg_color = "#d4edda" if "Selesai" in stat_hist else "#f8d7da" if "Ditolak" in stat_hist else "#fff3cd" if "Menunggu Pembayaran" in stat_hist else "#cce5ff" if "Proses" in stat_hist else "#f8f9fa"
                                     border_color = "#28a745" if "Selesai" in stat_hist else "#dc3545" if "Ditolak" in stat_hist else "#ffc107" if "Menunggu Pembayaran" in stat_hist else "#007bff" if "Proses" in stat_hist else "#6c757d"
@@ -687,7 +718,6 @@ if menu == "FORMULIR KUNJUNGAN PUBLIK":
                                     </div>
                                     """, unsafe_allow_html=True)
                                     
-                                    # Munculkan Tombol Download jika status Selesai & ini adalah kotak paling atas
                                     if index == 0 and "Selesai" in stat_hist and link_hasil_unduh and link_hasil_unduh != "-":
                                         if "http" in link_hasil_unduh:
                                             st.link_button("📥 UNDUH DATA HASIL PERMOHONAN DI SINI", link_hasil_unduh, type="primary", use_container_width=True)
@@ -698,6 +728,42 @@ if menu == "FORMULIR KUNJUNGAN PUBLIK":
                             st.error("❌ Data Tidak Ditemukan. Pastikan nomor WhatsApp yang Anda masukkan sama persis dengan yang diisi pada formulir.")
                     else:
                         st.info("Database kosong atau sedang tidak tersedia.")
+
+    # ------------------------------------------
+    # ISI HALAMAN 5: PENGADUAN & SARAN (BARU)
+    # ------------------------------------------
+    elif st.session_state.active_tab == "PENGADUAN & SARAN":
+        st.subheader("🗣️ FORMULIR PENGADUAN DAN SARAN")
+        st.caption("Kami sangat menghargai setiap masukan Anda untuk terus meningkatkan kualitas pelayanan kami. Laporan dapat bersifat anonim.")
+        
+        with st.container(border=True):
+            with st.form("form_pengaduan"):
+                p_kategori = st.radio("**Jenis Laporan** *", ["Saran / Masukan Inovasi", "Pengaduan Pelayanan"])
+                
+                col_p1, col_p2 = st.columns(2)
+                with col_p1:
+                    p_nama = st.text_input("**Nama Lengkap (Boleh Anonim)**", placeholder="Kosongkan jika ingin dirahasiakan")
+                with col_p2:
+                    p_kontak = st.text_input("**Nomor HP / Email (Opsional)**", placeholder="Bila ingin menerima *feedback* tindak lanjut")
+                    
+                p_pesan = st.text_area("**Uraian Pesan / Pengaduan** *", placeholder="Tuliskan keluhan atau saran Anda secara detail di sini...", height=150)
+                
+                btn_pengaduan = st.form_submit_button("KIRIM PESAN", type="primary", use_container_width=True)
+                
+            if btn_pengaduan:
+                if not p_pesan:
+                    st.error("❌ **GAGAL:** Mohon isi uraian pesan/pengaduan Anda!")
+                else:
+                    with st.spinner("🔄 Sedang mengirim pesan Anda dengan aman..."):
+                        waktu_skrg = datetime.now(timezone(timedelta(hours=8))).strftime("%Y-%m-%d %H:%M:%S")
+                        nama_pengadu = p_nama if p_nama else "Anonim"
+                        kontak_pengadu = p_kontak if p_kontak else "Tidak Disertakan"
+                        
+                        row_pengaduan = [waktu_skrg, p_kategori, nama_pengadu, kontak_pengadu, p_pesan, "Menunggu Tindak Lanjut"]
+                        
+                        if simpan_ke_google_sheets("Pengaduan_Saran", row_pengaduan):
+                            st.success("✔️ **TERIMA KASIH!** Pesan/Saran Anda telah berhasil dikirim dengan aman ke meja pimpinan kami.")
+                            st.balloons()
 
 # ==========================================
 # 7. PORTAL ADMIN & REKAP LAPORAN
@@ -743,8 +809,8 @@ elif menu == "PORTAL ADMIN & REKAP LAPORAN":
                 st.session_state.admin_tab = "DATABASE TAMU & LAYANAN"
                 st.rerun()
         with ca2:
-            if st.button("ARSIP DOKUMEN CLOUD", use_container_width=True, type="primary" if st.session_state.admin_tab == "ARSIP DOKUMEN CLOUD" else "secondary"):
-                st.session_state.admin_tab = "ARSIP DOKUMEN CLOUD"
+            if st.button("AUDIT ARSIP DOKUMEN CLOUD", use_container_width=True, type="primary" if st.session_state.admin_tab == "AUDIT ARSIP DOKUMEN CLOUD" else "secondary"):
+                st.session_state.admin_tab = "AUDIT ARSIP DOKUMEN CLOUD"
                 st.rerun()
                 
         st.markdown("---")
@@ -771,9 +837,21 @@ elif menu == "PORTAL ADMIN & REKAP LAPORAN":
                     st.download_button("📥 Unduh Laporan Permohonan (.csv)", data=csv_permohonan, file_name=f"Laporan_Permohonan_Data_Stamet_Bima_{datetime.now().strftime('%Y%m%d')}.csv", mime="text/csv", type="primary")
                 else:
                     st.info("Database Permohonan Data masih kosong.")
+            
+            st.divider()
+            
+            st.subheader("3. Tabel Laporan Pengaduan & Saran")
+            with st.spinner("Sedang menarik kotak pengaduan dari Cloud..."):
+                df_pengaduan = ambil_data_google_sheets("Pengaduan_Saran")
+                if not df_pengaduan.empty:
+                    st.dataframe(df_pengaduan, use_container_width=True)
+                    csv_pengaduan = df_pengaduan.to_csv(index=False).encode('utf-8')
+                    st.download_button("📥 Unduh Laporan Pengaduan (.csv)", data=csv_pengaduan, file_name=f"Laporan_Pengaduan_Stamet_Bima_{datetime.now().strftime('%Y%m%d')}.csv", mime="text/csv", type="primary")
+                else:
+                    st.info("Belum ada laporan pengaduan yang masuk.")
                     
-        elif st.session_state.admin_tab == "ARSIP DOKUMEN CLOUD":
-            st.subheader("Galeri Berkas Pemohon Data (Cloud Storage)")
+        elif st.session_state.admin_tab == "AUDIT ARSIP DOKUMEN CLOUD":
+            st.subheader("Galeri Audit Berkas Pemohon Data (Cloud Storage)")
             st.write("Sistem otomatis menarik data dari 22 kolom pangkalan data Google Sheets.")
             st.write("")
             
