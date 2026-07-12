@@ -18,13 +18,13 @@ st.set_page_config(
 )
 
 # ==========================================
-# 2. KUSTOMISASI CSS & TABS KOTAK FORMAL
+# 2. KUSTOMISASI CSS FORMAL & ELEGAN
 # ==========================================
 st.markdown("""
     <style>
-    /* Mengubah font seluruh halaman menjadi Arial yang sangat formal */
+    /* Mengubah font seluruh halaman menjadi Arial/Helvetica yang sangat formal */
     html, body, [class*="css"] {
-        font-family: 'Arial', sans-serif !important;
+        font-family: 'Arial', 'Helvetica Neue', Helvetica, sans-serif !important;
     }
 
     [data-testid="stHeaderToolbar"] { display: none !important; }
@@ -91,46 +91,11 @@ st.markdown("""
         padding-bottom: 2rem !important;
     }
 
-    /* =========================================================
-       CSS SAKTI: MENYULAP RADIO HORIZONTAL JADI TAB KOTAK (BOXY) FORMAL
-       ========================================================= */
-    .block-container div[data-testid="stRadio"] div[role="radiogroup"][aria-orientation="horizontal"] {
-        gap: 12px;
-        margin-bottom: 20px;
-    }
-    .block-container div[data-testid="stRadio"] div[role="radiogroup"][aria-orientation="horizontal"] > label {
-        padding: 12px 20px;
-        background-color: white;
-        border: 2px solid #002B49;
-        border-radius: 8px;
-        cursor: pointer;
-        transition: all 0.3s ease;
-        box-shadow: 0px 2px 5px rgba(0,0,0,0.05);
-    }
-    .block-container div[data-testid="stRadio"] div[role="radiogroup"][aria-orientation="horizontal"] > label:hover {
-        background-color: #f0f2f6;
-        transform: translateY(-2px);
-    }
-    /* Sembunyikan bulatan radio aslinya */
-    .block-container div[data-testid="stRadio"] div[role="radiogroup"][aria-orientation="horizontal"] > label > div:first-child {
-        display: none !important; 
-    }
-    /* Warna Tab saat Sedang Aktif/Diklik */
-    .block-container div[data-testid="stRadio"] div[role="radiogroup"][aria-orientation="horizontal"] > label[data-checked="true"] {
-        background-color: #002B49 !important;
-        border-color: #002B49 !important;
-        box-shadow: 0px 4px 10px rgba(0,43,73,0.3);
-    }
-    .block-container div[data-testid="stRadio"] div[role="radiogroup"][aria-orientation="horizontal"] > label[data-checked="true"] p {
-        color: white !important;
-    }
-    .block-container div[data-testid="stRadio"] div[role="radiogroup"][aria-orientation="horizontal"] > label p {
-        font-family: 'Arial', sans-serif !important;
-        font-size: 14px !important;
-        font-weight: bold !important;
+    /* Menebalkan teks pada semua tombol navigasi st.button */
+    div[data-testid="stButton"] button p {
+        font-weight: 700 !important;
         letter-spacing: 0.5px !important;
-        color: #002B49;
-        margin: 0;
+        font-size: 14px !important;
     }
     </style>
 """, unsafe_allow_html=True)
@@ -255,7 +220,6 @@ def update_status_sheets(nama_pemohon, status_baru, link_hasil=""):
             waktu_sekarang = datetime.now(timezone(timedelta(hours=8))).strftime("%Y-%m-%d %H:%M:%S")
             row_vals = sheet.row_values(cell.row)
             
-            # FORMAT HISTORY LAMA + BARU
             histori_lama = row_vals[21] if len(row_vals) >= 22 else f"{row_vals[19] if len(row_vals) > 19 else ''} | {row_vals[18] if len(row_vals) > 18 else 'Menunggu Verifikasi Berkas'}"
             histori_baru = f"{histori_lama} || {waktu_sekarang} | {status_baru}"
             
@@ -282,6 +246,8 @@ def format_tgl_jam(waktu_str):
 
 # FUNGSI ROBOT NOTIFIKASI TELEGRAM OTOMATIS (DI BALIK LAYAR)
 def notif_otomatis_admin(nama, kategori, layanan):
+    # Nanti setelah presentasi, Mbak isi TOKEN_BOT dan CHAT_ID ini dari Telegram.
+    # Selama ini kosong, aplikasinya tetap jalan normal (aman).
     TOKEN_BOT = ""  
     CHAT_ID = ""    
     
@@ -307,7 +273,6 @@ if "active_tab" not in st.session_state:
     st.session_state.active_tab = "E-BUKU TAMU"
 if "admin_tab" not in st.session_state:
     st.session_state.admin_tab = "DATABASE TAMU & LAYANAN"
-# Sesi memori untuk auto-drag dari E-Buku Tamu ke Permohonan Data
 if "draft_nama" not in st.session_state:
     st.session_state.draft_nama = ""
 if "draft_instansi" not in st.session_state:
@@ -376,28 +341,34 @@ if menu == "FORMULIR KUNJUNGAN PUBLIK":
     st.divider()
     
     # ---------------------------------------------------------
-    # TABS SAKTI BERBENTUK KOTAK (BOXY) FORMAL & ANTI BOCOR
+    # TOMBOL KOTAK NAVIGASI LENGKAP (5 TAB)
     # ---------------------------------------------------------
-    tabs_list = ["E-BUKU TAMU", "PERMOHONAN DATA", "E-KATALOG PNBP", "LACAK STATUS DATA", "PENGADUAN & SARAN"]
-    
-    # Deteksi posisi tab untuk auto-drag redirect
-    try:
-        default_idx = tabs_list.index(st.session_state.active_tab)
-    except:
-        default_idx = 0
-
-    pilihan_tab = st.radio(
-        "Navigasi Utama", 
-        tabs_list,
-        index=default_idx,
-        horizontal=True,
-        label_visibility="collapsed"
-    )
-    st.session_state.active_tab = pilihan_tab
-    st.write("")
+    c1, c2, c3, c4, c5 = st.columns(5)
+    with c1:
+        if st.button("E-BUKU TAMU", use_container_width=True, type="primary" if st.session_state.active_tab == "E-BUKU TAMU" else "secondary"):
+            st.session_state.active_tab = "E-BUKU TAMU"
+            st.rerun()
+    with c2:
+        if st.button("PERMOHONAN DATA", use_container_width=True, type="primary" if st.session_state.active_tab == "PERMOHONAN DATA" else "secondary"):
+            st.session_state.active_tab = "PERMOHONAN DATA"
+            st.rerun()
+    with c3:
+        if st.button("E-KATALOG PNBP", use_container_width=True, type="primary" if st.session_state.active_tab == "E-KATALOG PNBP" else "secondary"):
+            st.session_state.active_tab = "E-KATALOG PNBP"
+            st.rerun()
+    with c4:
+        if st.button("LACAK STATUS", use_container_width=True, type="primary" if st.session_state.active_tab == "LACAK STATUS DATA" else "secondary"):
+            st.session_state.active_tab = "LACAK STATUS DATA"
+            st.rerun()
+    with c5:
+        if st.button("PENGADUAN & SARAN", use_container_width=True, type="primary" if st.session_state.active_tab == "PENGADUAN & SARAN" else "secondary"):
+            st.session_state.active_tab = "PENGADUAN & SARAN"
+            st.rerun()
+            
+    st.markdown("---")
     
     # ------------------------------------------
-    # TAB 1: E-BUKU TAMU
+    # ISI HALAMAN 1: E-BUKU TAMU
     # ------------------------------------------
     if st.session_state.active_tab == "E-BUKU TAMU":
         if not st.session_state.tamu_terdaftar:
@@ -471,7 +442,7 @@ if menu == "FORMULIR KUNJUNGAN PUBLIK":
                 st.rerun()
 
     # ------------------------------------------
-    # TAB 2: PERMOHONAN DATA
+    # ISI HALAMAN 2: PERMOHONAN DATA
     # ------------------------------------------
     elif st.session_state.active_tab == "PERMOHONAN DATA":
         st.subheader("📝 FORMULIR PERMOHONAN DATA METEOROLOGI")
@@ -484,8 +455,8 @@ if menu == "FORMULIR KUNJUNGAN PUBLIK":
                     Sistem akan secara otomatis menyesuaikan formulir unggahan berdasarkan pilihan kategori Anda:
                 </p>
                 <ul style='font-size: 14px; color: var(--text-color); margin-top: 0px;'>
-                    <li><b>Komersial/Swasta (PNBP):</b> Wajib unggah KTP, Surat Permohonan Instansi, dan Bukti Isi SKM.</li>
-                    <li><b>Pendidikan/Pemerintah (Rp 0,-):</b> Wajib unggah KTP, Surat Permohonan, Surat Pengantar, Surat Pernyataan Bermeterai, Proposal (khusus Mahasiswa), dan Bukti Isi SKM. <span style='color:red; font-weight:bold;'>Maksimal rentang periode data adalah 5 tahun.</span></li>
+                    <li><b>Komersial/Swasta (PNBP):</b> <b>Wajib</b> unggah KTP, Surat Permohonan Instansi, dan Bukti Isi SKM.</li>
+                    <li><b>Pendidikan/Pemerintah (Rp 0,-):</b> <b>Wajib</b> unggah KTP, Surat Permohonan, Surat Pengantar, Surat Pernyataan Bermeterai, Proposal (khusus Mahasiswa), dan Bukti Isi SKM. <span style='color:red; font-weight:bold;'>Maksimal rentang periode data adalah 5 tahun.</span></li>
                 </ul>
             </div>
             """, unsafe_allow_html=True)
@@ -646,7 +617,7 @@ if menu == "FORMULIR KUNJUNGAN PUBLIK":
                         st.link_button("🚨 KLIK DI SINI UNTUK KONFIRMASI KE WA ADMIN (WAJIB) 🚨", f"https://wa.me/{NOMOR_WA_CS}?text={pesan_wa}", type="primary", use_container_width=True)
 
     # ------------------------------------------
-    # TAB 3: E-KATALOG PNBP
+    # ISI HALAMAN 3: E-KATALOG PNBP
     # ------------------------------------------
     elif st.session_state.active_tab == "E-KATALOG PNBP":
         st.markdown("<h3 style='color: #002B49; margin-bottom: 0px;'>💰 Katalog Tarif Resmi Jasa Data dan Informasi</h3>", unsafe_allow_html=True)
@@ -773,7 +744,7 @@ if menu == "FORMULIR KUNJUNGAN PUBLIK":
                         st.info("Database kosong atau sedang tidak tersedia.")
 
     # ------------------------------------------
-    # ISI HALAMAN 5: PENGADUAN & SARAN
+    # ISI HALAMAN 5: PENGADUAN & SARAN (BARU)
     # ------------------------------------------
     elif st.session_state.active_tab == "PENGADUAN & SARAN":
         st.subheader("🗣️ FORMULIR PENGADUAN DAN SARAN")
