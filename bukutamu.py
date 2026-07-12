@@ -95,7 +95,7 @@ st.markdown("""
     div[data-testid="stButton"] button p {
         font-weight: 700 !important;
         letter-spacing: 0.5px !important;
-        font-size: 15px !important;
+        font-size: 14px !important;
     }
     </style>
 """, unsafe_allow_html=True)
@@ -141,7 +141,7 @@ st.markdown(f"""
 """, unsafe_allow_html=True)
 
 # ==========================================
-# 3. FUNGSI INTEGRASI GOOGLE CLOUD
+# 3. FUNGSI INTEGRASI CLOUD & ROBOT NOTIF
 # ==========================================
 def dapatkan_kredensial():
     scope = ["https://spreadsheets.google.com/feeds", "https://www.googleapis.com/auth/drive"]
@@ -220,7 +220,7 @@ def update_status_sheets(nama_pemohon, status_baru, link_hasil=""):
             waktu_sekarang = datetime.now(timezone(timedelta(hours=8))).strftime("%Y-%m-%d %H:%M:%S")
             row_vals = sheet.row_values(cell.row)
             
-            # MEMBACA HISTORY LAMA DAN MENAMBAH HISTORY BARU (Format: Waktu | Status || Waktu | Status)
+            # FORMAT HISTORY LAMA + BARU
             histori_lama = row_vals[21] if len(row_vals) >= 22 else f"{row_vals[19] if len(row_vals) > 19 else ''} | {row_vals[18] if len(row_vals) > 18 else 'Menunggu Verifikasi Berkas'}"
             histori_baru = f"{histori_lama} || {waktu_sekarang} | {status_baru}"
             
@@ -235,7 +235,6 @@ def update_status_sheets(nama_pemohon, status_baru, link_hasil=""):
         st.error(f"Gagal memperbarui status di sistem Cloud: {e}")
         return False
 
-# FUNGSI PEMISAH TANGGAL DAN JAM
 def format_tgl_jam(waktu_str):
     try:
         dt = datetime.strptime(str(waktu_str).strip(), "%Y-%m-%d %H:%M:%S")
@@ -248,8 +247,6 @@ def format_tgl_jam(waktu_str):
 
 # FUNGSI ROBOT NOTIFIKASI TELEGRAM OTOMATIS (DI BALIK LAYAR)
 def notif_otomatis_admin(nama, kategori, layanan):
-    # Nanti setelah presentasi, Mbak isi TOKEN_BOT dan CHAT_ID ini dari Telegram.
-    # Selama ini kosong, aplikasinya tetap jalan normal (aman).
     TOKEN_BOT = ""  
     CHAT_ID = ""    
     
@@ -275,6 +272,7 @@ if "active_tab" not in st.session_state:
     st.session_state.active_tab = "E-BUKU TAMU"
 if "admin_tab" not in st.session_state:
     st.session_state.admin_tab = "DATABASE TAMU & LAYANAN"
+# Sesi memori untuk auto-drag dari E-Buku Tamu ke Permohonan Data
 if "draft_nama" not in st.session_state:
     st.session_state.draft_nama = ""
 if "draft_instansi" not in st.session_state:
@@ -343,7 +341,7 @@ if menu == "FORMULIR KUNJUNGAN PUBLIK":
     st.divider()
     
     # ---------------------------------------------------------
-    # TOMBOL NAVIGASI FORMAL (ANTI BOCOR)
+    # TOMBOL KOTAK NAVIGASI (ANTI BOCOR)
     # ---------------------------------------------------------
     c1, c2, c3, c4, c5 = st.columns(5)
     with c1:
@@ -436,6 +434,7 @@ if menu == "FORMULIR KUNJUNGAN PUBLIK":
 
         elif st.session_state.tamu_terdaftar:
             st.success(f"🎉 **DATA BERHASIL TERSIMPAN:** Terima kasih Bapak/Ibu **{st.session_state.nama_pendaftar}**, data kunjungan Anda telah sah tercatat.")
+            st.balloons()
             st.write("")
             if st.button("KEMBALI KE REGISTRASI TAMU BARU", type="primary", use_container_width=True):
                 st.session_state.tamu_terdaftar = False
@@ -523,7 +522,7 @@ if menu == "FORMULIR KUNJUNGAN PUBLIK":
                     file_surat_pernyataan = None
                 else:
                     st.markdown("📄 **[Download Format Surat Pengantar](https://docs.google.com/document/d/1YNKGAGzif4i36bvLLCZ2jDyz8oYYoQLj/edit)**")
-                    file_surat_pengantar = st.file_uploader("**3. Surat Pengantar Sekolah/Instansi (Wajib)** *", type=["pdf"])
+                    file_surat_pengantar = st.file_uploader("**3. Surat Pengantar Instansi (Wajib)** *", type=["pdf"])
                     st.markdown("📄 **[Download Format Surat Pernyataan Bermeterai](https://docs.google.com/document/d/1N6nBHU8PIaGtXIX6u96T9Z0f6cYcnkb6/edit)**")
                     file_surat_pernyataan = st.file_uploader("**4. Surat Pernyataan Bermeterai (Wajib)** *", type=["pdf"])
             
@@ -638,18 +637,21 @@ if menu == "FORMULIR KUNJUNGAN PUBLIK":
         st.markdown("#### **Tabel Rincian Layanan Prioritas Stamet Bima**")
         
         raw_data_ia = {
-            "No.": ["1", "2"],
+            "No.": ["1", "2", "3"],
             "Jenis Layanan (Penerimaan Negara Bukan Pajak)": [
                 "Informasi Meteorologi untuk Keperluan Klaim Asuransi", 
-                "Informasi Meteorologi Khusus untuk Pendukung Kegiatan Proyek, Survei, dan Penelitian Komersial (Jasa Konsultasi Meteorologi)"
+                "Informasi Meteorologi Khusus untuk Pendukung Kegiatan Proyek, Survei, dan Penelitian Komersial (Jasa Konsultasi Meteorologi)",
+                "Informasi Radar Cuaca (per 10 menit)"
             ],
             "Satuan": [
                 "per lokasi per hari", 
-                "per lokasi"
+                "per lokasi",
+                "per data per lokasi"
             ],
             "Tarif Resmi": [
                 "Rp 175.000,00", 
-                "Rp 3.750.000,00"
+                "Rp 3.750.000,00",
+                "Rp 70.000,00"
             ]
         }
         st.dataframe(pd.DataFrame(raw_data_ia), use_container_width=True, hide_index=True)
