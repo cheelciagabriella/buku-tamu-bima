@@ -95,7 +95,7 @@ st.markdown("""
     div[data-testid="stButton"] button p {
         font-weight: 700 !important;
         letter-spacing: 0.5px !important;
-        font-size: 14px !important;
+        font-size: 15px !important;
     }
     </style>
 """, unsafe_allow_html=True)
@@ -141,7 +141,7 @@ st.markdown(f"""
 """, unsafe_allow_html=True)
 
 # ==========================================
-# 3. FUNGSI INTEGRASI CLOUD & ROBOT NOTIF
+# 3. FUNGSI INTEGRASI GOOGLE CLOUD
 # ==========================================
 def dapatkan_kredensial():
     scope = ["https://spreadsheets.google.com/feeds", "https://www.googleapis.com/auth/drive"]
@@ -637,18 +637,21 @@ if menu == "FORMULIR KUNJUNGAN PUBLIK":
         st.markdown("#### **Tabel Rincian Layanan Prioritas Stamet Bima**")
         
         raw_data_ia = {
-            "No.": ["1", "2"],
+            "No.": ["1", "2", "3", "4"],
             "Jenis Layanan (Penerimaan Negara Bukan Pajak)": [
                 "Informasi Meteorologi untuk Keperluan Klaim Asuransi", 
-                "Informasi Meteorologi Khusus untuk Pendukung Kegiatan Proyek, Survei, dan Penelitian Komersial (Jasa Konsultasi Meteorologi)"
+                "Informasi Meteorologi Khusus untuk Pendukung Kegiatan Proyek, Survei, dan Penelitian Komersial (Jasa Konsultasi Meteorologi)",
+                "Informasi Radar Cuaca (per 10 menit)"
             ],
             "Satuan": [
                 "per lokasi per hari", 
-                "per lokasi"
+                "per lokasi",
+                "per data per lokasi"
             ],
             "Tarif Resmi": [
                 "Rp 175.000,00", 
-                "Rp 3.750.000,00"
+                "Rp 3.750.000,00",
+                "Rp 70.000,00",
             ]
         }
         st.dataframe(pd.DataFrame(raw_data_ia), use_container_width=True, hide_index=True)
@@ -744,7 +747,7 @@ if menu == "FORMULIR KUNJUNGAN PUBLIK":
                         st.info("Database kosong atau sedang tidak tersedia.")
 
     # ------------------------------------------
-    # ISI HALAMAN 5: PENGADUAN & SARAN (BARU)
+    # ISI HALAMAN 5: PENGADUAN & SARAN
     # ------------------------------------------
     elif st.session_state.active_tab == "PENGADUAN & SARAN":
         st.subheader("🗣️ FORMULIR PENGADUAN DAN SARAN")
@@ -758,7 +761,7 @@ if menu == "FORMULIR KUNJUNGAN PUBLIK":
                 with col_p1:
                     p_nama = st.text_input("**Nama Lengkap (Boleh Anonim)**", placeholder="Kosongkan jika ingin dirahasiakan")
                 with col_p2:
-                    p_kontak = st.text_input("**Nomor HP / Email (Opsional)**", placeholder="Bila ingin menerima *feedback* tindak lanjut")
+                    p_kontak = st.text_input("**Nomor HP / Email (Opsional)**", placeholder="Bila ingin menerima feedback tindak lanjut")
                     
                 p_pesan = st.text_area("**Uraian Pesan / Pengaduan** *", placeholder="Tuliskan keluhan atau saran Anda secara detail di sini...", height=150)
                 
