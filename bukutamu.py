@@ -97,6 +97,44 @@ st.markdown("""
         letter-spacing: 0.5px !important;
         font-size: 14px !important;
     }
+    
+    /* TABS SAKTI BERBENTUK KOTAK (BOXY) FORMAL */
+    .block-container div[data-testid="stRadio"] div[role="radiogroup"][aria-orientation="horizontal"] {
+        gap: 12px;
+        margin-bottom: 20px;
+    }
+    .block-container div[data-testid="stRadio"] div[role="radiogroup"][aria-orientation="horizontal"] > label {
+        padding: 12px 20px;
+        background-color: white;
+        border: 2px solid #002B49;
+        border-radius: 8px;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        box-shadow: 0px 2px 5px rgba(0,0,0,0.05);
+    }
+    .block-container div[data-testid="stRadio"] div[role="radiogroup"][aria-orientation="horizontal"] > label:hover {
+        background-color: #f0f2f6;
+        transform: translateY(-2px);
+    }
+    .block-container div[data-testid="stRadio"] div[role="radiogroup"][aria-orientation="horizontal"] > label > div:first-child {
+        display: none !important; 
+    }
+    .block-container div[data-testid="stRadio"] div[role="radiogroup"][aria-orientation="horizontal"] > label[data-checked="true"] {
+        background-color: #002B49 !important;
+        border-color: #002B49 !important;
+        box-shadow: 0px 4px 10px rgba(0,43,73,0.3);
+    }
+    .block-container div[data-testid="stRadio"] div[role="radiogroup"][aria-orientation="horizontal"] > label[data-checked="true"] p {
+        color: white !important;
+    }
+    .block-container div[data-testid="stRadio"] div[role="radiogroup"][aria-orientation="horizontal"] > label p {
+        font-family: 'Arial', sans-serif !important;
+        font-size: 14px !important;
+        font-weight: bold !important;
+        letter-spacing: 0.5px !important;
+        color: #002B49;
+        margin: 0;
+    }
     </style>
 """, unsafe_allow_html=True)
 
@@ -220,7 +258,6 @@ def update_status_sheets(nama_pemohon, status_baru, link_hasil=""):
             waktu_sekarang = datetime.now(timezone(timedelta(hours=8))).strftime("%Y-%m-%d %H:%M:%S")
             row_vals = sheet.row_values(cell.row)
             
-            # FORMAT HISTORY LAMA + BARU
             histori_lama = row_vals[21] if len(row_vals) >= 22 else f"{row_vals[19] if len(row_vals) > 19 else ''} | {row_vals[18] if len(row_vals) > 18 else 'Menunggu Verifikasi Berkas'}"
             histori_baru = f"{histori_lama} || {waktu_sekarang} | {status_baru}"
             
@@ -245,10 +282,7 @@ def format_tgl_jam(waktu_str):
         jam = parts[1] if len(parts) > 1 else "-"
         return tgl, jam
 
-# FUNGSI ROBOT NOTIFIKASI TELEGRAM OTOMATIS (DI BALIK LAYAR)
 def notif_otomatis_admin(nama, kategori, layanan):
-    # Nanti setelah presentasi, Mbak isi TOKEN_BOT dan CHAT_ID ini dari Telegram.
-    # Selama ini kosong, aplikasinya tetap jalan normal (aman).
     TOKEN_BOT = ""  
     CHAT_ID = ""    
     
@@ -262,7 +296,7 @@ def notif_otomatis_admin(nama, kategori, layanan):
             pass
 
 # ==========================================
-# 4. INISIALISASI KONTROL ALUR & AUTO-DRAG
+# 4. INISIALISASI KONTROL ALUR
 # ==========================================
 if "tamu_terdaftar" not in st.session_state:
     st.session_state.tamu_terdaftar = False
@@ -274,7 +308,6 @@ if "active_tab" not in st.session_state:
     st.session_state.active_tab = "E-BUKU TAMU"
 if "admin_tab" not in st.session_state:
     st.session_state.admin_tab = "DATABASE TAMU & LAYANAN"
-# Sesi memori untuk auto-drag dari E-Buku Tamu ke Permohonan Data
 if "draft_nama" not in st.session_state:
     st.session_state.draft_nama = ""
 if "draft_instansi" not in st.session_state:
@@ -343,31 +376,24 @@ if menu == "FORMULIR KUNJUNGAN PUBLIK":
     st.divider()
     
     # ---------------------------------------------------------
-    # TOMBOL KOTAK NAVIGASI (ANTI BOCOR)
+    # TOMBOL KOTAK NAVIGASI FORMAL
     # ---------------------------------------------------------
-    c1, c2, c3, c4, c5 = st.columns(5)
-    with c1:
-        if st.button("E-BUKU TAMU", use_container_width=True, type="primary" if st.session_state.active_tab == "E-BUKU TAMU" else "secondary"):
-            st.session_state.active_tab = "E-BUKU TAMU"
-            st.rerun()
-    with c2:
-        if st.button("PERMOHONAN DATA", use_container_width=True, type="primary" if st.session_state.active_tab == "PERMOHONAN DATA" else "secondary"):
-            st.session_state.active_tab = "PERMOHONAN DATA"
-            st.rerun()
-    with c3:
-        if st.button("E-KATALOG PNBP", use_container_width=True, type="primary" if st.session_state.active_tab == "E-KATALOG PNBP" else "secondary"):
-            st.session_state.active_tab = "E-KATALOG PNBP"
-            st.rerun()
-    with c4:
-        if st.button("LACAK STATUS", use_container_width=True, type="primary" if st.session_state.active_tab == "LACAK STATUS DATA" else "secondary"):
-            st.session_state.active_tab = "LACAK STATUS DATA"
-            st.rerun()
-    with c5:
-        if st.button("PENGADUAN & SARAN", use_container_width=True, type="primary" if st.session_state.active_tab == "PENGADUAN & SARAN" else "secondary"):
-            st.session_state.active_tab = "PENGADUAN & SARAN"
-            st.rerun()
-            
-    st.markdown("---")
+    tabs_list = ["E-BUKU TAMU", "PERMOHONAN DATA", "E-KATALOG PNBP", "LACAK STATUS DATA", "PENGADUAN & SARAN"]
+    
+    try:
+        default_idx = tabs_list.index(st.session_state.active_tab)
+    except:
+        default_idx = 0
+
+    pilihan_tab = st.radio(
+        "Navigasi Utama", 
+        tabs_list,
+        index=default_idx,
+        horizontal=True,
+        label_visibility="collapsed"
+    )
+    st.session_state.active_tab = pilihan_tab
+    st.write("")
     
     # ------------------------------------------
     # ISI HALAMAN 1: E-BUKU TAMU
@@ -588,11 +614,9 @@ if menu == "FORMULIR KUNJUNGAN PUBLIK":
                     
                     if simpan_ke_google_sheets("Permohonan_Data", row_khusus):
                         
-                        # FITUR AUTO-SINKRONISASI BUKU TAMU
                         row_tamu_otomatis = [waktu_khusus, nama_khusus, kontak_khusus, instansi_khusus, "Permohonan Data (Sinkronisasi Otomatis)", "Kunjungan Pelayanan Publik", "-", waktu_khusus]
                         simpan_ke_google_sheets("Tamu", row_tamu_otomatis)
                         
-                        # PANGGIL ROBOT NOTIFIKASI TELEGRAM DI SINI
                         notif_otomatis_admin(nama_khusus, kategori_pemohon, jenis_data_khusus)
                         
                         st.session_state.draft_nama = ""
@@ -639,21 +663,27 @@ if menu == "FORMULIR KUNJUNGAN PUBLIK":
         st.markdown("#### **Tabel Rincian Layanan Prioritas Stamet Bima**")
         
         raw_data_ia = {
-            "No.": ["1", "2", "3"],
+            "No.": ["1", "2", "3", "4", "5"],
             "Jenis Layanan (Penerimaan Negara Bukan Pajak)": [
                 "Informasi Meteorologi untuk Keperluan Klaim Asuransi", 
-                "Informasi Meteorologi Khusus untuk Pendukung Kegiatan Proyek, Survei, dan Penelitian Komersial (Jasa Konsultasi Meteorologi)",
-                "Informasi Radar Cuaca (per 10 menit)"
+                "Informasi Cuaca Khusus Untuk Kegiatan Olahraga",
+                "Informasi Cuaca Khusus Untuk Kegiatan Komersial Outdoor/Indoor",
+                "Informasi Radar Cuaca (per 10 Menit)",
+                "Informasi Meteorologi Khusus Untuk Pendukung Kegiatan Proyek Survei, dan Penelitian Komersial"
             ],
             "Satuan": [
-                "per lokasi per hari", 
-                "per lokasi",
-                "per data per lokasi"
+                "Per lokasi per hari", 
+                "Per lokasi per hari",
+                "Per lokasi per hari",
+                "Per lokasi per data",
+                "Per lokasi"
             ],
-            "Tarif Resmi": [
-                "Rp 175.000,00", 
-                "Rp 3.750.000,00",
-                "Rp 70.000,00"
+            "Tarif (Rp)": [
+                "175.000", 
+                "100.000",
+                "100.000",
+                "70.000",
+                "3.750.000"
             ]
         }
         st.dataframe(pd.DataFrame(raw_data_ia), use_container_width=True, hide_index=True)
