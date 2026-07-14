@@ -247,6 +247,8 @@ def format_tgl_jam(waktu_str):
 
 # FUNGSI ROBOT NOTIFIKASI TELEGRAM OTOMATIS (DI BALIK LAYAR)
 def notif_otomatis_admin(nama, kategori, layanan):
+    # Nanti setelah presentasi, Mbak isi TOKEN_BOT dan CHAT_ID ini dari Telegram.
+    # Selama ini kosong, aplikasinya tetap jalan normal (aman).
     TOKEN_BOT = ""  
     CHAT_ID = ""    
     
