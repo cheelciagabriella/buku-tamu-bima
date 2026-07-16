@@ -91,11 +91,11 @@ st.markdown("""
         padding-bottom: 2rem !important;
     }
 
-    /* Menebalkan teks pada semua tombol navigasi st.button (Ukuran diperbesar) */
+    /* Menebalkan teks pada semua tombol navigasi st.button (Ukuran Lebih Besar & Lebih Tebal) */
     div[data-testid="stButton"] button p {
-        font-weight: 700 !important;
+        font-weight: 800 !important;
         letter-spacing: 0.5px !important;
-        font-size: 15.5px !important; 
+        font-size: 18px !important; 
     }
     </style>
 """, unsafe_allow_html=True)
@@ -258,6 +258,7 @@ def format_tgl_jam(waktu_str):
         jam = parts[1] if len(parts) > 1 else "-"
         return tgl, jam
 
+# FUNGSI ROBOT NOTIFIKASI TELEGRAM OTOMATIS (DI BALIK LAYAR)
 def notif_otomatis_admin(nama, kategori, layanan):
     TOKEN_BOT = ""  
     CHAT_ID = ""    
@@ -353,7 +354,7 @@ if menu == "FORMULIR KUNJUNGAN PUBLIK":
     st.divider()
     
     # ---------------------------------------------------------
-    # TOMBOL KOTAK NAVIGASI FORMAL (Telah Diurutkan Ulang)
+    # TOMBOL KOTAK NAVIGASI FORMAL
     # ---------------------------------------------------------
     c1, c2, c3, c4, c5 = st.columns(5)
     with c1:
