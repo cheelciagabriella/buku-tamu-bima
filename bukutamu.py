@@ -258,7 +258,6 @@ def format_tgl_jam(waktu_str):
         jam = parts[1] if len(parts) > 1 else "-"
         return tgl, jam
 
-# FUNGSI ROBOT NOTIFIKASI TELEGRAM OTOMATIS (DI BALIK LAYAR)
 def notif_otomatis_admin(nama, kategori, layanan):
     TOKEN_BOT = ""  
     CHAT_ID = ""    
@@ -338,18 +337,28 @@ if menu == "FORMULIR KUNJUNGAN PUBLIK":
         
     with col_clock:
         components.html("""
-            <div id="clock" style="font-family: 'Arial', sans-serif; font-size: 14px; font-weight: bold; color: #002B49; text-align: right; padding-top: 25px;"></div>
+            <div style="font-family: 'Arial', sans-serif; text-align: right; padding-top: 10px;">
+                <div style="color: #7f8c8d; font-size: 14px; letter-spacing: 0.5px; margin-bottom: 2px;">PANEL WAKTU REAL-TIME:</div>
+                <div id="clock_time" style="color: #009F6B; font-size: 26px; font-weight: 900; letter-spacing: 1px;"></div>
+                <div id="clock_date" style="color: #002B49; font-size: 13px; font-weight: 700; margin-top: 2px;"></div>
+            </div>
             <script>
                 function updateTime() {
                     const now = new Date();
-                    const options = { timeZone: 'Asia/Makassar', weekday: 'long', year: 'numeric', month: 'long', day: 'numeric', hour: '2-digit', minute: '2-digit', second: '2-digit', hour12: false };
-                    const timeString = new Intl.DateTimeFormat('id-ID', options).format(now);
-                    document.getElementById('clock').innerHTML = timeString.replace(/\\./g, ':') + ' WITA';
+                    
+                    const timeOptions = { timeZone: 'Asia/Makassar', hour: '2-digit', minute: '2-digit', second: '2-digit', hour12: false };
+                    const timeString = new Intl.DateTimeFormat('id-ID', timeOptions).format(now).replace(/\\./g, ':');
+                    document.getElementById('clock_time').innerHTML = 'WITA: ' + timeString;
+                    
+                    const dateOptions = { timeZone: 'Asia/Makassar', weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' };
+                    const dateString = new Intl.DateTimeFormat('id-ID', dateOptions).format(now);
+                    document.getElementById('clock_date').innerHTML = dateString;
+                    
                     setTimeout(updateTime, 1000);
                 }
                 updateTime();
             </script>
-        """, height=80)
+        """, height=100)
     
     st.divider()
     
