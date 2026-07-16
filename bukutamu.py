@@ -258,6 +258,7 @@ def format_tgl_jam(waktu_str):
         jam = parts[1] if len(parts) > 1 else "-"
         return tgl, jam
 
+# FUNGSI ROBOT NOTIFIKASI TELEGRAM OTOMATIS (DI BALIK LAYAR)
 def notif_otomatis_admin(nama, kategori, layanan):
     TOKEN_BOT = ""  
     CHAT_ID = ""    
@@ -353,7 +354,7 @@ if menu == "FORMULIR KUNJUNGAN PUBLIK":
     st.divider()
     
     # ---------------------------------------------------------
-    # TOMBOL KOTAK NAVIGASI FORMAL (KEMBALI KE ASLI)
+    # TOMBOL KOTAK NAVIGASI FORMAL (Telah Diurutkan Ulang)
     # ---------------------------------------------------------
     c1, c2, c3, c4, c5 = st.columns(5)
     with c1:
@@ -365,16 +366,16 @@ if menu == "FORMULIR KUNJUNGAN PUBLIK":
             st.session_state.active_tab = "PERMOHONAN DATA"
             st.rerun()
     with c3:
+        if st.button("PENGADUAN & SARAN", use_container_width=True, type="primary" if st.session_state.active_tab == "PENGADUAN & SARAN" else "secondary"):
+            st.session_state.active_tab = "PENGADUAN & SARAN"
+            st.rerun()
+    with c4:
         if st.button("E-KATALOG PNBP", use_container_width=True, type="primary" if st.session_state.active_tab == "E-KATALOG PNBP" else "secondary"):
             st.session_state.active_tab = "E-KATALOG PNBP"
             st.rerun()
-    with c4:
+    with c5:
         if st.button("LACAK STATUS DATA", use_container_width=True, type="primary" if st.session_state.active_tab == "LACAK STATUS DATA" else "secondary"):
             st.session_state.active_tab = "LACAK STATUS DATA"
-            st.rerun()
-    with c5:
-        if st.button("PENGADUAN & SARAN", use_container_width=True, type="primary" if st.session_state.active_tab == "PENGADUAN & SARAN" else "secondary"):
-            st.session_state.active_tab = "PENGADUAN & SARAN"
             st.rerun()
             
     st.markdown("---")
@@ -629,7 +630,43 @@ if menu == "FORMULIR KUNJUNGAN PUBLIK":
                         st.link_button("🚨 KLIK DI SINI UNTUK KONFIRMASI KE WA ADMIN (WAJIB) 🚨", f"https://wa.me/{NOMOR_WA_CS}?text={pesan_wa}", type="primary", use_container_width=True)
 
     # ------------------------------------------
-    # ISI HALAMAN 3: E-KATALOG PNBP
+    # ISI HALAMAN 3: PENGADUAN & SARAN
+    # ------------------------------------------
+    elif st.session_state.active_tab == "PENGADUAN & SARAN":
+        st.subheader("🗣️ FORMULIR PENGADUAN DAN SARAN")
+        st.caption("Kami sangat menghargai setiap masukan Anda untuk terus meningkatkan kualitas pelayanan kami. Laporan dapat bersifat anonim.")
+        
+        with st.container(border=True):
+            with st.form("form_pengaduan"):
+                p_kategori = st.radio("**Jenis Laporan** *", ["Saran / Masukan Inovasi", "Pengaduan Pelayanan"])
+                
+                col_p1, col_p2 = st.columns(2)
+                with col_p1:
+                    p_nama = st.text_input("**Nama Lengkap (Boleh Anonim)**", placeholder="Kosongkan jika ingin dirahasiakan")
+                with col_p2:
+                    p_kontak = st.text_input("**Nomor HP / Email (Opsional)**", placeholder="Bila ingin menerima feedback tindak lanjut")
+                    
+                p_pesan = st.text_area("**Uraian Pesan / Pengaduan** *", placeholder="Tuliskan keluhan atau saran Anda secara detail di sini...", height=150)
+                
+                btn_pengaduan = st.form_submit_button("KIRIM PESAN", type="primary", use_container_width=True)
+                
+            if btn_pengaduan:
+                if not p_pesan:
+                    st.error("❌ **GAGAL:** Mohon isi uraian pesan/pengaduan Anda!")
+                else:
+                    with st.spinner("🔄 Sedang mengirim pesan Anda dengan aman..."):
+                        waktu_skrg = datetime.now(timezone(timedelta(hours=8))).strftime("%Y-%m-%d %H:%M:%S")
+                        nama_pengadu = p_nama if p_nama else "Anonim"
+                        kontak_pengadu = p_kontak if p_kontak else "Tidak Disertakan"
+                        
+                        row_pengaduan = [waktu_skrg, p_kategori, nama_pengadu, kontak_pengadu, p_pesan, "Menunggu Tindak Lanjut"]
+                        
+                        if simpan_ke_google_sheets("Pengaduan_Saran", row_pengaduan):
+                            st.success("✔️ **TERIMA KASIH!** Pesan/Saran Anda telah berhasil dikirim dengan aman ke meja pimpinan kami.")
+                            st.balloons()
+
+    # ------------------------------------------
+    # ISI HALAMAN 4: E-KATALOG PNBP
     # ------------------------------------------
     elif st.session_state.active_tab == "E-KATALOG PNBP":
         st.markdown("<h3 style='color: #002B49; margin-bottom: 0px;'>💰 Katalog Tarif Resmi Jasa Data dan Informasi</h3>", unsafe_allow_html=True)
@@ -728,7 +765,7 @@ if menu == "FORMULIR KUNJUNGAN PUBLIK":
         st.link_button("📞 Konsultasi Estimasi Biaya via WhatsApp", f"https://wa.me/{NOMOR_WA_CS}?text={pesan_tanya_tarif}", use_container_width=True)
 
     # ------------------------------------------
-    # ISI HALAMAN 4: FITUR TRACKING / LACAK DATA
+    # ISI HALAMAN 5: FITUR TRACKING / LACAK DATA
     # ------------------------------------------
     elif st.session_state.active_tab == "LACAK STATUS DATA":
         st.subheader("🔍 PORTAL PELACAKAN STATUS PERMOHONAN DATA")
@@ -799,42 +836,6 @@ if menu == "FORMULIR KUNJUNGAN PUBLIK":
                             st.error("❌ Data Tidak Ditemukan. Pastikan nomor WhatsApp yang Anda masukkan sama persis dengan yang diisi pada formulir.")
                     else:
                         st.info("Database kosong atau sedang tidak tersedia.")
-
-    # ------------------------------------------
-    # ISI HALAMAN 5: PENGADUAN & SARAN
-    # ------------------------------------------
-    elif st.session_state.active_tab == "PENGADUAN & SARAN":
-        st.subheader("🗣️ FORMULIR PENGADUAN DAN SARAN")
-        st.caption("Kami sangat menghargai setiap masukan Anda untuk terus meningkatkan kualitas pelayanan kami. Laporan dapat bersifat anonim.")
-        
-        with st.container(border=True):
-            with st.form("form_pengaduan"):
-                p_kategori = st.radio("**Jenis Laporan** *", ["Saran / Masukan Inovasi", "Pengaduan Pelayanan"])
-                
-                col_p1, col_p2 = st.columns(2)
-                with col_p1:
-                    p_nama = st.text_input("**Nama Lengkap (Boleh Anonim)**", placeholder="Kosongkan jika ingin dirahasiakan")
-                with col_p2:
-                    p_kontak = st.text_input("**Nomor HP / Email (Opsional)**", placeholder="Bila ingin menerima feedback tindak lanjut")
-                    
-                p_pesan = st.text_area("**Uraian Pesan / Pengaduan** *", placeholder="Tuliskan keluhan atau saran Anda secara detail di sini...", height=150)
-                
-                btn_pengaduan = st.form_submit_button("KIRIM PESAN", type="primary", use_container_width=True)
-                
-            if btn_pengaduan:
-                if not p_pesan:
-                    st.error("❌ **GAGAL:** Mohon isi uraian pesan/pengaduan Anda!")
-                else:
-                    with st.spinner("🔄 Sedang mengirim pesan Anda dengan aman..."):
-                        waktu_skrg = datetime.now(timezone(timedelta(hours=8))).strftime("%Y-%m-%d %H:%M:%S")
-                        nama_pengadu = p_nama if p_nama else "Anonim"
-                        kontak_pengadu = p_kontak if p_kontak else "Tidak Disertakan"
-                        
-                        row_pengaduan = [waktu_skrg, p_kategori, nama_pengadu, kontak_pengadu, p_pesan, "Menunggu Tindak Lanjut"]
-                        
-                        if simpan_ke_google_sheets("Pengaduan_Saran", row_pengaduan):
-                            st.success("✔️ **TERIMA KASIH!** Pesan/Saran Anda telah berhasil dikirim dengan aman ke meja pimpinan kami.")
-                            st.balloons()
 
 # ==========================================
 # 7. PORTAL ADMIN & REKAP LAPORAN
