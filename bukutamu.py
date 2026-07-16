@@ -91,11 +91,11 @@ st.markdown("""
         padding-bottom: 2rem !important;
     }
 
-    /* Menebalkan teks pada semua tombol navigasi st.button */
+    /* Menebalkan teks pada semua tombol navigasi st.button (Ukuran diperbesar) */
     div[data-testid="stButton"] button p {
         font-weight: 700 !important;
         letter-spacing: 0.5px !important;
-        font-size: 14px !important;
+        font-size: 15.5px !important; 
     }
     </style>
 """, unsafe_allow_html=True)
@@ -258,7 +258,6 @@ def format_tgl_jam(waktu_str):
         jam = parts[1] if len(parts) > 1 else "-"
         return tgl, jam
 
-# FUNGSI ROBOT NOTIFIKASI TELEGRAM OTOMATIS (DI BALIK LAYAR)
 def notif_otomatis_admin(nama, kategori, layanan):
     TOKEN_BOT = ""  
     CHAT_ID = ""    
@@ -683,7 +682,7 @@ if menu == "FORMULIR KUNJUNGAN PUBLIK":
             st.warning("💼 **Layanan PNBP (BERBAYAR)**\nDiperuntukkan bagi Instansi Swasta, BUMN, Kontraktor, dan Perorangan untuk keperluan operasional proyek, klaim asuransi, dan kegiatan berorientasi profit/komersial.")
         
         st.write("")
-        st.markdown("#### **Tabel Rincian Layanan Prioritas Stamet Bima**")
+        st.markdown("#### **Tabel Rincian Layanan Prioritas Stasiun Meteorologi Kelas II Sultan Muhammad Salahuddin Bima**")
         
         # TABEL HTML SUPER MIRIP DENGAN FOTO ASLI (KODE SAKTI)
         tabel_pnbp_html = """
