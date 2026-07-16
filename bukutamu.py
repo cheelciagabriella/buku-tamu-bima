@@ -698,7 +698,7 @@ if menu == "FORMULIR KUNJUNGAN PUBLIK":
                 </tr>
                 <tr>
                     <td style="border-right: 2px solid black;"></td>
-                    <td colspan="3" style="border: 2px solid black; padding: 8px; text-align: center;">Informasi Meteorologi, Klimatologi, dan Geofisika untuk Keperluan Klaim Asuransi</td>
+                    <td colspan="3" style="border: 2px solid black; padding: 8px; text-align: left;">Informasi Meteorologi, Klimatologi, dan Geofisika untuk Keperluan Klaim Asuransi</td>
                 </tr>
                 <tr>
                     <td style="border-right: 2px solid black;"></td>
@@ -708,7 +708,7 @@ if menu == "FORMULIR KUNJUNGAN PUBLIK":
                 </tr>
                 <tr>
                     <td style="border-right: 2px solid black;"></td>
-                    <td colspan="3" style="border: 2px solid black; padding: 8px; text-align: center;">Informasi Khusus Meteorologi, Klimatologi Dan Geofisika Sesuai Permintaan</td>
+                    <td colspan="3" style="border: 2px solid black; padding: 8px; text-align: left;">Informasi Khusus Meteorologi, Klimatologi Dan Geofisika Sesuai Permintaan</td>
                 </tr>
                 <tr>
                     <td style="border-right: 2px solid black;"></td>
@@ -734,7 +734,7 @@ if menu == "FORMULIR KUNJUNGAN PUBLIK":
                 </tr>
                 <tr>
                     <td style="border-right: 2px solid black;"></td>
-                    <td style="border: 2px solid black; padding: 8px; text-align: center;">Informasi Meteorologi Khusus Untuk Pendukung<br>Kegiatan Proyek Survei, dan Penelitian Komersial</td>
+                    <td style="border: 2px solid black; padding: 8px; text-align: left;">Informasi Meteorologi Khusus Untuk Pendukung<br>Kegiatan Proyek Survei, dan Penelitian Komersial</td>
                     <td style="border: 2px solid black; padding: 8px; text-align: center;">Per lokasi</td>
                     <td style="border: 2px solid black; padding: 8px; text-align: center;">3.750.000</td>
                 </tr>
@@ -915,8 +915,8 @@ elif menu == "PORTAL ADMIN & REKAP LAPORAN":
                 st.session_state.admin_tab = "DATABASE TAMU & LAYANAN"
                 st.rerun()
         with ca2:
-            if st.button("AUDIT ARSIP DOKUMEN CLOUD", use_container_width=True, type="primary" if st.session_state.admin_tab == "AUDIT ARSIP DOKUMEN CLOUD" else "secondary"):
-                st.session_state.admin_tab = "AUDIT ARSIP DOKUMEN CLOUD"
+            if st.button("ARSIP DOKUMEN", use_container_width=True, type="primary" if st.session_state.admin_tab == "ARSIP DOKUMEN" else "secondary"):
+                st.session_state.admin_tab = "ARSIP DOKUMEN"
                 st.rerun()
                 
         st.markdown("---")
@@ -981,8 +981,8 @@ elif menu == "PORTAL ADMIN & REKAP LAPORAN":
                 else:
                     st.info("Belum ada laporan pengaduan yang masuk.")
                     
-        elif st.session_state.admin_tab == "AUDIT ARSIP DOKUMEN CLOUD":
-            st.subheader("Galeri Audit Berkas Pemohon Data (Cloud Storage)")
+        elif st.session_state.admin_tab == "ARSIP DOKUMEN":
+            st.subheader("Galeri Arsip Dokumen Pemohon Data")
             st.write("Sistem otomatis menarik data dari 22 kolom pangkalan data Google Sheets.")
             st.write("")
             
