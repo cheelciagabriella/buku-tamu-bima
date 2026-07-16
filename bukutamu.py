@@ -97,6 +97,44 @@ st.markdown("""
         letter-spacing: 0.5px !important;
         font-size: 18px !important; 
     }
+    
+    /* TABS SAKTI BERBENTUK KOTAK (BOXY) FORMAL */
+    .block-container div[data-testid="stRadio"] div[role="radiogroup"][aria-orientation="horizontal"] {
+        gap: 12px;
+        margin-bottom: 20px;
+    }
+    .block-container div[data-testid="stRadio"] div[role="radiogroup"][aria-orientation="horizontal"] > label {
+        padding: 12px 20px;
+        background-color: white;
+        border: 2px solid #002B49;
+        border-radius: 8px;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        box-shadow: 0px 2px 5px rgba(0,0,0,0.05);
+    }
+    .block-container div[data-testid="stRadio"] div[role="radiogroup"][aria-orientation="horizontal"] > label:hover {
+        background-color: #f0f2f6;
+        transform: translateY(-2px);
+    }
+    .block-container div[data-testid="stRadio"] div[role="radiogroup"][aria-orientation="horizontal"] > label > div:first-child {
+        display: none !important; 
+    }
+    .block-container div[data-testid="stRadio"] div[role="radiogroup"][aria-orientation="horizontal"] > label[data-checked="true"] {
+        background-color: #002B49 !important;
+        border-color: #002B49 !important;
+        box-shadow: 0px 4px 10px rgba(0,43,73,0.3);
+    }
+    .block-container div[data-testid="stRadio"] div[role="radiogroup"][aria-orientation="horizontal"] > label[data-checked="true"] p {
+        color: white !important;
+    }
+    .block-container div[data-testid="stRadio"] div[role="radiogroup"][aria-orientation="horizontal"] > label p {
+        font-family: 'Arial', sans-serif !important;
+        font-size: 14px !important;
+        font-weight: bold !important;
+        letter-spacing: 0.5px !important;
+        color: #002B49;
+        margin: 0;
+    }
     </style>
 """, unsafe_allow_html=True)
 
@@ -303,7 +341,7 @@ except:
 st.sidebar.title("NAVIGASI SISTEM")
 menu = st.sidebar.radio("PILIH MENU LAYANAN:", [
     "FORMULIR KUNJUNGAN PUBLIK", 
-    "PORTAL ADMIN & REKAP LAPORAN"
+    "PORTAL ADMIN"
 ])
 st.sidebar.divider()
 st.sidebar.caption("SISTEM ADMINISTRASI TERPADU")
@@ -340,7 +378,7 @@ if menu == "FORMULIR KUNJUNGAN PUBLIK":
             <div style="font-family: 'Arial', sans-serif; text-align: right; padding-top: 10px;">
                 <div style="color: #7f8c8d; font-size: 14px; letter-spacing: 0.5px; margin-bottom: 2px;">PANEL WAKTU REAL-TIME:</div>
                 <div id="clock_time" style="color: #009F6B; font-size: 26px; font-weight: 900; letter-spacing: 1px;"></div>
-                <div id="clock_date" style="color: #002B49; font-size: 13px; font-weight: 700; margin-top: 2px;"></div>
+                <div id="clock_date" style="color: #003a63; font-size: 13px; font-weight: 700; margin-top: 2px;"></div>
             </div>
             <script>
                 function updateTime() {
@@ -847,9 +885,9 @@ if menu == "FORMULIR KUNJUNGAN PUBLIK":
                         st.info("Database kosong atau sedang tidak tersedia.")
 
 # ==========================================
-# 7. PORTAL ADMIN & REKAP LAPORAN
+# 7. PORTAL ADMIN
 # ==========================================
-elif menu == "PORTAL ADMIN & REKAP LAPORAN":
+elif menu == "PORTAL ADMIN":
     st.title("SISTEM MANAJEMEN DATABASE STASIUN")
     st.divider()
 
