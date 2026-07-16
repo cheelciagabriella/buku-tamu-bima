@@ -339,8 +339,8 @@ if menu == "FORMULIR KUNJUNGAN PUBLIK":
         components.html("""
             <div style="font-family: 'Arial', sans-serif; text-align: right; padding-top: 10px;">
                 <div style="color: #7f8c8d; font-size: 14px; letter-spacing: 0.5px; margin-bottom: 2px;">PANEL WAKTU REAL-TIME:</div>
-                <div id="clock_time" style="color: #002B49; font-size: 26px; font-weight: 900; letter-spacing: 1px;"></div>
-                <div id="clock_date" style="color: #003a63; font-size: 13px; font-weight: 700; margin-top: 2px;"></div>
+                <div id="clock_time" style="color: #009F6B; font-size: 26px; font-weight: 900; letter-spacing: 1px;"></div>
+                <div id="clock_date" style="color: #002B49; font-size: 13px; font-weight: 700; margin-top: 2px;"></div>
             </div>
             <script>
                 function updateTime() {
