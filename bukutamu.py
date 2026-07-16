@@ -97,6 +97,44 @@ st.markdown("""
         letter-spacing: 0.5px !important;
         font-size: 14px !important;
     }
+    
+    /* TABS SAKTI BERBENTUK KOTAK (BOXY) FORMAL */
+    .block-container div[data-testid="stRadio"] div[role="radiogroup"][aria-orientation="horizontal"] {
+        gap: 12px;
+        margin-bottom: 20px;
+    }
+    .block-container div[data-testid="stRadio"] div[role="radiogroup"][aria-orientation="horizontal"] > label {
+        padding: 12px 20px;
+        background-color: white;
+        border: 2px solid #002B49;
+        border-radius: 8px;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        box-shadow: 0px 2px 5px rgba(0,0,0,0.05);
+    }
+    .block-container div[data-testid="stRadio"] div[role="radiogroup"][aria-orientation="horizontal"] > label:hover {
+        background-color: #f0f2f6;
+        transform: translateY(-2px);
+    }
+    .block-container div[data-testid="stRadio"] div[role="radiogroup"][aria-orientation="horizontal"] > label > div:first-child {
+        display: none !important; 
+    }
+    .block-container div[data-testid="stRadio"] div[role="radiogroup"][aria-orientation="horizontal"] > label[data-checked="true"] {
+        background-color: #002B49 !important;
+        border-color: #002B49 !important;
+        box-shadow: 0px 4px 10px rgba(0,43,73,0.3);
+    }
+    .block-container div[data-testid="stRadio"] div[role="radiogroup"][aria-orientation="horizontal"] > label[data-checked="true"] p {
+        color: white !important;
+    }
+    .block-container div[data-testid="stRadio"] div[role="radiogroup"][aria-orientation="horizontal"] > label p {
+        font-family: 'Arial', sans-serif !important;
+        font-size: 14px !important;
+        font-weight: bold !important;
+        letter-spacing: 0.5px !important;
+        color: #002B49;
+        margin: 0;
+    }
     </style>
 """, unsafe_allow_html=True)
 
@@ -220,7 +258,6 @@ def update_status_sheets(nama_pemohon, status_baru, link_hasil=""):
             waktu_sekarang = datetime.now(timezone(timedelta(hours=8))).strftime("%Y-%m-%d %H:%M:%S")
             row_vals = sheet.row_values(cell.row)
             
-            # FORMAT HISTORY LAMA + BARU
             histori_lama = row_vals[21] if len(row_vals) >= 22 else f"{row_vals[19] if len(row_vals) > 19 else ''} | {row_vals[18] if len(row_vals) > 18 else 'Menunggu Verifikasi Berkas'}"
             histori_baru = f"{histori_lama} || {waktu_sekarang} | {status_baru}"
             
@@ -233,6 +270,23 @@ def update_status_sheets(nama_pemohon, status_baru, link_hasil=""):
         return False
     except Exception as e:
         st.error(f"Gagal memperbarui status di sistem Cloud: {e}")
+        return False
+
+def update_status_pengaduan(waktu_pengaduan, status_baru):
+    try:
+        creds = dapatkan_kredensial()
+        client = gspread.authorize(creds)
+        # Buka sheet Pengaduan_Saran
+        sheet = client.open_by_key("1qdrgfAhB_NKPSIxP9p5cY0LF1RmXRzqG-aWUNEx7r94").worksheet("Pengaduan_Saran")
+        # Cari berdasarkan kolom Waktu (kolom ke-1)
+        cell = sheet.find(waktu_pengaduan, in_column=1)
+        if cell:
+            # Update status di kolom ke-6 (F)
+            sheet.update_cell(cell.row, 6, status_baru)
+            return True
+        return False
+    except Exception as e:
+        st.error(f"Gagal memperbarui status pengaduan: {e}")
         return False
 
 def format_tgl_jam(waktu_str):
@@ -341,31 +395,24 @@ if menu == "FORMULIR KUNJUNGAN PUBLIK":
     st.divider()
     
     # ---------------------------------------------------------
-    # TOMBOL KOTAK NAVIGASI (ANTI BOCOR)
+    # TOMBOL KOTAK NAVIGASI FORMAL
     # ---------------------------------------------------------
-    c1, c2, c3, c4, c5 = st.columns(5)
-    with c1:
-        if st.button("E-BUKU TAMU", use_container_width=True, type="primary" if st.session_state.active_tab == "E-BUKU TAMU" else "secondary"):
-            st.session_state.active_tab = "E-BUKU TAMU"
-            st.rerun()
-    with c2:
-        if st.button("PERMOHONAN DATA", use_container_width=True, type="primary" if st.session_state.active_tab == "PERMOHONAN DATA" else "secondary"):
-            st.session_state.active_tab = "PERMOHONAN DATA"
-            st.rerun()
-    with c3:
-        if st.button("E-KATALOG PNBP", use_container_width=True, type="primary" if st.session_state.active_tab == "E-KATALOG PNBP" else "secondary"):
-            st.session_state.active_tab = "E-KATALOG PNBP"
-            st.rerun()
-    with c4:
-        if st.button("LACAK STATUS", use_container_width=True, type="primary" if st.session_state.active_tab == "LACAK STATUS DATA" else "secondary"):
-            st.session_state.active_tab = "LACAK STATUS DATA"
-            st.rerun()
-    with c5:
-        if st.button("PENGADUAN & SARAN", use_container_width=True, type="primary" if st.session_state.active_tab == "PENGADUAN & SARAN" else "secondary"):
-            st.session_state.active_tab = "PENGADUAN & SARAN"
-            st.rerun()
-            
-    st.markdown("---")
+    tabs_list = ["E-BUKU TAMU", "PERMOHONAN DATA", "E-KATALOG PNBP", "LACAK STATUS DATA", "PENGADUAN & SARAN"]
+    
+    try:
+        default_idx = tabs_list.index(st.session_state.active_tab)
+    except:
+        default_idx = 0
+
+    pilihan_tab = st.radio(
+        "Navigasi Utama", 
+        tabs_list,
+        index=default_idx,
+        horizontal=True,
+        label_visibility="collapsed"
+    )
+    st.session_state.active_tab = pilihan_tab
+    st.write("")
     
     # ------------------------------------------
     # ISI HALAMAN 1: E-BUKU TAMU
@@ -765,9 +812,10 @@ if menu == "FORMULIR KUNJUNGAN PUBLIK":
                                     waktu_hist, stat_hist = item.split(" | ", 1)
                                     tgl_h, jam_h = format_tgl_jam(waktu_hist)
                                     
-                                    icon = "✅" if "Selesai" in stat_hist else "⏳" if "Menunggu" in stat_hist else "🔄" if "Proses" in stat_hist else "❌" if "Ditolak" in stat_hist else "📌"
-                                    bg_color = "#d4edda" if "Selesai" in stat_hist else "#f8d7da" if "Ditolak" in stat_hist else "#fff3cd" if "Menunggu Pembayaran" in stat_hist else "#cce5ff" if "Proses" in stat_hist else "#f8f9fa"
-                                    border_color = "#28a745" if "Selesai" in stat_hist else "#dc3545" if "Ditolak" in stat_hist else "#ffc107" if "Menunggu Pembayaran" in stat_hist else "#007bff" if "Proses" in stat_hist else "#6c757d"
+                                    # Ubah ikon & warna khusus untuk "Berkas Tidak Lengkap" (Revisi)
+                                    icon = "✅" if "Selesai" in stat_hist else "⏳" if "Menunggu Verifikasi" in stat_hist else "🔄" if "Proses" in stat_hist else "⚠️" if "Tidak Lengkap" in stat_hist else "📌"
+                                    bg_color = "#d4edda" if "Selesai" in stat_hist else "#f8d7da" if "Tidak Lengkap" in stat_hist else "#fff3cd" if "Menunggu Pembayaran" in stat_hist else "#cce5ff" if "Proses" in stat_hist else "#f8f9fa"
+                                    border_color = "#28a745" if "Selesai" in stat_hist else "#dc3545" if "Tidak Lengkap" in stat_hist else "#ffc107" if "Menunggu Pembayaran" in stat_hist else "#007bff" if "Proses" in stat_hist else "#6c757d"
                                     
                                     st.markdown(f"""
                                     <div style='background-color: {bg_color}; padding: 15px; border-radius: 8px; margin-bottom: 12px; border-left: 6px solid {border_color};'>
@@ -905,6 +953,31 @@ elif menu == "PORTAL ADMIN & REKAP LAPORAN":
                     st.dataframe(df_pengaduan, use_container_width=True)
                     csv_pengaduan = df_pengaduan.to_csv(index=False).encode('utf-8')
                     st.download_button("📥 Unduh Laporan Pengaduan (.csv)", data=csv_pengaduan, file_name=f"Laporan_Pengaduan_Stamet_Bima_{datetime.now().strftime('%Y%m%d')}.csv", mime="text/csv", type="primary")
+                    
+                    st.write("")
+                    st.markdown("#### ⚙️ Tindak Lanjut Pengaduan & Saran")
+                    st.caption("Ubah status pengaduan menjadi 'Selesai' setelah ditindaklanjuti secara internal.")
+                    
+                    df_pengaduan['Display'] = df_pengaduan.iloc[:, 0] + " - " + df_pengaduan.iloc[:, 2] 
+                    list_pengaduan = df_pengaduan['Display'].tolist()
+                    
+                    with st.form("form_update_pengaduan"):
+                        pilih_pengaduan = st.selectbox("Pilih Laporan/Pengaduan:", list_pengaduan)
+                        status_pengaduan = st.selectbox("Update Status:", ["Menunggu Tindak Lanjut", "Sedang Diproses", "Selesai Ditindaklanjuti"])
+                        catatan_admin = st.text_input("Catatan Tindak Lanjut (Opsional):", placeholder="Misal: Sudah dilaporkan ke teknisi...")
+                        
+                        btn_update_pengaduan = st.form_submit_button("UPDATE STATUS PENGADUAN", type="primary")
+                        
+                    if btn_update_pengaduan:
+                        waktu_terpilih = pilih_pengaduan.split(" - ")[0]
+                        final_status_pengaduan = status_pengaduan
+                        if catatan_admin:
+                            final_status_pengaduan = f"{status_pengaduan} (Catatan: {catatan_admin})"
+                            
+                        with st.spinner("Mengupdate status pengaduan..."):
+                            if update_status_pengaduan(waktu_terpilih, final_status_pengaduan):
+                                st.success(f"Status pengaduan berhasil diperbarui!")
+                                st.rerun()
                 else:
                     st.info("Belum ada laporan pengaduan yang masuk.")
                     
@@ -979,23 +1052,33 @@ elif menu == "PORTAL ADMIN & REKAP LAPORAN":
                     if list_nama_khusus:
                         with st.form("form_update_status"):
                             pilih_nama = st.selectbox("**Pilih Nama Pemohon Khusus:**", list_nama_khusus)
+                            
                             pilih_status = st.selectbox("**Set Status Progres Terbaru:**", [
                                 "Menunggu Verifikasi Berkas", 
+                                "Berkas Tidak Lengkap (Menunggu Revisi)", 
                                 "Proses Penyiapan Data", 
                                 "Menunggu Pembayaran PNBP",
-                                "Selesai (Data Telah Dikirim / Siap Diambil)",
-                                "Ditolak (Berkas Tidak Memenuhi Syarat)"
+                                "Selesai (Data Telah Dikirim / Siap Diambil)"
                             ])
+                            
+                            catatan_revisi = st.text_input("**Tulis Berkas yang Kurang/Salah (HANYA diisi jika memilih Berkas Tidak Lengkap):**", placeholder="Contoh: KTP kurang jelas, Surat Permohonan belum ditandatangani...")
                             
                             link_input = st.text_input("**Tautkan Link Google Drive Data Hasil (Hanya jika Selesai):**", placeholder="Paste URL file data di sini (https://...)")
                             
                             btn_simpan_status = st.form_submit_button("SIMPAN PEMBARUAN STATUS", type="primary")
                             
                         if btn_simpan_status:
-                            with st.spinner("🔄 Mengupdate status di database cloud..."):
-                                if update_status_sheets(pilih_nama, pilih_status, link_input):
-                                    st.success(f"Berhasil mengubah status {pilih_nama} menjadi: {pilih_status}!")
-                                    st.rerun()
+                            if pilih_status == "Berkas Tidak Lengkap (Menunggu Revisi)" and not catatan_revisi:
+                                st.error("❌ **GAGAL:** Anda harus mengisi keterangan berkas apa yang kurang/salah pada kolom catatan!")
+                            else:
+                                final_status = pilih_status
+                                if pilih_status == "Berkas Tidak Lengkap (Menunggu Revisi)":
+                                    final_status = f"Berkas Tidak Lengkap (Revisi) - Kekurangan: {catatan_revisi}"
+                                    
+                                with st.spinner("🔄 Mengupdate status di database cloud..."):
+                                    if update_status_sheets(pilih_nama, final_status, link_input):
+                                        st.success(f"Berhasil mengubah status {pilih_nama} menjadi: {final_status}!")
+                                        st.rerun()
                 else:
                     st.info("Belum ada data pemohon khusus baru yang terekam.")
             else:
