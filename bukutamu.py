@@ -91,7 +91,7 @@ st.markdown("""
         padding-bottom: 2rem !important;
     }
 
-    /* Menebalkan teks pada semua tombol navigasi st.button */
+    /* Menebalkan teks pada semua tombol navigasi st.button (Ukuran Lebih Besar & Lebih Tebal) */
     div[data-testid="stButton"] button p {
         font-weight: 800 !important;
         letter-spacing: 0.5px !important;
@@ -537,15 +537,26 @@ if menu == "FORMULIR KUNJUNGAN PUBLIK":
             
             with col_k1:
                 nama_khusus = st.text_input("**NAMA LENGKAP** *", value=st.session_state.draft_nama, placeholder="Nama depan dan nama belakang")
+                err_nama = st.empty()
+                
                 ktp_nim = st.text_input("**NOMOR KTP / NIM** *", placeholder="Masukkan Nomor Induk Kependudukan / Mahasiswa")
+                err_ktp_nim = st.empty()
+                
                 instansi_khusus = st.text_input("**SEKOLAH / UNIVERSITAS / INSTANSI** *", value=st.session_state.draft_instansi, placeholder="Contoh: Universitas Mataram / PT. XYZ")
+                err_instansi = st.empty()
+                
             with col_k2:
                 kontak_khusus = st.text_input("**NOMOR HP WHATSAPP (AKTIF)** *", value=st.session_state.draft_hp, placeholder="Contoh: 081234567xxx")
+                err_kontak = st.empty()
+                
                 email_khusus = st.text_input("**EMAIL** *", placeholder="Contoh: email_anda@gmail.com")
+                err_email = st.empty()
             
             st.write("")
             st.markdown("#### **III. DATA YANG DIBUTUHKAN**")
             judul_penelitian = st.text_input("**JUDUL KEGIATAN / PROYEK / PENELITIAN** *", placeholder="Masukkan judul penelitian atau proyek")
+            err_judul = st.empty()
+            
             jenis_data_khusus = st.selectbox("**JENIS DATA YANG DIBUTUHKAN** *", [
                 "Curah Hujan", "Suhu Udara", "Arah dan Kecepatan Angin", 
                 "Tekanan Udara", "Lama Penyinaran Matahari", "Penguapan", "Lainnya"
@@ -560,7 +571,10 @@ if menu == "FORMULIR KUNJUNGAN PUBLIK":
                     st.markdown("<small style='color: red; font-weight: bold;'>⚠️ (Perhatian: Untuk data Tarif Rp. 0,- maksimal periode data adalah 5 tahun)</small>", unsafe_allow_html=True)
                 
             lokasi_data = st.text_input("**LOKASI DATA YANG DIMINTA** *", placeholder="Contoh: Kota Bima")
+            err_lokasi = st.empty()
+            
             deskripsi_tujuan = st.text_area("**DESKRIPSI SINGKAT KEBUTUHAN DATA DAN TUJUAN PENGGUNAAN** *", placeholder="Jelaskan secara singkat untuk apa data ini digunakan...")
+            err_deskripsi = st.empty()
 
             st.write("")
             st.markdown(f"#### **IV. UPLOAD BERKAS PENDUKUNG**")
@@ -569,34 +583,34 @@ if menu == "FORMULIR KUNJUNGAN PUBLIK":
             col_u1, col_u2 = st.columns(2)
             with col_u1:
                 file_ktp = st.file_uploader("**1. KTP / Kartu Identitas (Wajib)** *", type=["pdf", "jpg", "png"])
-                err_ktp = st.empty() # Kotak pesan error KTP
+                err_file_ktp = st.empty()
                 
                 file_surat_permohonan = st.file_uploader("**2. Surat Permohonan Instansi (Wajib)** *", type=["pdf"])
-                err_permohonan = st.empty() # Kotak pesan error Surat Permohonan
+                err_file_permohonan = st.empty()
                 
                 if "Pendidikan" in kategori_pemohon:
                     st.write("")
                     file_proposal = st.file_uploader("**5. Proposal & Lembar Pengesahan (Wajib Mahasiswa)** *", type=["pdf"])
-                    err_proposal = st.empty() # Kotak pesan error Proposal
+                    err_file_proposal = st.empty()
                 else:
                     file_proposal = None
-                    err_proposal = None
+                    err_file_proposal = st.empty()
                     
             with col_u2:
                 if "Berbayar PNBP" in kategori_pemohon:
                     st.info("💡 **Informasi Layanan Komersial:** \nAnda berada pada jalur permohonan berbayar (PNBP). Anda cukup melampirkan identitas diri (KTP), Surat Permohonan resmi dari instansi, dan tangkapan layar bukti pengisian SKM di bawah.")
                     file_surat_pengantar = None
-                    err_pengantar = None
+                    err_file_pengantar = st.empty()
                     file_surat_pernyataan = None
-                    err_pernyataan = None
+                    err_file_pernyataan = st.empty()
                 else:
                     st.markdown("📄 **[Download Format Surat Pengantar](https://docs.google.com/document/d/1YNKGAGzif4i36bvLLCZ2jDyz8oYYoQLj/edit)**")
                     file_surat_pengantar = st.file_uploader("**3. Surat Pengantar Instansi (Wajib)** *", type=["pdf"])
-                    err_pengantar = st.empty() # Kotak pesan error Surat Pengantar
+                    err_file_pengantar = st.empty()
                     
                     st.markdown("📄 **[Download Format Surat Pernyataan Bermeterai](https://docs.google.com/document/d/1N6nBHU8PIaGtXIX6u96T9Z0f6cYcnkb6/edit)**")
                     file_surat_pernyataan = st.file_uploader("**4. Surat Pernyataan Bermeterai (Wajib)** *", type=["pdf"])
-                    err_pernyataan = st.empty() # Kotak pesan error Surat Pernyataan
+                    err_file_pernyataan = st.empty()
             
             st.write("")
             st.markdown("#### **V. KONFIRMASI SURVEI KEPUASAN MASYARAKAT (SKM) [WAJIB]**")
@@ -604,7 +618,7 @@ if menu == "FORMULIR KUNJUNGAN PUBLIK":
             st.write("👉 **[KLIK DI SINI UNTUK MENGISI FORMULIR SKM BMKG](https://forms.gle/7msXFJk9sKNhGtrQ7)**")
             
             file_bukti_skm = st.file_uploader("**6. Unggah Bukti Hasil Pengisian SKM (Wajib)** *", type=["pdf", "jpg", "jpeg", "png"])
-            err_skm = st.empty() # Kotak pesan error Bukti SKM
+            err_file_skm = st.empty()
             
             cek_skm = st.checkbox("**Saya menyatakan dengan sadar bahwa saya BENAR-BENAR TELAH MENGISI Survei Kepuasan Masyarakat (SKM) pada tautan di atas dan mengunggah buktinya.** *")
             
@@ -615,38 +629,34 @@ if menu == "FORMULIR KUNJUNGAN PUBLIK":
             selisih_hari = (tgl_selesai - tgl_mulai).days
             is_valid = True
             
-            # FITUR BARU: Detektor File Kosong (Menampilkan Notifikasi Merah)
-            notif_merah = "<div style='background-color: #ff4b4b; color: white; padding: 5px 10px; border-radius: 5px; margin-top: -15px; margin-bottom: 10px; font-weight: bold; font-size: 13px;'>🚨 File ini belum diisi!</div>"
+            # FITUR BARU: Notifikasi Merah Super Keren
+            notif_merah_teks = "<div style='background-color: #ff4b4b; color: white; padding: 5px 10px; border-radius: 5px; margin-top: -15px; margin-bottom: 10px; font-weight: bold; font-size: 13px;'>🚨 Kolom ini wajib diisi!</div>"
+            notif_merah_file = "<div style='background-color: #ff4b4b; color: white; padding: 5px 10px; border-radius: 5px; margin-top: -15px; margin-bottom: 10px; font-weight: bold; font-size: 13px;'>🚨 File ini belum diunggah!</div>"
             
-            if not file_ktp:
-                err_ktp.markdown(notif_merah, unsafe_allow_html=True)
-                is_valid = False
-            if not file_surat_permohonan:
-                err_permohonan.markdown(notif_merah, unsafe_allow_html=True)
-                is_valid = False
-            if not file_bukti_skm:
-                err_skm.markdown(notif_merah, unsafe_allow_html=True)
-                is_valid = False
+            # Pengecekan Kolom Isian Ketik
+            if not nama_khusus: err_nama.markdown(notif_merah_teks, unsafe_allow_html=True); is_valid = False
+            if not ktp_nim: err_ktp_nim.markdown(notif_merah_teks, unsafe_allow_html=True); is_valid = False
+            if not instansi_khusus: err_instansi.markdown(notif_merah_teks, unsafe_allow_html=True); is_valid = False
+            if not kontak_khusus: err_kontak.markdown(notif_merah_teks, unsafe_allow_html=True); is_valid = False
+            if not email_khusus: err_email.markdown(notif_merah_teks, unsafe_allow_html=True); is_valid = False
+            if not judul_penelitian: err_judul.markdown(notif_merah_teks, unsafe_allow_html=True); is_valid = False
+            if not lokasi_data: err_lokasi.markdown(notif_merah_teks, unsafe_allow_html=True); is_valid = False
+            if not deskripsi_tujuan: err_deskripsi.markdown(notif_merah_teks, unsafe_allow_html=True); is_valid = False
+
+            # Pengecekan Kolom Upload File
+            if not file_ktp: err_file_ktp.markdown(notif_merah_file, unsafe_allow_html=True); is_valid = False
+            if not file_surat_permohonan: err_file_permohonan.markdown(notif_merah_file, unsafe_allow_html=True); is_valid = False
+            if not file_bukti_skm: err_file_skm.markdown(notif_merah_file, unsafe_allow_html=True); is_valid = False
                 
             if "Tarif Rp 0" in kategori_pemohon:
-                if not file_surat_pengantar:
-                    err_pengantar.markdown(notif_merah, unsafe_allow_html=True)
-                    is_valid = False
-                if not file_surat_pernyataan:
-                    err_pernyataan.markdown(notif_merah, unsafe_allow_html=True)
-                    is_valid = False
+                if not file_surat_pengantar: err_file_pengantar.markdown(notif_merah_file, unsafe_allow_html=True); is_valid = False
+                if not file_surat_pernyataan: err_file_pernyataan.markdown(notif_merah_file, unsafe_allow_html=True); is_valid = False
                     
             if "Pendidikan" in kategori_pemohon and not file_proposal:
-                err_proposal.markdown(notif_merah, unsafe_allow_html=True)
-                is_valid = False
-            
-            # Pengecekan kolom isian ketikan
-            if not nama_khusus or not ktp_nim or not instansi_khusus or not kontak_khusus or not email_khusus or not judul_penelitian or not lokasi_data or not deskripsi_tujuan:
-                is_valid = False
+                err_file_proposal.markdown(notif_merah_file, unsafe_allow_html=True); is_valid = False
 
-            # Keputusan Validasi
             if not is_valid:
-                st.error("❌ **PROSES GAGAL:** Ada isian atau file wajib yang belum lengkap. Silakan periksa kotak merah (🚨) pada bagian *Upload File* di atas!")
+                st.error("❌ **PROSES GAGAL:** Ada isian atau file wajib yang belum lengkap. Silakan periksa tanda merah (🚨) pada kotak-kotak di atas!")
             elif not cek_skm:
                 st.error("❌ **PROSES GAGAL:** Anda WAJIB mencentang kotak konfirmasi Survei Kepuasan Masyarakat (SKM).")
             elif "Tarif Rp 0" in kategori_pemohon and selisih_hari > 1825:
