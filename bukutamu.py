@@ -193,7 +193,7 @@ def simpan_ke_google_sheets(nama_tab, data_list):
     try:
         creds = dapatkan_kredensial()
         client = gspread.authorize(creds)
-        sheet = client.open_by_key("1qdrgfAhB_NKPSIxP9p5cY0LF1RmXRzqG-aWUNEx7r94").worksheet(nama_tab)
+        sheet = client.open_by_key("11ufBy4NGYnM-LBc3R6Z3A4jmJu8D_qUM1dym7SPX0b0").worksheet(nama_tab)
         sheet.append_row(data_list)
         return True
     except Exception as e:
@@ -204,7 +204,7 @@ def ambil_data_google_sheets(nama_tab):
     try:
         creds = dapatkan_kredensial()
         client = gspread.authorize(creds)
-        sheet = client.open_by_key("1qdrgfAhB_NKPSIxP9p5cY0LF1RmXRzqG-aWUNEx7r94").worksheet(nama_tab)
+        sheet = client.open_by_key("11ufBy4NGYnM-LBc3R6Z3A4jmJu8D_qUM1dym7SPX0b0").worksheet(nama_tab)
         data = sheet.get_all_values()
         
         if len(data) > 0:
@@ -252,7 +252,7 @@ def update_status_sheets(nama_pemohon, status_baru, link_hasil=""):
     try:
         creds = dapatkan_kredensial()
         client = gspread.authorize(creds)
-        sheet = client.open_by_key("1qdrgfAhB_NKPSIxP9p5cY0LF1RmXRzqG-aWUNEx7r94").worksheet("Permohonan_Data")
+        sheet = client.open_by_key("11ufBy4NGYnM-LBc3R6Z3A4jmJu8D_qUM1dym7SPX0b0").worksheet("Permohonan_Data")
         cell = sheet.find(nama_pemohon)
         if cell:
             waktu_sekarang = datetime.now(timezone(timedelta(hours=8))).strftime("%Y-%m-%d %H:%M:%S")
@@ -276,7 +276,7 @@ def update_status_pengaduan(waktu_pengaduan, status_baru):
     try:
         creds = dapatkan_kredensial()
         client = gspread.authorize(creds)
-        sheet = client.open_by_key("1qdrgfAhB_NKPSIxP9p5cY0LF1RmXRzqG-aWUNEx7r94").worksheet("Pengaduan_Saran")
+        sheet = client.open_by_key("11ufBy4NGYnM-LBc3R6Z3A4jmJu8D_qUM1dym7SPX0b0").worksheet("Pengaduan_Saran")
         cell = sheet.find(waktu_pengaduan, in_column=1)
         if cell:
             sheet.update_cell(cell.row, 6, status_baru)
@@ -917,7 +917,7 @@ elif menu == "PORTAL ADMIN":
         st.markdown("#### 🔗 Akses Cepat Cloud Storage")
         col_sheet, col_drive = st.columns(2)
         with col_sheet:
-            st.link_button("📊 Buka Google Sheets (Database Asli)", "https://docs.google.com/spreadsheets/d/1qdrgfAhB_NKPSIxP9p5cY0LF1RmXRzqG-aWUNEx7r94/edit", use_container_width=True)
+            st.link_button("📊 Buka Google Sheets (Database Asli)", "https://docs.google.com/spreadsheets/d/11ufBy4NGYnM-LBc3R6Z3A4jmJu8D_qUM1dym7SPX0b0/edit", use_container_width=True)
         with col_drive:
             st.link_button("📁 Buka Google Drive (Folder Arsip)", "https://drive.google.com/drive/folders/1FtwvPLbWcTPpyIOxMRBW88oLHri_rZVH", use_container_width=True)
         st.divider()
