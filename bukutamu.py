@@ -227,7 +227,8 @@ def ambil_data_google_sheets(nama_tab):
         return pd.DataFrame()
 
 def upload_ke_google_drive(file_buffer, nama_file, mime_type):
-    url_gas = "https://script.google.com/macros/s/AKfycbwS4JlhvQnHGSj6rZ8nLo7P5Ompf--jv7EPuUkSvSq13N7ThP9vyP5RrYC1fv3oq3lo/exec" 
+    # URL Google Apps Script yang sudah diperbarui dengan akun kantor
+    url_gas = "https://script.google.com/macros/s/AKfycbzUFpkVnw_EaxYSiMzJOevXxKP5rjuxtSZFdNonY2-3N-3VEZYyuvk-0pU66eJewMmySA/exec" 
     try:
         file_bytes = file_buffer.getvalue()
         encoded_file = base64.b64encode(file_bytes).decode('utf-8')
@@ -919,7 +920,7 @@ elif menu == "PORTAL ADMIN":
         with col_sheet:
             st.link_button("📊 Buka Google Sheets (Database Asli)", "https://docs.google.com/spreadsheets/d/11ufBy4NGYnM-LBc3R6Z3A4jmJu8D_qUM1dym7SPX0b0/edit", use_container_width=True)
         with col_drive:
-            st.link_button("📁 Buka Google Drive (Folder Arsip)", "https://drive.google.com/drive/folders/1FtwvPLbWcTPpyIOxMRBW88oLHri_rZVH", use_container_width=True)
+            st.link_button("📁 Buka Google Drive (Folder Arsip)", "https://drive.google.com/drive/folders/1ox7Uo6lZVo9y-rUF_Z6tsqp8Tjc2kvdS?usp=sharing", use_container_width=True)
         st.divider()
         
         ca1, ca2 = st.columns(2)
