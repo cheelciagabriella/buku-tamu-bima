@@ -226,16 +226,17 @@ def ambil_data_google_sheets(nama_tab):
         st.error(f"Gagal mengambil data database: {e}")
         return pd.DataFrame()
 
-def upload_ke_google_drive(file_buffer, nama_file, mime_type):
-    # URL Google Apps Script yang sudah diperbarui dengan akun kantor
-    url_gas = "https://script.google.com/macros/s/AKfycbzUFpkVnw_EaxYSiMzJOevXxKP5rjuxtSZFdNonY2-3N-3VEZYyuvk-0pU66eJewMmySA/exec" 
+def upload_ke_google_drive(file_buffer, nama_file, mime_type, nama_pemohon):
+    # Link Web App Kantor Mbak yang TERBARU (v2)
+    url_gas = "https://script.google.com/macros/s/AKfycbz9bbKecoGyKxf3IwJd8E8o2m48BBvMP0_-3-xK2i5E22NQ-0DhlltxMiVROZQhM49fdA/exec" 
     try:
         file_bytes = file_buffer.getvalue()
         encoded_file = base64.b64encode(file_bytes).decode('utf-8')
         payload = {
             "fileData": encoded_file,
             "mimeType": mime_type,
-            "fileName": nama_file
+            "fileName": nama_file,
+            "folderName": nama_pemohon # Ini dia yang mengirim nama folder langsung ke Drive
         }
         response = requests.post(url_gas, data=payload)
         try:
@@ -623,7 +624,8 @@ if menu == "FORMULIR KUNJUNGAN PUBLIK":
                         if file_obj is not None:
                             ext = file_obj.name.split('.')[-1]
                             nama_file = f"{prefix}_{nama_khusus.replace(' ', '_')}_{datetime.now().strftime('%Y%m%d%H%M')}.{ext}"
-                            return upload_ke_google_drive(file_obj, nama_file, file_obj.type)
+                            # Python mengirimkan nama_khusus secara akurat ke sistem Drive!
+                            return upload_ke_google_drive(file_obj, nama_file, file_obj.type, nama_khusus) 
                         return "-"
 
                     link_ktp = proses_upload(file_ktp, "KTP")
