@@ -91,7 +91,7 @@ st.markdown("""
         padding-bottom: 2rem !important;
     }
 
-    /* Menebalkan teks pada semua tombol navigasi st.button (Ukuran Lebih Besar & Lebih Tebal) */
+    /* Menebalkan teks pada semua tombol navigasi st.button */
     div[data-testid="stButton"] button p {
         font-weight: 800 !important;
         letter-spacing: 0.5px !important;
@@ -227,7 +227,6 @@ def ambil_data_google_sheets(nama_tab):
         return pd.DataFrame()
 
 def upload_ke_google_drive(file_buffer, nama_file, mime_type, nama_pemohon):
-    # Link Web App Kantor Mbak yang TERBARU (v2)
     url_gas = "https://script.google.com/macros/s/AKfycbz9bbKecoGyKxf3IwJd8E8o2m48BBvMP0_-3-xK2i5E22NQ-0DhlltxMiVROZQhM49fdA/exec" 
     try:
         file_bytes = file_buffer.getvalue()
@@ -236,7 +235,7 @@ def upload_ke_google_drive(file_buffer, nama_file, mime_type, nama_pemohon):
             "fileData": encoded_file,
             "mimeType": mime_type,
             "fileName": nama_file,
-            "folderName": nama_pemohon # Ini dia yang mengirim nama folder langsung ke Drive
+            "folderName": nama_pemohon 
         }
         response = requests.post(url_gas, data=payload)
         try:
@@ -570,23 +569,34 @@ if menu == "FORMULIR KUNJUNGAN PUBLIK":
             col_u1, col_u2 = st.columns(2)
             with col_u1:
                 file_ktp = st.file_uploader("**1. KTP / Kartu Identitas (Wajib)** *", type=["pdf", "jpg", "png"])
+                err_ktp = st.empty() # Kotak pesan error KTP
+                
                 file_surat_permohonan = st.file_uploader("**2. Surat Permohonan Instansi (Wajib)** *", type=["pdf"])
+                err_permohonan = st.empty() # Kotak pesan error Surat Permohonan
+                
                 if "Pendidikan" in kategori_pemohon:
                     st.write("")
                     file_proposal = st.file_uploader("**5. Proposal & Lembar Pengesahan (Wajib Mahasiswa)** *", type=["pdf"])
+                    err_proposal = st.empty() # Kotak pesan error Proposal
                 else:
                     file_proposal = None
+                    err_proposal = None
                     
             with col_u2:
                 if "Berbayar PNBP" in kategori_pemohon:
                     st.info("💡 **Informasi Layanan Komersial:** \nAnda berada pada jalur permohonan berbayar (PNBP). Anda cukup melampirkan identitas diri (KTP), Surat Permohonan resmi dari instansi, dan tangkapan layar bukti pengisian SKM di bawah.")
                     file_surat_pengantar = None
+                    err_pengantar = None
                     file_surat_pernyataan = None
+                    err_pernyataan = None
                 else:
                     st.markdown("📄 **[Download Format Surat Pengantar](https://docs.google.com/document/d/1YNKGAGzif4i36bvLLCZ2jDyz8oYYoQLj/edit)**")
                     file_surat_pengantar = st.file_uploader("**3. Surat Pengantar Instansi (Wajib)** *", type=["pdf"])
+                    err_pengantar = st.empty() # Kotak pesan error Surat Pengantar
+                    
                     st.markdown("📄 **[Download Format Surat Pernyataan Bermeterai](https://docs.google.com/document/d/1N6nBHU8PIaGtXIX6u96T9Z0f6cYcnkb6/edit)**")
                     file_surat_pernyataan = st.file_uploader("**4. Surat Pernyataan Bermeterai (Wajib)** *", type=["pdf"])
+                    err_pernyataan = st.empty() # Kotak pesan error Surat Pernyataan
             
             st.write("")
             st.markdown("#### **V. KONFIRMASI SURVEI KEPUASAN MASYARAKAT (SKM) [WAJIB]**")
@@ -594,6 +604,8 @@ if menu == "FORMULIR KUNJUNGAN PUBLIK":
             st.write("👉 **[KLIK DI SINI UNTUK MENGISI FORMULIR SKM BMKG](https://forms.gle/7msXFJk9sKNhGtrQ7)**")
             
             file_bukti_skm = st.file_uploader("**6. Unggah Bukti Hasil Pengisian SKM (Wajib)** *", type=["pdf", "jpg", "jpeg", "png"])
+            err_skm = st.empty() # Kotak pesan error Bukti SKM
+            
             cek_skm = st.checkbox("**Saya menyatakan dengan sadar bahwa saya BENAR-BENAR TELAH MENGISI Survei Kepuasan Masyarakat (SKM) pada tautan di atas dan mengunggah buktinya.** *")
             
             st.write("")
@@ -603,17 +615,38 @@ if menu == "FORMULIR KUNJUNGAN PUBLIK":
             selisih_hari = (tgl_selesai - tgl_mulai).days
             is_valid = True
             
-            if not nama_khusus or not ktp_nim or not instansi_khusus or not kontak_khusus or not email_khusus or not judul_penelitian or not lokasi_data or not deskripsi_tujuan or not file_ktp or not file_surat_permohonan or not file_bukti_skm:
-                is_valid = False
+            # FITUR BARU: Detektor File Kosong (Menampilkan Notifikasi Merah)
+            notif_merah = "<div style='background-color: #ff4b4b; color: white; padding: 5px 10px; border-radius: 5px; margin-top: -15px; margin-bottom: 10px; font-weight: bold; font-size: 13px;'>🚨 File ini belum diisi!</div>"
             
-            if "Tarif Rp 0" in kategori_pemohon and (not file_surat_pengantar or not file_surat_pernyataan):
+            if not file_ktp:
+                err_ktp.markdown(notif_merah, unsafe_allow_html=True)
+                is_valid = False
+            if not file_surat_permohonan:
+                err_permohonan.markdown(notif_merah, unsafe_allow_html=True)
+                is_valid = False
+            if not file_bukti_skm:
+                err_skm.markdown(notif_merah, unsafe_allow_html=True)
                 is_valid = False
                 
+            if "Tarif Rp 0" in kategori_pemohon:
+                if not file_surat_pengantar:
+                    err_pengantar.markdown(notif_merah, unsafe_allow_html=True)
+                    is_valid = False
+                if not file_surat_pernyataan:
+                    err_pernyataan.markdown(notif_merah, unsafe_allow_html=True)
+                    is_valid = False
+                    
             if "Pendidikan" in kategori_pemohon and not file_proposal:
+                err_proposal.markdown(notif_merah, unsafe_allow_html=True)
+                is_valid = False
+            
+            # Pengecekan kolom isian ketikan
+            if not nama_khusus or not ktp_nim or not instansi_khusus or not kontak_khusus or not email_khusus or not judul_penelitian or not lokasi_data or not deskripsi_tujuan:
                 is_valid = False
 
+            # Keputusan Validasi
             if not is_valid:
-                st.error("❌ **PROSES GAGAL:** Pastikan seluruh kolom isian dan berkas yang bertanda Wajib (*) telah diisi dan diunggah sesuai dengan kategori permohonan Anda.")
+                st.error("❌ **PROSES GAGAL:** Ada isian atau file wajib yang belum lengkap. Silakan periksa kotak merah (🚨) pada bagian *Upload File* di atas!")
             elif not cek_skm:
                 st.error("❌ **PROSES GAGAL:** Anda WAJIB mencentang kotak konfirmasi Survei Kepuasan Masyarakat (SKM).")
             elif "Tarif Rp 0" in kategori_pemohon and selisih_hari > 1825:
@@ -624,7 +657,6 @@ if menu == "FORMULIR KUNJUNGAN PUBLIK":
                         if file_obj is not None:
                             ext = file_obj.name.split('.')[-1]
                             nama_file = f"{prefix}_{nama_khusus.replace(' ', '_')}_{datetime.now().strftime('%Y%m%d%H%M')}.{ext}"
-                            # Python mengirimkan nama_khusus secara akurat ke sistem Drive!
                             return upload_ke_google_drive(file_obj, nama_file, file_obj.type, nama_khusus) 
                         return "-"
 
@@ -633,7 +665,7 @@ if menu == "FORMULIR KUNJUNGAN PUBLIK":
                     link_pengantar = proses_upload(file_surat_pengantar, "Pengantar")
                     link_pernyataan = proses_upload(file_surat_pernyataan, "Pernyataan")
                     link_proposal = proses_upload(file_proposal, "Proposal")
-                    link_skm = proses_upload(file_bukti_skm, "Bukti_SKM")
+                    link_skm = proses_upload(file_bukti_skm, "SKM") 
                     
                     waktu_khusus = datetime.now(timezone(timedelta(hours=8))).strftime("%Y-%m-%d %H:%M:%S")
                     periode_gabung = f"{tgl_mulai} sd {tgl_selesai}"
