@@ -564,9 +564,17 @@ if menu == "FORMULIR KUNJUNGAN PUBLIK":
             
             col_d1, col_d2 = st.columns(2)
             with col_d1:
-                tgl_mulai = st.date_input("**PERIODE DATA (TANGGAL MULAI)** *")
+                tgl_mulai = st.date_input(
+                    "**PERIODE DATA (TANGGAL MULAI)** *",
+                    min_value=datetime(1990, 1, 1),
+                    max_value=datetime.today()
+                )
             with col_d2:
-                tgl_selesai = st.date_input("**PERIODE DATA (TANGGAL SELESAI)** *")
+                tgl_selesai = st.date_input(
+                    "**PERIODE DATA (TANGGAL SELESAI)** *",
+                    min_value=datetime(1990, 1, 1),
+                    max_value=datetime.today()
+                )
                 if "Tarif Rp 0" in kategori_pemohon:
                     st.markdown("<small style='color: red; font-weight: bold;'>⚠️ (Perhatian: Untuk data Tarif Rp. 0,- maksimal periode data adalah 5 tahun)</small>", unsafe_allow_html=True)
                 
